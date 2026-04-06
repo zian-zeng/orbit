@@ -17,13 +17,4 @@ class Constants {
       'For code, provide runnable examples and mention important assumptions briefly. '
       'For images, describe what is visible before giving conclusions. '
       'If the request is unclear, ask one short clarifying question instead of guessing.';
-
-  static const List<String> starterPrompts = [
-    'Summarize this',
-    'Plan my day',
-    'Draft a reply',
-    'Explain a concept',
-    'Improve writing',
-    'Analyze an image',
-  ];
 }

@@ -19,6 +19,15 @@ class ChatHistory extends HiveObject {
   @HiveField(4)
   final DateTime timestamp;
 
+  @HiveField(5)
+  final String? selectedLabel;
+
+  @HiveField(6)
+  final String? recommendedSkillId;
+
+  @HiveField(7)
+  final String? templateId;
+
   // constructor
   ChatHistory({
     required this.chatId,
@@ -26,5 +35,8 @@ class ChatHistory extends HiveObject {
     required this.response,
     required this.imagesUrls,
     required this.timestamp,
+    this.selectedLabel,
+    this.recommendedSkillId,
+    this.templateId,
   });
 }

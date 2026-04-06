@@ -40,6 +40,22 @@ class ChatProvider extends ChangeNotifier {
 
   int get messageCount => _inChatMessages.length;
 
+  List<String> recentLabelKeys({int limit = 3}) {
+    if (!Hive.isBoxOpen(Constants.chatHistoryBox)) {
+      return const <String>[];
+    }
+
+    final history = Boxes.getChatHistory().values.toList(growable: false)
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    return history
+        .map((chat) => chat.selectedLabel)
+        .whereType<String>()
+        .where((label) => label.trim().isNotEmpty)
+        .take(limit)
+        .toList(growable: false);
+  }
+
   Future<void> setInChatMessages({required String chatId}) async {
     final messagesFromDB = await loadMessagesFromDB(chatId: chatId);
     _inChatMessages
@@ -84,8 +100,9 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> setModel({required bool isTextOnly}) async {
-    final modelName =
-        isTextOnly ? Constants.geminiTextModel : Constants.geminiVisionModel;
+    final modelName = isTextOnly
+        ? Constants.geminiTextModel
+        : Constants.geminiVisionModel;
     setCurrentModel(newModel: modelName);
     final generationConfig = GenerationConfig(
       temperature: isTextOnly ? 0.45 : 0.35,
@@ -186,6 +203,9 @@ class ChatProvider extends ChangeNotifier {
     required String message,
     required bool isTextOnly,
     List<XFile>? draftImages,
+    String? selectedLabel,
+    String? recommendedSkillId,
+    String? templateId,
   }) async {
     final trimmedMessage = message.trim();
     if (trimmedMessage.isEmpty) {
@@ -197,15 +217,13 @@ class ChatProvider extends ChangeNotifier {
     String chatId = getChatId();
     final imageFiles = isTextOnly
         ? const <XFile>[]
-        : await _storeDraftImages(
-            chatId: chatId,
-            draftImages: draftImages,
-          );
+        : await _storeDraftImages(chatId: chatId, draftImages: draftImages);
     List<Content> history = [];
     history = await getHistory(chatId: chatId);
     List<String> imagesUrls = getImagesUrls(imageFiles: imageFiles);
-    final messagesBox =
-        await Hive.openBox('${Constants.chatMessagesBox}$chatId');
+    final messagesBox = await Hive.openBox(
+      '${Constants.chatMessagesBox}$chatId',
+    );
     final userMessageId = messagesBox.keys.length;
     final assistantMessageId = messagesBox.keys.length + 1;
 
@@ -234,6 +252,9 @@ class ChatProvider extends ChangeNotifier {
       userMessage: userMessage,
       modelMessageId: assistantMessageId.toString(),
       messagesBox: messagesBox,
+      selectedLabel: selectedLabel,
+      recommendedSkillId: recommendedSkillId,
+      templateId: templateId,
     );
   }
 
@@ -247,6 +268,9 @@ class ChatProvider extends ChangeNotifier {
     required Message userMessage,
     required String modelMessageId,
     required Box messagesBox,
+    String? selectedLabel,
+    String? recommendedSkillId,
+    String? templateId,
   }) async {
     final chatSession = _model!.startChat(
       history: history.isEmpty || !isTextOnly ? null : history,
@@ -276,14 +300,14 @@ class ChatProvider extends ChangeNotifier {
         userMessage: userMessage,
         assistantMessage: assistantMessage,
         messagesBox: messagesBox,
+        selectedLabel: selectedLabel,
+        recommendedSkillId: recommendedSkillId,
+        templateId: templateId,
       );
     } catch (error, stackTrace) {
       _removeAssistantDraft(assistantMessage);
       notifyListeners();
-      Error.throwWithStackTrace(
-        StateError(formatChatError(error)),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(StateError(formatChatError(error)), stackTrace);
     } finally {
       if (messagesBox.isOpen) {
         await messagesBox.close();
@@ -298,8 +322,9 @@ class ChatProvider extends ChangeNotifier {
     required Message assistantMessage,
   }) async {
     try {
-      final response =
-          await chatSession.sendMessage(content).timeout(_requestTimeout);
+      final response = await chatSession
+          .sendMessage(content)
+          .timeout(_requestTimeout);
       _applyAssistantText(
         assistantMessage: assistantMessage,
         text: response.text?.trim() ?? '',
@@ -309,8 +334,9 @@ class ChatProvider extends ChangeNotifier {
         rethrow;
       }
 
-      final retryResponse =
-          await chatSession.sendMessage(content).timeout(_requestTimeout);
+      final retryResponse = await chatSession
+          .sendMessage(content)
+          .timeout(_requestTimeout);
       _applyAssistantText(
         assistantMessage: assistantMessage,
         text: retryResponse.text?.trim() ?? '',
@@ -345,9 +371,13 @@ class ChatProvider extends ChangeNotifier {
     required Message userMessage,
     required Message assistantMessage,
     required Box messagesBox,
+    String? selectedLabel,
+    String? recommendedSkillId,
+    String? templateId,
   }) async {
-    final settings =
-        Boxes.getSettings().isNotEmpty ? Boxes.getSettings().getAt(0) : null;
+    final settings = Boxes.getSettings().isNotEmpty
+        ? Boxes.getSettings().getAt(0)
+        : null;
     final saveChatHistory = settings?.saveChatHistory ?? true;
 
     if (!saveChatHistory) {
@@ -363,6 +393,9 @@ class ChatProvider extends ChangeNotifier {
       response: assistantMessage.message.toString(),
       imagesUrls: userMessage.imagesUrls,
       timestamp: DateTime.now(),
+      selectedLabel: selectedLabel,
+      recommendedSkillId: recommendedSkillId,
+      templateId: templateId,
     );
     await chatHistoryBox.put(chatID, chatHistory);
   }
@@ -387,9 +420,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  List<String> getImagesUrls({
-    required List<XFile> imageFiles,
-  }) {
+  List<String> getImagesUrls({required List<XFile> imageFiles}) {
     return imageFiles.map((image) => image.path).toList(growable: false);
   }
 
@@ -416,10 +447,7 @@ class ChatProvider extends ChangeNotifier {
       final storedFile = File(
         '${mediaDir.path}/${const Uuid().v4()}.$extension',
       );
-      await storedFile.writeAsBytes(
-        await imageFile.readAsBytes(),
-        flush: true,
-      );
+      await storedFile.writeAsBytes(await imageFile.readAsBytes(), flush: true);
       storedImages.add(XFile(storedFile.path));
     }
     return storedImages;
@@ -433,9 +461,7 @@ class ChatProvider extends ChangeNotifier {
     return pathValue.substring(lastDot + 1).toLowerCase();
   }
 
-  Future<Set<String>> _storedImagePathsForChat({
-    required String chatId,
-  }) async {
+  Future<Set<String>> _storedImagePathsForChat({required String chatId}) async {
     final imagePaths = <String>{};
     final storedMessages = await loadMessagesFromDB(chatId: chatId);
     for (final message in storedMessages) {
