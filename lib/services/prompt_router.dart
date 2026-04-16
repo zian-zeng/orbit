@@ -87,7 +87,7 @@ class PromptRouter {
 
     final strongMatches = scored.where((item) => item.score >= 40).toList();
     if (strongMatches.isNotEmpty) {
-      return strongMatches.take(limit).toList(growable: false);
+      return scored.take(limit).toList(growable: false);
     }
 
     final fallbackMatches = scored.where((item) => item.score > 0).toList();
@@ -147,9 +147,9 @@ class PromptRouter {
     }
 
     if (context.preferredLabels.contains(template.label)) {
-      score += 12;
+      score += _preferredLabelBoost(context, template.label);
       if (_canReplaceFallbackReason(reason)) {
-        reason = 'Matches your preferred help style';
+        reason = 'Matched from your saved setup';
       }
     }
 
@@ -167,6 +167,21 @@ class PromptRouter {
 
   bool _canReplaceFallbackReason(String reason) {
     return reason == _defaultReason || reason == _placeholderReason;
+  }
+
+  int _preferredLabelBoost(RoutingContext context, SupportLabel label) {
+    final index = context.preferredLabels.indexOf(label);
+    if (index < 0) {
+      return 0;
+    }
+
+    return switch (index) {
+      0 => 36,
+      1 => 24,
+      2 => 18,
+      3 => 12,
+      _ => 6,
+    };
   }
 }
 
