@@ -13,10 +13,14 @@ class UserModel extends HiveObject {
   @HiveField(2)
   final String image;
 
+  @HiveField(3)
+  final List<String> preferredLabels;
+
   // constructor
   UserModel({
     required this.uid,
     required this.name,
     required this.image,
+    this.preferredLabels = const [],
   });
 }

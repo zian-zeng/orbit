@@ -1,10 +1,12 @@
 import 'dart:ui';
 
+import 'package:chatbotapp/models/prompt_recommendation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
+import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/providers/voice_input_provider.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
 import 'package:chatbotapp/utilities/app_motion.dart';
@@ -15,26 +17,33 @@ import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-enum _AttachmentAction {
-  photos,
-  camera,
-  clear,
-}
+enum _AttachmentAction { photos, camera, clear }
 
 class BottomChatField extends StatefulWidget {
   const BottomChatField({
     super.key,
     required this.chatProvider,
+    required this.textController,
+    this.onDraftChanged,
+    this.onMessageSent,
+    this.selectedLabel,
+    this.recommendedSkillId,
+    this.templateId,
   });
 
   final ChatProvider chatProvider;
+  final TextEditingController textController;
+  final ValueChanged<String>? onDraftChanged;
+  final VoidCallback? onMessageSent;
+  final SupportLabel? selectedLabel;
+  final String? recommendedSkillId;
+  final String? templateId;
 
   @override
   State<BottomChatField> createState() => _BottomChatFieldState();
 }
 
 class _BottomChatFieldState extends State<BottomChatField> {
-  final TextEditingController textController = TextEditingController();
   final FocusNode textFieldFocus = FocusNode();
   final ImagePicker _picker = ImagePicker();
   VoiceInputProvider? _voiceProvider;
@@ -44,8 +53,19 @@ class _BottomChatFieldState extends State<BottomChatField> {
 
   @override
   void initState() {
-    textController.addListener(_handleComposerChange);
+    widget.textController.addListener(_handleComposerChange);
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant BottomChatField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.textController == widget.textController) {
+      return;
+    }
+
+    oldWidget.textController.removeListener(_handleComposerChange);
+    widget.textController.addListener(_handleComposerChange);
   }
 
   @override
@@ -61,6 +81,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
   }
 
   void _handleComposerChange() {
+    widget.onDraftChanged?.call(widget.textController.text);
     if (mounted) {
       setState(() {});
     }
@@ -76,7 +97,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
     if (transcript != _lastTranscript) {
       _lastTranscript = transcript;
       final merged = _mergeVoiceText(_voiceSeedText, transcript);
-      textController.value = TextEditingValue(
+      widget.textController.value = TextEditingValue(
         text: merged,
         selection: TextSelection.collapsed(offset: merged.length),
       );
@@ -114,7 +135,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
       return;
     }
 
-    _voiceSeedText = textController.text.trim();
+    _voiceSeedText = widget.textController.text.trim();
     _lastTranscript = '';
     _lastVoiceError = '';
 
@@ -137,8 +158,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
   @override
   void dispose() {
     _voiceProvider?.removeListener(_handleVoiceUpdates);
-    textController.removeListener(_handleComposerChange);
-    textController.dispose();
+    widget.textController.removeListener(_handleComposerChange);
     textFieldFocus.dispose();
     super.dispose();
   }
@@ -151,8 +171,9 @@ class _BottomChatFieldState extends State<BottomChatField> {
     final enableHaptics = context.read<SettingsProvider>().enableHaptics;
     final voiceProvider = context.read<VoiceInputProvider>();
     final draftText = message;
-    final draftImages =
-        List<XFile>.from(chatProvider.imagesFileList ?? const <XFile>[]);
+    final draftImages = List<XFile>.from(
+      chatProvider.imagesFileList ?? const <XFile>[],
+    );
     final shouldClearText = draftText.trim().isNotEmpty;
     final shouldRestoreImages = draftImages.isNotEmpty;
     var didSend = false;
@@ -160,7 +181,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
     try {
       await voiceProvider.stopListening();
       if (shouldClearText) {
-        textController.clear();
+        widget.textController.clear();
       }
       if (shouldRestoreImages) {
         chatProvider.clearDraft();
@@ -172,8 +193,21 @@ class _BottomChatFieldState extends State<BottomChatField> {
         message: normalizedMessage,
         isTextOnly: isTextOnly,
         draftImages: draftImages,
+        selectedLabel: supportLabelKey(widget.selectedLabel),
+        recommendedSkillId: widget.recommendedSkillId,
+        templateId: widget.templateId,
       );
+      final selectedLabel = widget.selectedLabel;
+      if (!mounted) {
+        return;
+      }
+      if (selectedLabel != null) {
+        await context.read<UserProfileProvider>().rememberPreferredLabel(
+              supportLabelKey(selectedLabel)!,
+            );
+      }
       didSend = true;
+      widget.onMessageSent?.call();
       if (enableHaptics) {
         await HapticFeedback.lightImpact();
       }
@@ -181,8 +215,8 @@ class _BottomChatFieldState extends State<BottomChatField> {
       if (!mounted) {
         return;
       }
-      if (!didSend && shouldClearText && textController.text.isEmpty) {
-        textController.value = TextEditingValue(
+      if (!didSend && shouldClearText && widget.textController.text.isEmpty) {
+        widget.textController.value = TextEditingValue(
           text: draftText,
           selection: TextSelection.collapsed(offset: draftText.length),
         );
@@ -203,14 +237,14 @@ class _BottomChatFieldState extends State<BottomChatField> {
   Future<void> _submitCurrentDraft() async {
     final hasImages = widget.chatProvider.imagesFileList != null &&
         widget.chatProvider.imagesFileList!.isNotEmpty;
-    final canSend = textController.text.trim().isNotEmpty || hasImages;
+    final canSend = widget.textController.text.trim().isNotEmpty || hasImages;
 
     if (widget.chatProvider.isLoading || !canSend) {
       return;
     }
 
     await sendChatMessage(
-      message: textController.text,
+      message: widget.textController.text,
       chatProvider: widget.chatProvider,
       isTextOnly: !hasImages,
     );
@@ -253,10 +287,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
 
     final currentImages = widget.chatProvider.imagesFileList ?? const <XFile>[];
     widget.chatProvider.setImagesFileList(
-      listValue: [
-        ...currentImages,
-        ...pickedImages,
-      ],
+      listValue: [...currentImages, ...pickedImages],
     );
   }
 
@@ -275,9 +306,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
     showAppSnackBar(context, message, bottomOffset: 132);
   }
 
-  Future<void> _showAttachmentOptions({
-    required bool hasImages,
-  }) async {
+  Future<void> _showAttachmentOptions({required bool hasImages}) async {
     final action = await showAdaptiveActionSheet<_AttachmentAction>(
       context: context,
       title: 'Add image',
@@ -335,9 +364,9 @@ class _BottomChatFieldState extends State<BottomChatField> {
           : colorScheme.primaryContainer.withValues(alpha: 0.84),
       foregroundColor: colorScheme.onPrimaryContainer,
     );
-    bool hasImages = widget.chatProvider.imagesFileList != null &&
+    final hasImages = widget.chatProvider.imagesFileList != null &&
         widget.chatProvider.imagesFileList!.isNotEmpty;
-    final canSend = textController.text.trim().isNotEmpty || hasImages;
+    final canSend = widget.textController.text.trim().isNotEmpty || hasImages;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
@@ -376,9 +405,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
                             key: const ValueKey('listening-banner'),
                             level: voiceLevel,
                           )
-                        : const SizedBox.shrink(
-                            key: ValueKey('idle-banner'),
-                          ),
+                        : const SizedBox.shrink(key: ValueKey('idle-banner')),
                   ),
                   AnimatedSwitcher(
                     duration: motionDuration,
@@ -415,7 +442,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
                       Expanded(
                         child: TextField(
                           focusNode: textFieldFocus,
-                          controller: textController,
+                          controller: widget.textController,
                           autofocus: settingsProvider.autoFocusComposer &&
                               widget.chatProvider.inChatMessages.isEmpty,
                           keyboardType: TextInputType.multiline,
@@ -488,10 +515,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
 }
 
 class _ListeningBanner extends StatelessWidget {
-  const _ListeningBanner({
-    super.key,
-    required this.level,
-  });
+  const _ListeningBanner({super.key, required this.level});
 
   final double level;
 
@@ -520,8 +544,9 @@ class _ListeningBanner extends StatelessWidget {
               child: LinearProgressIndicator(
                 minHeight: 6,
                 value: normalizedLevel,
-                backgroundColor:
-                    colorScheme.onPrimaryContainer.withValues(alpha: 0.15),
+                backgroundColor: colorScheme.onPrimaryContainer.withValues(
+                  alpha: 0.15,
+                ),
               ),
             ),
           ),

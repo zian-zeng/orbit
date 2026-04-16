@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chatbotapp/apis/api_service.dart';
+import 'package:chatbotapp/models/prompt_recommendation.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/providers/voice_input_provider.dart';
 import 'package:chatbotapp/screens/chat_history_screen.dart';
 import 'package:chatbotapp/screens/settings_screen.dart';
+import 'package:chatbotapp/services/prompt_router.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
 import 'package:chatbotapp/utilities/app_motion.dart';
-import 'package:chatbotapp/utilities/app_snackbar.dart';
-import 'package:chatbotapp/utilities/chat_error_formatter.dart';
 import 'package:chatbotapp/widgets/app_screen_scaffold.dart';
 import 'package:chatbotapp/widgets/chat/chat_empty_state.dart';
 import 'package:chatbotapp/widgets/chat/chat_header.dart';
@@ -26,9 +26,15 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final PromptRouter _promptRouter = const PromptRouter();
+  final TextEditingController _composerController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   int _lastMessageCount = 0;
   bool _showJumpToLatest = false;
+  String _draftText = '';
+  SupportLabel? _selectedLabel;
+  PromptRecommendation? _selectedRecommendation;
+  bool _isApplyingRecommendation = false;
 
   @override
   void initState() {
@@ -40,7 +46,33 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _scrollController.removeListener(_syncJumpToLatestButton);
     _scrollController.dispose();
+    _composerController.dispose();
     super.dispose();
+  }
+
+  void _handleDraftChanged(String value) {
+    if (_isApplyingRecommendation) {
+      return;
+    }
+
+    final shouldClearSelection =
+        _selectedRecommendation != null &&
+        value.trim() != _selectedRecommendation!.promptTemplate.trim();
+
+    setState(() {
+      _draftText = value;
+      if (shouldClearSelection) {
+        _selectedRecommendation = null;
+      }
+    });
+  }
+
+  void _handleMessageSent() {
+    setState(() {
+      _draftText = '';
+      _selectedLabel = null;
+      _selectedRecommendation = null;
+    });
   }
 
   bool _shouldShowJumpToLatest() {
@@ -87,6 +119,15 @@ class _ChatScreenState extends State<ChatScreen> {
         _scrollController.jumpTo(0);
       }
     });
+  }
+
+  void _resetComposerRoutingState() {
+    _isApplyingRecommendation = true;
+    _composerController.clear();
+    _isApplyingRecommendation = false;
+    _draftText = '';
+    _selectedLabel = null;
+    _selectedRecommendation = null;
   }
 
   void _scrollToBottom() {
@@ -147,6 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _startNewChat(ChatProvider chatProvider) async {
     if (!chatProvider.hasMessages) {
       await chatProvider.prepareChatRoom(isNewChat: true, chatID: '');
+      setState(_resetComposerRoutingState);
       return;
     }
 
@@ -163,19 +205,31 @@ class _ChatScreenState extends State<ChatScreen> {
 
     await chatProvider.prepareChatRoom(isNewChat: true, chatID: '');
     _resetJumpToLatestState();
+    setState(_resetComposerRoutingState);
   }
 
-  Future<void> _sendSuggestion(String prompt) async {
-    final chatProvider = context.read<ChatProvider>();
+  void _selectLabel(SupportLabel? label) {
+    setState(() {
+      _selectedLabel = label;
+      _selectedRecommendation = null;
+    });
+  }
 
-    try {
-      await chatProvider.sentMessage(message: prompt, isTextOnly: true);
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      showAppSnackBar(context, formatChatError(error), bottomOffset: 132);
-    }
+  void _applyRecommendation(PromptRecommendation recommendation) {
+    _isApplyingRecommendation = true;
+    _composerController.value = TextEditingValue(
+      text: recommendation.promptTemplate,
+      selection: TextSelection.collapsed(
+        offset: recommendation.promptTemplate.length,
+      ),
+    );
+    _isApplyingRecommendation = false;
+
+    setState(() {
+      _draftText = recommendation.promptTemplate;
+      _selectedLabel = recommendation.label;
+      _selectedRecommendation = recommendation;
+    });
   }
 
   Future<void> _openPage(Widget page) async {
@@ -186,9 +240,7 @@ class _ChatScreenState extends State<ChatScreen> {
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           )
-        : CupertinoPageRoute<void>(
-            builder: (context) => page,
-          );
+        : CupertinoPageRoute<void>(builder: (context) => page);
 
     await Navigator.of(context).push(route);
   }
@@ -201,10 +253,24 @@ class _ChatScreenState extends State<ChatScreen> {
           chatProvider: chatProvider,
           settingsProvider: settingsProvider,
         );
-        final userName = context.watch<UserProfileProvider>().firstName;
+        final userProfile = context.watch<UserProfileProvider>();
+        final userName = userProfile.firstName;
+        final routingContext = RoutingContext(
+          draftText: _draftText,
+          selectedLabel: _selectedLabel,
+          hasImages: chatProvider.imagesFileList?.isNotEmpty ?? false,
+          recentLabels: supportLabelsFromKeys(chatProvider.recentLabelKeys()),
+          preferredLabels: supportLabelsFromKeys(
+            userProfile.preferredLabelKeys,
+          ),
+        );
+        final recommendations = _promptRouter.recommend(
+          context: routingContext,
+        );
         final showJumpButton = chatProvider.hasMessages && _showJumpToLatest;
-        final motionDuration =
-            settingsProvider.reduceMotion ? Duration.zero : AppMotion.regular;
+        final motionDuration = settingsProvider.reduceMotion
+            ? Duration.zero
+            : AppMotion.regular;
         final bottomInset = homeIndicatorSpacing(
           context,
           base: 12,
@@ -212,20 +278,17 @@ class _ChatScreenState extends State<ChatScreen> {
           maxExtra: 6,
         );
         final draftImages = chatProvider.imagesFileList?.isNotEmpty ?? false;
-        final composerInset = bottomInset +
+        final composerInset =
+            bottomInset +
             92 +
             (draftImages ? 112 : 0) +
             (voiceProvider.isListening ? 44 : 0);
-        final contentBottomPadding =
-            composerInset > 24 ? composerInset - 24 : composerInset;
+        final contentBottomPadding = composerInset > 24
+            ? composerInset - 24
+            : composerInset;
 
         return AppScreenScaffold(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            10,
-            16,
-            0,
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
           child: Column(
             children: [
               ChatHeader(
@@ -260,7 +323,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                   apiConfigured: ApiService.isConfigured,
                                   showStarterPrompts:
                                       settingsProvider.showStarterPrompts,
-                                  onSuggestionTap: _sendSuggestion,
+                                  labels: _promptRouter.labels,
+                                  recommendations: recommendations,
+                                  selectedLabel: _selectedLabel,
+                                  onSuggestionTap: _applyRecommendation,
+                                  onLabelSelected: _selectLabel,
                                 ),
                               ),
                       ),
@@ -293,7 +360,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       left: 0,
                       right: 0,
                       bottom: bottomInset,
-                      child: BottomChatField(chatProvider: chatProvider),
+                      child: BottomChatField(
+                        chatProvider: chatProvider,
+                        textController: _composerController,
+                        onDraftChanged: _handleDraftChanged,
+                        onMessageSent: _handleMessageSent,
+                        selectedLabel: _selectedLabel,
+                        recommendedSkillId: _selectedRecommendation?.skillId,
+                        templateId: _selectedRecommendation?.templateId,
+                      ),
                     ),
                   ],
                 ),
@@ -307,9 +382,7 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _JumpToLatestButton extends StatelessWidget {
-  const _JumpToLatestButton({
-    required this.onTap,
-  });
+  const _JumpToLatestButton({required this.onTap});
 
   final VoidCallback onTap;
 
@@ -324,8 +397,9 @@ class _JumpToLatestButton extends StatelessWidget {
         backgroundColor: isDark
             ? colorScheme.primaryContainer.withValues(alpha: 0.9)
             : colorScheme.surfaceContainerLow.withValues(alpha: 0.92),
-        foregroundColor:
-            isDark ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+        foregroundColor: isDark
+            ? colorScheme.onPrimaryContainer
+            : colorScheme.onSurface,
       ),
       tooltip: 'Jump to latest',
       icon: const Icon(CupertinoIcons.arrow_down),

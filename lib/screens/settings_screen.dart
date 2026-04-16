@@ -118,16 +118,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settingsProvider = context.watch<SettingsProvider>();
     final userProfile = context.watch<UserProfileProvider>();
     final colorScheme = Theme.of(context).colorScheme;
-    final motionDuration =
-        settingsProvider.reduceMotion ? Duration.zero : AppMotion.regular;
+    final motionDuration = settingsProvider.reduceMotion
+        ? Duration.zero
+        : AppMotion.regular;
 
     return AppScreenScaffold(
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        10,
-        16,
-        0,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,10 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () => Navigator.of(context).pop(),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Settings',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text('Settings', style: Theme.of(context).textTheme.titleLarge),
               ],
             ),
             const SizedBox(height: 16),
@@ -182,17 +175,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               children: [
                                 Text(
                                   userProfile.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
+                                  style: Theme.of(context).textTheme.titleLarge
                                       ?.copyWith(fontWeight: FontWeight.w700),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Profile',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
+                                  style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
@@ -216,9 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         TextField(
                           controller: _nameController,
                           textCapitalization: TextCapitalization.words,
-                          decoration: const InputDecoration(
-                            labelText: 'Name',
-                          ),
+                          decoration: const InputDecoration(labelText: 'Name'),
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -341,8 +328,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const Divider(height: 1),
                   SettingsTile(
                     icon: CupertinoIcons.square_grid_2x2,
-                    title: 'Starter prompts',
-                    subtitle: 'Show prompt suggestions',
+                    title: 'Suggestions',
+                    subtitle: 'Show recommended prompts',
                     value: settingsProvider.showStarterPrompts,
                     onChanged: (value) {
                       settingsProvider.toggleShowStarterPrompts(value: value);
@@ -375,18 +362,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({
-    required this.title,
-  });
+  const _SectionLabel({required this.title});
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium,
-    );
+    return Text(title, style: Theme.of(context).textTheme.titleMedium);
   }
 }
 
@@ -408,8 +390,9 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final iconColor =
-        isDestructive ? colorScheme.error : colorScheme.onPrimaryContainer;
+    final iconColor = isDestructive
+        ? colorScheme.error
+        : colorScheme.onPrimaryContainer;
     final iconBackground = isDestructive
         ? colorScheme.errorContainer
         : colorScheme.primaryContainer;
@@ -439,8 +422,8 @@ class _ActionTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
