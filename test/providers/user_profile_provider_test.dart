@@ -102,4 +102,92 @@ void main() {
     expect(provider.shouldShowOnboarding, isFalse);
     expect(provider.name, 'You');
   });
+
+  test('imported signals and history enrich routing labels', () async {
+    await provider.saveProfile(
+      name: 'Taylor',
+      imagePath: '',
+      preferredLabelKeys: const [
+        'writing',
+        'planning',
+        'study_help',
+        'summarization',
+        'image_analysis',
+        'wellbeing_checkin',
+      ],
+    );
+    await Hive.box<ChatHistory>(Constants.chatHistoryBox).put(
+      'chat-1',
+      ChatHistory(
+        chatId: 'chat-1',
+        prompt: 'I am overwhelmed by deadlines and need a plan.',
+        response: 'Let us map the week out.',
+        imagesUrls: const [],
+        timestamp: DateTime(2026, 4, 16),
+        selectedLabel: 'wellbeing_checkin',
+      ),
+    );
+
+    await provider.mergeImportedLabelSignals(
+      labelKeys: const [
+        'planning',
+        'study_help',
+        'summarization',
+        'writing',
+        'image_analysis',
+        'wellbeing_checkin',
+      ],
+      sourceName: 'Google Calendar',
+    );
+
+    expect(provider.importedLabelKeys.first, 'planning');
+    expect(provider.routingLabelKeys.first, 'planning');
+    expect(provider.labelSignalSources, contains('History'));
+    expect(provider.labelSignalSources, contains('Google Calendar'));
+  });
+
+  test('re-importing the same source replaces stale imported labels', () async {
+    await provider.saveProfile(
+      name: 'Taylor',
+      imagePath: '',
+      preferredLabelKeys: const [
+        'writing',
+        'planning',
+        'study_help',
+        'summarization',
+        'image_analysis',
+        'wellbeing_checkin',
+      ],
+    );
+
+    await provider.mergeImportedLabelSignals(
+      labelKeys: const [
+        'planning',
+        'study_help',
+        'summarization',
+        'writing',
+        'image_analysis',
+        'wellbeing_checkin',
+      ],
+      sourceName: 'Google Calendar',
+    );
+    await provider.mergeImportedLabelSignals(
+      labelKeys: const [
+        'wellbeing_checkin',
+        'planning',
+        'summarization',
+        'writing',
+        'study_help',
+        'image_analysis',
+      ],
+      sourceName: 'Google Calendar',
+    );
+
+    expect(provider.importedLabelKeys.first, 'wellbeing_checkin');
+    expect(
+      provider.labelSignalSources
+          .where((source) => source == 'Google Calendar'),
+      hasLength(1),
+    );
+  });
 }

@@ -55,8 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
 
-    final shouldClearSelection =
-        _selectedRecommendation != null &&
+    final shouldClearSelection = _selectedRecommendation != null &&
         value.trim() != _selectedRecommendation!.promptTemplate.trim();
 
     setState(() {
@@ -261,16 +260,15 @@ class _ChatScreenState extends State<ChatScreen> {
           hasImages: chatProvider.imagesFileList?.isNotEmpty ?? false,
           recentLabels: supportLabelsFromKeys(chatProvider.recentLabelKeys()),
           preferredLabels: supportLabelsFromKeys(
-            userProfile.preferredLabelKeys,
+            userProfile.routingLabelKeys,
           ),
         );
         final recommendations = _promptRouter.recommend(
           context: routingContext,
         );
         final showJumpButton = chatProvider.hasMessages && _showJumpToLatest;
-        final motionDuration = settingsProvider.reduceMotion
-            ? Duration.zero
-            : AppMotion.regular;
+        final motionDuration =
+            settingsProvider.reduceMotion ? Duration.zero : AppMotion.regular;
         final bottomInset = homeIndicatorSpacing(
           context,
           base: 12,
@@ -278,14 +276,12 @@ class _ChatScreenState extends State<ChatScreen> {
           maxExtra: 6,
         );
         final draftImages = chatProvider.imagesFileList?.isNotEmpty ?? false;
-        final composerInset =
-            bottomInset +
+        final composerInset = bottomInset +
             92 +
             (draftImages ? 112 : 0) +
             (voiceProvider.isListening ? 44 : 0);
-        final contentBottomPadding = composerInset > 24
-            ? composerInset - 24
-            : composerInset;
+        final contentBottomPadding =
+            composerInset > 24 ? composerInset - 24 : composerInset;
 
         return AppScreenScaffold(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -397,9 +393,8 @@ class _JumpToLatestButton extends StatelessWidget {
         backgroundColor: isDark
             ? colorScheme.primaryContainer.withValues(alpha: 0.9)
             : colorScheme.surfaceContainerLow.withValues(alpha: 0.92),
-        foregroundColor: isDark
-            ? colorScheme.onPrimaryContainer
-            : colorScheme.onSurface,
+        foregroundColor:
+            isDark ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
       ),
       tooltip: 'Jump to latest',
       icon: const Icon(CupertinoIcons.arrow_down),

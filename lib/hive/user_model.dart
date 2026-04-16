@@ -16,11 +16,23 @@ class UserModel extends HiveObject {
   @HiveField(3)
   final List<String> preferredLabels;
 
+  @HiveField(4)
+  final List<String> importedLabels;
+
+  @HiveField(5)
+  final List<String> importedSources;
+
+  @HiveField(6)
+  final List<String> importedSourceRankings;
+
   // constructor
   UserModel({
     required this.uid,
     required this.name,
     required this.image,
     this.preferredLabels = const [],
+    this.importedLabels = const [],
+    this.importedSources = const [],
+    this.importedSourceRankings = const [],
   });
 }

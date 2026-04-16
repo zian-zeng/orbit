@@ -205,6 +205,8 @@ class _BottomChatFieldState extends State<BottomChatField> {
         await context.read<UserProfileProvider>().rememberPreferredLabel(
               supportLabelKey(selectedLabel)!,
             );
+      } else {
+        await context.read<UserProfileProvider>().refreshEnrichedLabels();
       }
       didSend = true;
       widget.onMessageSent?.call();

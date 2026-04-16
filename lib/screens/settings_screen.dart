@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:chatbotapp/models/prompt_recommendation.dart';
 import 'package:flutter/services.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
+import 'package:chatbotapp/services/label_enrichment_service.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
 import 'package:chatbotapp/utilities/app_motion.dart';
 import 'package:chatbotapp/utilities/app_snackbar.dart';
@@ -27,13 +29,30 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _calendarTokenController =
+      TextEditingController();
+  final TextEditingController _calendarIdController = TextEditingController(
+    text: 'primary',
+  );
+  final TextEditingController _canvasBaseUrlController =
+      TextEditingController();
+  final TextEditingController _canvasTokenController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  final LabelEnrichmentService _labelEnrichmentService =
+      const LabelEnrichmentService();
   File? _draftImageFile;
   bool _isEditingProfile = false;
+  bool _isRefreshingSignals = false;
+  bool _isImportingCalendar = false;
+  bool _isImportingCanvas = false;
 
   @override
   void dispose() {
     _nameController.dispose();
+    _calendarTokenController.dispose();
+    _calendarIdController.dispose();
+    _canvasBaseUrlController.dispose();
+    _canvasTokenController.dispose();
     super.dispose();
   }
 
@@ -99,6 +118,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _confirmClearHistory() async {
+    final chatProvider = context.read<ChatProvider>();
+    final userProfile = context.read<UserProfileProvider>();
     final confirmed = await showAnimatedConfirmationDialog(
       context: context,
       title: 'Clear history',
@@ -110,7 +131,153 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    await context.read<ChatProvider>().clearAllChats();
+    await chatProvider.clearAllChats();
+    await userProfile.refreshEnrichedLabels();
+    if (mounted) {
+      showAppSnackBar(context, 'History cleared');
+    }
+  }
+
+  Future<void> _refreshSignals(UserProfileProvider userProfile) async {
+    if (_isRefreshingSignals) {
+      return;
+    }
+
+    setState(() {
+      _isRefreshingSignals = true;
+    });
+
+    try {
+      await userProfile.refreshEnrichedLabels();
+      if (!mounted) {
+        return;
+      }
+      showAppSnackBar(context, 'Refreshed label signals');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshingSignals = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _importGoogleCalendar(UserProfileProvider userProfile) async {
+    final accessToken = _calendarTokenController.text.trim();
+    final calendarId = _calendarIdController.text.trim().isEmpty
+        ? 'primary'
+        : _calendarIdController.text.trim();
+
+    if (accessToken.isEmpty) {
+      showAppSnackBar(context, 'Enter a Google Calendar access token');
+      return;
+    }
+
+    setState(() {
+      _isImportingCalendar = true;
+    });
+
+    try {
+      final snapshot = await _labelEnrichmentService.fetchGoogleCalendarLabels(
+        accessToken: accessToken,
+        calendarId: calendarId,
+      );
+      if (snapshot.rankedLabels.isEmpty) {
+        await userProfile.mergeImportedLabelSignals(
+          labelKeys: const [],
+          sourceName: snapshot.sourceName,
+        );
+        if (!mounted) {
+          return;
+        }
+        showAppSnackBar(context, 'No calendar signals found; import cleared');
+        return;
+      }
+      await userProfile.mergeImportedLabelSignals(
+        labelKeys: snapshot.labelKeys,
+        sourceName: snapshot.sourceName,
+      );
+      if (!mounted) {
+        return;
+      }
+      showAppSnackBar(
+        context,
+        'Imported ${snapshot.itemCount} Google Calendar events',
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      showAppSnackBar(context, '$error');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isImportingCalendar = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _importCanvas(UserProfileProvider userProfile) async {
+    final baseUrl = _canvasBaseUrlController.text.trim();
+    final accessToken = _canvasTokenController.text.trim();
+
+    if (baseUrl.isEmpty || accessToken.isEmpty) {
+      showAppSnackBar(context, 'Enter both Canvas base URL and access token');
+      return;
+    }
+
+    setState(() {
+      _isImportingCanvas = true;
+    });
+
+    try {
+      final snapshot = await _labelEnrichmentService.fetchCanvasLabels(
+        baseUrl: baseUrl,
+        accessToken: accessToken,
+      );
+      if (snapshot.rankedLabels.isEmpty) {
+        await userProfile.mergeImportedLabelSignals(
+          labelKeys: const [],
+          sourceName: snapshot.sourceName,
+        );
+        if (!mounted) {
+          return;
+        }
+        showAppSnackBar(context, 'No Canvas signals found; import cleared');
+        return;
+      }
+      await userProfile.mergeImportedLabelSignals(
+        labelKeys: snapshot.labelKeys,
+        sourceName: snapshot.sourceName,
+      );
+      if (!mounted) {
+        return;
+      }
+      showAppSnackBar(
+        context,
+        'Imported ${snapshot.itemCount} Canvas items',
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      showAppSnackBar(context, '$error');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isImportingCanvas = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _clearImportedSignals(UserProfileProvider userProfile) async {
+    await userProfile.clearImportedLabelSignals();
+    if (!mounted) {
+      return;
+    }
+    showAppSnackBar(context, 'Cleared imported label signals');
   }
 
   @override
@@ -118,9 +285,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settingsProvider = context.watch<SettingsProvider>();
     final userProfile = context.watch<UserProfileProvider>();
     final colorScheme = Theme.of(context).colorScheme;
-    final motionDuration = settingsProvider.reduceMotion
-        ? Duration.zero
-        : AppMotion.regular;
+    final motionDuration =
+        settingsProvider.reduceMotion ? Duration.zero : AppMotion.regular;
 
     return AppScreenScaffold(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -175,13 +341,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               children: [
                                 Text(
                                   userProfile.name,
-                                  style: Theme.of(context).textTheme.titleLarge
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
                                       ?.copyWith(fontWeight: FontWeight.w700),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Profile',
-                                  style: Theme.of(context).textTheme.bodyMedium
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
                                       ?.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
@@ -232,6 +402,155 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 22),
+            const _SectionLabel(title: 'Label Signals'),
+            const SizedBox(height: 10),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Routing focus',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: supportLabelsFromKeys(
+                        userProfile.routingLabelKeys,
+                      )
+                          .take(3)
+                          .map(
+                            (label) => Chip(
+                              label: Text(label.displayName),
+                            ),
+                          )
+                          .toList(growable: false),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Orbit combines signup answers, chat history, and optional imports to keep these labels fresh.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    if (userProfile.labelSignalSources.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: userProfile.labelSignalSources
+                            .map(
+                              (source) => Chip(
+                                label: Text(source),
+                              ),
+                            )
+                            .toList(growable: false),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _isRefreshingSignals
+                                ? null
+                                : () => _refreshSignals(userProfile),
+                            child: Text(
+                              _isRefreshingSignals
+                                  ? 'Refreshing...'
+                                  : 'Refresh from history',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: userProfile.importedLabelKeys.isEmpty
+                                ? null
+                                : () => _clearImportedSignals(userProfile),
+                            child: const Text('Clear imports'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Google Calendar import',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _calendarTokenController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Access token',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _calendarIdController,
+                      decoration: const InputDecoration(
+                        labelText: 'Calendar ID',
+                        hintText: 'primary',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _isImportingCalendar
+                            ? null
+                            : () => _importGoogleCalendar(userProfile),
+                        child: Text(
+                          _isImportingCalendar
+                              ? 'Importing calendar...'
+                              : 'Import Google Calendar',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Canvas import',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _canvasBaseUrlController,
+                      decoration: const InputDecoration(
+                        labelText: 'Canvas base URL',
+                        hintText: 'https://canvas.school.edu',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _canvasTokenController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Canvas access token',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _isImportingCanvas
+                            ? null
+                            : () => _importCanvas(userProfile),
+                        child: Text(
+                          _isImportingCanvas
+                              ? 'Importing Canvas...'
+                              : 'Import Canvas',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
             const _SectionLabel(title: 'Appearance'),
             const SizedBox(height: 10),
             Card(
@@ -390,9 +709,8 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final iconColor = isDestructive
-        ? colorScheme.error
-        : colorScheme.onPrimaryContainer;
+    final iconColor =
+        isDestructive ? colorScheme.error : colorScheme.onPrimaryContainer;
     final iconBackground = isDestructive
         ? colorScheme.errorContainer
         : colorScheme.primaryContainer;
@@ -422,8 +740,8 @@ class _ActionTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),

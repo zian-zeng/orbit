@@ -67,6 +67,10 @@ class TestUserProfileProvider extends UserProfileProvider {
       List<String>.unmodifiable(_preferredLabelKeys);
 
   @override
+  List<String> get routingLabelKeys =>
+      List<String>.unmodifiable(_preferredLabelKeys);
+
+  @override
   Future<void> loadUser() async {
     _isReady = true;
     notifyListeners();
@@ -77,6 +81,9 @@ class TestUserProfileProvider extends UserProfileProvider {
     required String name,
     required String imagePath,
     List<String>? preferredLabelKeys,
+    List<String>? importedLabelKeys,
+    List<String>? importedSources,
+    List<String>? importedSourceRankings,
   }) async {
     _name = name.trim().isEmpty ? 'You' : name.trim();
     _preferredLabelKeys = preferredLabelKeys ?? _preferredLabelKeys;
