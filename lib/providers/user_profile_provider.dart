@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/user_model.dart';
@@ -8,11 +10,16 @@ class UserProfileProvider extends ChangeNotifier {
   String _name = 'You';
   String _imagePath = '';
   List<String> _preferredLabelKeys = [];
+  bool _isReady = false;
+  bool _shouldShowOnboarding = false;
 
   String get uid => _uid;
   String get name => _name.trim().isEmpty ? 'You' : _name.trim();
   String get firstName => name.split(' ').first;
   String get imagePath => _imagePath;
+  bool get isReady => _isReady;
+  bool get hasCompletedOnboarding => _uid.trim().isNotEmpty;
+  bool get shouldShowOnboarding => _shouldShowOnboarding;
   List<String> get preferredLabelKeys =>
       List<String>.unmodifiable(_preferredLabelKeys);
   bool get hasImage => _imagePath.trim().isNotEmpty;
@@ -27,27 +34,48 @@ class UserProfileProvider extends ChangeNotifier {
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
   }
 
+  void _resetProfile({required bool shouldShowOnboarding}) {
+    _uid = '';
+    _name = 'You';
+    _imagePath = '';
+    _preferredLabelKeys = [];
+    _shouldShowOnboarding = shouldShowOnboarding;
+  }
+
+  bool _hasLegacyActivity() {
+    return Boxes.getChatHistory().isNotEmpty || Boxes.getSettings().isNotEmpty;
+  }
+
   Future<void> loadUser() async {
-    final userBox = Boxes.getUser();
-    if (userBox.isEmpty) {
-      _uid = '';
-      _name = 'You';
-      _imagePath = '';
-      _preferredLabelKeys = [];
+    try {
+      final userBox = Boxes.getUser();
+      if (userBox.isEmpty) {
+        _resetProfile(shouldShowOnboarding: !_hasLegacyActivity());
+        return;
+      }
+
+      final user = userBox.getAt(0);
+      if (user == null) {
+        _resetProfile(shouldShowOnboarding: !_hasLegacyActivity());
+        return;
+      }
+
+      _uid = user.uid;
+      _name = user.name;
+      _imagePath = user.image;
+      _preferredLabelKeys = List<String>.from(user.preferredLabels);
+      _shouldShowOnboarding = false;
+    } catch (error, stackTrace) {
+      _resetProfile(shouldShowOnboarding: false);
+      log(
+        'Failed to load user profile',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    } finally {
+      _isReady = true;
       notifyListeners();
-      return;
     }
-
-    final user = userBox.getAt(0);
-    if (user == null) {
-      return;
-    }
-
-    _uid = user.uid;
-    _name = user.name;
-    _imagePath = user.image;
-    _preferredLabelKeys = List<String>.from(user.preferredLabels);
-    notifyListeners();
   }
 
   Future<void> saveProfile({
@@ -74,6 +102,8 @@ class UserProfileProvider extends ChangeNotifier {
     _name = user.name;
     _imagePath = user.image;
     _preferredLabelKeys = List<String>.from(user.preferredLabels);
+    _isReady = true;
+    _shouldShowOnboarding = false;
     notifyListeners();
   }
 
@@ -86,9 +116,6 @@ class UserProfileProvider extends ChangeNotifier {
       labelKey,
       ..._preferredLabelKeys.where((existing) => existing != labelKey),
     ];
-    if (updated.length > 4) {
-      updated.removeRange(4, updated.length);
-    }
 
     await saveProfile(
       name: _name,

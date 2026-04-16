@@ -54,4 +54,47 @@ void main() {
       ]),
     );
   });
+
+  test('higher-ranked preferred labels outrank lower-ranked ones', () {
+    final recommendations = router.recommend(
+      context: const RoutingContext(
+        draftText: '',
+        selectedLabel: null,
+        hasImages: false,
+        recentLabels: [],
+        preferredLabels: [
+          SupportLabel.wellbeingCheckIn,
+          SupportLabel.planning,
+          SupportLabel.writing,
+          SupportLabel.studyHelp,
+          SupportLabel.summarization,
+          SupportLabel.imageAnalysis,
+        ],
+      ),
+    );
+
+    expect(recommendations.first.label, SupportLabel.wellbeingCheckIn);
+  });
+
+  test('strong saved-label matches still keep three recommendations', () {
+    final recommendations = router.recommend(
+      context: const RoutingContext(
+        draftText: '',
+        selectedLabel: null,
+        hasImages: false,
+        recentLabels: [],
+        preferredLabels: [
+          SupportLabel.planning,
+          SupportLabel.studyHelp,
+          SupportLabel.summarization,
+          SupportLabel.wellbeingCheckIn,
+          SupportLabel.writing,
+          SupportLabel.imageAnalysis,
+        ],
+      ),
+    );
+
+    expect(recommendations, hasLength(3));
+    expect(recommendations.first.label, SupportLabel.planning);
+  });
 }
