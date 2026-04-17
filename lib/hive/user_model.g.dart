@@ -21,13 +21,16 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       name: fields[1] as String,
       image: fields[2] as String,
       preferredLabels: (fields[3] as List?)?.cast<String>() ?? const [],
+      importedLabels: (fields[4] as List?)?.cast<String>() ?? const [],
+      importedSources: (fields[5] as List?)?.cast<String>() ?? const [],
+      importedSourceRankings: (fields[6] as List?)?.cast<String>() ?? const [],
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.uid)
       ..writeByte(1)
@@ -35,7 +38,13 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(2)
       ..write(obj.image)
       ..writeByte(3)
-      ..write(obj.preferredLabels);
+      ..write(obj.preferredLabels)
+      ..writeByte(4)
+      ..write(obj.importedLabels)
+      ..writeByte(5)
+      ..write(obj.importedSources)
+      ..writeByte(6)
+      ..write(obj.importedSourceRankings);
   }
 
   @override

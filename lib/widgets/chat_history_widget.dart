@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
+import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
 import 'package:chatbotapp/utilities/app_snackbar.dart';
 import 'package:provider/provider.dart';
@@ -146,6 +147,7 @@ class ChatHistoryWidget extends StatelessWidget {
 
   Future<void> _confirmDelete(BuildContext context) async {
     final chatProvider = context.read<ChatProvider>();
+    final userProfileProvider = context.read<UserProfileProvider>();
 
     final confirmed = await showAnimatedConfirmationDialog(
       context: context,
@@ -160,5 +162,6 @@ class ChatHistoryWidget extends StatelessWidget {
 
     await chatProvider.deleteChatMessages(chatId: chat.chatId);
     await chat.delete();
+    await userProfileProvider.refreshEnrichedLabels();
   }
 }

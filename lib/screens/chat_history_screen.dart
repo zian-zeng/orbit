@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
+import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
 import 'package:chatbotapp/widgets/app_icon_button.dart';
 import 'package:chatbotapp/widgets/app_screen_scaffold.dart';
@@ -43,14 +44,17 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
 
   Future<void> _removeChat(
     ChatProvider chatProvider,
+    UserProfileProvider userProfileProvider,
     ChatHistory chat,
   ) async {
     await chatProvider.deleteChatMessages(chatId: chat.chatId);
     await chat.delete();
+    await userProfileProvider.refreshEnrichedLabels();
   }
 
   Future<void> _clearAllHistory(BuildContext context) async {
     final chatProvider = context.read<ChatProvider>();
+    final userProfileProvider = context.read<UserProfileProvider>();
 
     if (!context.mounted) {
       return;
@@ -68,6 +72,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     }
 
     await chatProvider.clearAllChats();
+    await userProfileProvider.refreshEnrichedLabels();
   }
 
   Future<bool> _deleteChat(
@@ -75,6 +80,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     ChatHistory chat,
   ) async {
     final chatProvider = context.read<ChatProvider>();
+    final userProfileProvider = context.read<UserProfileProvider>();
 
     if (!context.mounted) {
       return false;
@@ -88,7 +94,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     );
 
     if (confirmed) {
-      await _removeChat(chatProvider, chat);
+      await _removeChat(chatProvider, userProfileProvider, chat);
     }
 
     return confirmed;

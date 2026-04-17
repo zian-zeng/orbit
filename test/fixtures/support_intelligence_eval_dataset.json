@@ -1,0 +1,1684 @@
+[
+  {
+    "user_id": "UMD_SYN_0001",
+    "display_name": "Student 0001",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0001-1",
+        "prompt": "I want a cleaner exam prep and calendar system.",
+        "response": "Conversation history points to recurring time-management breakdowns. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0001-2",
+        "prompt": "I underestimate how long assignments take and everything piles up.",
+        "response": "Conversation history points to recurring time-management breakdowns. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0001"
+  },
+  {
+    "user_id": "UMD_SYN_0011",
+    "display_name": "Student 0011",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0011-1",
+        "prompt": "I want a cleaner exam prep and calendar system.",
+        "response": "Conversation history points to recurring time-management breakdowns. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0011-2",
+        "prompt": "I need a realistic plan for classes, work, and rest.",
+        "response": "Conversation history points to recurring time-management breakdowns. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0011"
+  },
+  {
+    "user_id": "UMD_SYN_0021",
+    "display_name": "Student 0021",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0021-1",
+        "prompt": "I want a cleaner exam prep and calendar system.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0021-2",
+        "prompt": "I need a realistic plan for classes, work, and rest.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0021"
+  },
+  {
+    "user_id": "UMD_SYN_0029",
+    "display_name": "Student 0029",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0029-1",
+        "prompt": "I need help balancing class, work, and life without missing deadlines.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0029-2",
+        "prompt": "I underestimate how long assignments take and everything piles up.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0029"
+  },
+  {
+    "user_id": "UMD_SYN_0035",
+    "display_name": "Student 0035",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0035-1",
+        "prompt": "I want a cleaner exam prep and calendar system.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. Conversation history shows stress spikes before exams and deadlines.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0035-2",
+        "prompt": "My week feels full before I even start studying.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. Conversation history shows stress spikes before exams and deadlines.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0035"
+  },
+  {
+    "user_id": "UMD_SYN_0044",
+    "display_name": "Student 0044",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0044-1",
+        "prompt": "I want a cleaner exam prep and calendar system.",
+        "response": "Conversation history points to recurring time-management breakdowns. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0044-2",
+        "prompt": "I need a realistic plan for classes, work, and rest.",
+        "response": "Conversation history points to recurring time-management breakdowns. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0044"
+  },
+  {
+    "user_id": "UMD_SYN_0050",
+    "display_name": "Student 0050",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0050-1",
+        "prompt": "I want a cleaner exam prep and calendar system.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. User described burnout, overwhelm, and trouble calming down during busy weeks.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0050-2",
+        "prompt": "I need a realistic plan for classes, work, and rest.",
+        "response": "User described missed deadlines, overloaded weeks, and a need for calendar structure. User described burnout, overwhelm, and trouble calming down during busy weeks.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0050"
+  },
+  {
+    "user_id": "UMD_SYN_0066",
+    "display_name": "Student 0066",
+    "routing_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "planning",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0066-1",
+        "prompt": "I want a cleaner exam prep and calendar system.",
+        "response": "Conversation history points to recurring time-management breakdowns. Conversation history shows uncertainty about resume, networking, and next steps.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      },
+      {
+        "chat_id": "UMD_SYN_0066-2",
+        "prompt": "I need a realistic plan for classes, work, and rest.",
+        "response": "Conversation history points to recurring time-management breakdowns. Conversation history shows uncertainty about resume, networking, and next steps.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "planning",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "schedule_builder",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "deadline",
+    "source_profile_id": "UMD_SYN_0066"
+  },
+  {
+    "user_id": "UMD_SYN_0004",
+    "display_name": "Student 0004",
+    "routing_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0004-1",
+        "prompt": "I want a more reliable way to keep up with hard classes.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0004-2",
+        "prompt": "I know I should start earlier for exams, but I wait too long and panic.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0004"
+  },
+  {
+    "user_id": "UMD_SYN_0014",
+    "display_name": "Student 0014",
+    "routing_label_keys": [
+      "study_help",
+      "study_help"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "study_help"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0014-1",
+        "prompt": "I need help preparing for exams without cramming.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0014-2",
+        "prompt": "I know I should start earlier for exams, but I wait too long and panic.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0014"
+  },
+  {
+    "user_id": "UMD_SYN_0015",
+    "display_name": "Student 0015",
+    "routing_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0015-1",
+        "prompt": "I want recommendations for study support and course planning.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0015-2",
+        "prompt": "I know I should start earlier for exams, but I wait too long and panic.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0015"
+  },
+  {
+    "user_id": "UMD_SYN_0017",
+    "display_name": "Student 0017",
+    "routing_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0017-1",
+        "prompt": "I want a more reliable way to keep up with hard classes.",
+        "response": "Conversation history shows repeated concern about class difficulty and professor choice. Conversation history shows stress spikes before exams and deadlines.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0017-2",
+        "prompt": "I know I should start earlier for exams, but I wait too long and panic.",
+        "response": "Conversation history shows repeated concern about class difficulty and professor choice. Conversation history shows stress spikes before exams and deadlines.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0017"
+  },
+  {
+    "user_id": "UMD_SYN_0019",
+    "display_name": "Student 0019",
+    "routing_label_keys": [
+      "study_help",
+      "study_help"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "study_help"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0019-1",
+        "prompt": "I want a more reliable way to keep up with hard classes.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User described missed deadlines, overloaded weeks, and a need for calendar structure.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0019-2",
+        "prompt": "I know I should start earlier for exams, but I wait too long and panic.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User described missed deadlines, overloaded weeks, and a need for calendar structure.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0019"
+  },
+  {
+    "user_id": "UMD_SYN_0020",
+    "display_name": "Student 0020",
+    "routing_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0020-1",
+        "prompt": "I need help preparing for exams without cramming.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0020-2",
+        "prompt": "I keep falling behind in a course that has hard weekly problem sets.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0020"
+  },
+  {
+    "user_id": "UMD_SYN_0030",
+    "display_name": "Student 0030",
+    "routing_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0030-1",
+        "prompt": "I want recommendations for study support and course planning.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. Conversation history shows uncertainty about resume, networking, and next steps.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0030-2",
+        "prompt": "I know I should start earlier for exams, but I wait too long and panic.",
+        "response": "User mentioned a difficult course, exam prep, and wanting TA or tutoring support. Conversation history shows uncertainty about resume, networking, and next steps.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0030"
+  },
+  {
+    "user_id": "UMD_SYN_0032",
+    "display_name": "Student 0032",
+    "routing_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "study_help",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0032-1",
+        "prompt": "I want recommendations for study support and course planning.",
+        "response": "Conversation history shows repeated concern about class difficulty and professor choice. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      },
+      {
+        "chat_id": "UMD_SYN_0032-2",
+        "prompt": "I keep falling behind in a course that has hard weekly problem sets.",
+        "response": "Conversation history shows repeated concern about class difficulty and professor choice. User asked about internships, jobs, career fairs, and application timing.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "study_help",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "concept_breakdown",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "course",
+    "source_profile_id": "UMD_SYN_0032"
+  },
+  {
+    "user_id": "UMD_SYN_0002",
+    "display_name": "Student 0002",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "study_help"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "study_help"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0002-1",
+        "prompt": "I want a plan for managing pressure around exams and deadlines.",
+        "response": "Conversation history shows stress spikes before exams and deadlines. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0002-2",
+        "prompt": "I keep pushing through instead of using support before things get bad.",
+        "response": "Conversation history shows stress spikes before exams and deadlines. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0002"
+  },
+  {
+    "user_id": "UMD_SYN_0003",
+    "display_name": "Student 0003",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0003-1",
+        "prompt": "I need guidance on accommodations, classes, and daily logistics.",
+        "response": "Conversation history suggests uncertainty about whether support is available. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0003-2",
+        "prompt": "I need help figuring out what documentation and next steps matter.",
+        "response": "Conversation history suggests uncertainty about whether support is available. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0003"
+  },
+  {
+    "user_id": "UMD_SYN_0013",
+    "display_name": "Student 0013",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0013-1",
+        "prompt": "I want support that helps me function better week to week.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. User described burnout, overwhelm, and trouble calming down during busy weeks.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0013-2",
+        "prompt": "My focus and motivation have dropped a lot this semester.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. User described burnout, overwhelm, and trouble calming down during busy weeks.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0013"
+  },
+  {
+    "user_id": "UMD_SYN_0023",
+    "display_name": "Student 0023",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0023-1",
+        "prompt": "I want support that helps me function better week to week.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0023-2",
+        "prompt": "I know I need support, but starting the process feels hard.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0023"
+  },
+  {
+    "user_id": "UMD_SYN_0027",
+    "display_name": "Student 0027",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0027-1",
+        "prompt": "I want support that helps me function better week to week.",
+        "response": "Conversation history reflects reduced motivation and concern about coping. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0027-2",
+        "prompt": "My focus and motivation have dropped a lot this semester.",
+        "response": "Conversation history reflects reduced motivation and concern about coping. User mentioned a difficult course, exam prep, and wanting TA or tutoring support.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0027"
+  },
+  {
+    "user_id": "UMD_SYN_0028",
+    "display_name": "Student 0028",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0028-1",
+        "prompt": "I want support for focus, mood, and keeping up academically.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0028-2",
+        "prompt": "I am dealing with ADHD or depression symptoms and it is affecting school.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0028"
+  },
+  {
+    "user_id": "UMD_SYN_0033",
+    "display_name": "Student 0033",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0033-1",
+        "prompt": "I need help finding the right mental health resources at UMD.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. Conversation history includes housing or food insecurity concerns.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0033-2",
+        "prompt": "I am dealing with ADHD or depression symptoms and it is affecting school.",
+        "response": "User disclosed ADHD, depression, or a drop in daily functioning. Conversation history includes housing or food insecurity concerns.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0033"
+  },
+  {
+    "user_id": "UMD_SYN_0040",
+    "display_name": "Student 0040",
+    "routing_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "wellbeing_checkin",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0040-1",
+        "prompt": "I need help resetting before stress turns into burnout.",
+        "response": "User described burnout, overwhelm, and trouble calming down during busy weeks. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "wellbeing_checkin",
+        "template_id": "template.wellbeing_checkin"
+      },
+      {
+        "chat_id": "UMD_SYN_0040-2",
+        "prompt": "I need a plan for burnout, sleep, and exam pressure.",
+        "response": "User described burnout, overwhelm, and trouble calming down during busy weeks. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "wellbeing_checkin",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "recovery_planner",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "overwhelming",
+    "source_profile_id": "UMD_SYN_0040"
+  },
+  {
+    "user_id": "UMD_SYN_0010",
+    "display_name": "Student 0010",
+    "routing_label_keys": [
+      "writing",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "writing",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0010-1",
+        "prompt": "I need help figuring out which career resources to use first.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "writing",
+        "template_id": "template.draft_polished_reply"
+      },
+      {
+        "chat_id": "UMD_SYN_0010-2",
+        "prompt": "I do not know when to apply or which opportunities are actually worth my time.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "writing",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "drafting_assistant",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "draft",
+    "source_profile_id": "UMD_SYN_0010"
+  },
+  {
+    "user_id": "UMD_SYN_0016",
+    "display_name": "Student 0016",
+    "routing_label_keys": [
+      "writing",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "writing",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0016-1",
+        "prompt": "I want a clearer path to internships and job applications.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "writing",
+        "template_id": "template.draft_polished_reply"
+      },
+      {
+        "chat_id": "UMD_SYN_0016-2",
+        "prompt": "I feel behind compared with other students who already know the process.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "writing",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "drafting_assistant",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "draft",
+    "source_profile_id": "UMD_SYN_0016"
+  },
+  {
+    "user_id": "UMD_SYN_0031",
+    "display_name": "Student 0031",
+    "routing_label_keys": [
+      "writing",
+      "study_help"
+    ],
+    "recent_label_keys": [
+      "writing",
+      "study_help"
+    ],
+    "label_signal_sources": [
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0031-1",
+        "prompt": "I need help figuring out which career resources to use first.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "writing",
+        "template_id": "template.draft_polished_reply"
+      },
+      {
+        "chat_id": "UMD_SYN_0031-2",
+        "prompt": "I feel behind compared with other students who already know the process.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      }
+    ],
+    "expected_primary_label": "writing",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "drafting_assistant",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "draft",
+    "source_profile_id": "UMD_SYN_0031"
+  },
+  {
+    "user_id": "UMD_SYN_0037",
+    "display_name": "Student 0037",
+    "routing_label_keys": [
+      "writing",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "writing",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0037-1",
+        "prompt": "I want a plan for resume work, networking, and applying on time.",
+        "response": "Conversation history shows uncertainty about resume, networking, and next steps. Conversation history includes housing or food insecurity concerns.",
+        "selected_label": "writing",
+        "template_id": "template.draft_polished_reply"
+      },
+      {
+        "chat_id": "UMD_SYN_0037-2",
+        "prompt": "I need structured help with internships, networking, and resume feedback.",
+        "response": "Conversation history shows uncertainty about resume, networking, and next steps. Conversation history includes housing or food insecurity concerns.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "writing",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "drafting_assistant",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "draft",
+    "source_profile_id": "UMD_SYN_0037"
+  },
+  {
+    "user_id": "UMD_SYN_0046",
+    "display_name": "Student 0046",
+    "routing_label_keys": [
+      "writing",
+      "study_help"
+    ],
+    "recent_label_keys": [
+      "writing",
+      "study_help"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0046-1",
+        "prompt": "I want a clearer path to internships and job applications.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. User described missed deadlines, overloaded weeks, and a need for calendar structure.",
+        "selected_label": "writing",
+        "template_id": "template.draft_polished_reply"
+      },
+      {
+        "chat_id": "UMD_SYN_0046-2",
+        "prompt": "I feel behind compared with other students who already know the process.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. User described missed deadlines, overloaded weeks, and a need for calendar structure.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      }
+    ],
+    "expected_primary_label": "writing",
+    "expected_stress_band": "steady",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "drafting_assistant",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "draft",
+    "source_profile_id": "UMD_SYN_0046"
+  },
+  {
+    "user_id": "UMD_SYN_0055",
+    "display_name": "Student 0055",
+    "routing_label_keys": [
+      "writing",
+      "study_help"
+    ],
+    "recent_label_keys": [
+      "writing",
+      "study_help"
+    ],
+    "label_signal_sources": [
+      "Google Calendar",
+      "Canvas"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0055-1",
+        "prompt": "I want a plan for resume work, networking, and applying on time.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "writing",
+        "template_id": "template.draft_polished_reply"
+      },
+      {
+        "chat_id": "UMD_SYN_0055-2",
+        "prompt": "I need structured help with internships, networking, and resume feedback.",
+        "response": "User asked about internships, jobs, career fairs, and application timing. Conversation history points to recurring time-management breakdowns.",
+        "selected_label": "study_help",
+        "template_id": "template.study_coach"
+      }
+    ],
+    "expected_primary_label": "writing",
+    "expected_stress_band": "steady",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "drafting_assistant",
+      "calendar_signal_review",
+      "canvas_course_scan"
+    ],
+    "expected_prompt_keyword": "draft",
+    "source_profile_id": "UMD_SYN_0055"
+  },
+  {
+    "user_id": "UMD_SYN_0005",
+    "display_name": "Student 0005",
+    "routing_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0005-1",
+        "prompt": "I want help understanding UMD systems and communicating comfortably.",
+        "response": "Conversation history suggests the student is still learning UMD systems and expectations. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "summarization",
+        "template_id": "template.summarize_clearly"
+      },
+      {
+        "chat_id": "UMD_SYN_0005-2",
+        "prompt": "I understand the material, but speaking up in class is still hard.",
+        "response": "Conversation history suggests the student is still learning UMD systems and expectations. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "summarization",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "summary_builder",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "takeaways",
+    "source_profile_id": "UMD_SYN_0005"
+  },
+  {
+    "user_id": "UMD_SYN_0006",
+    "display_name": "Student 0006",
+    "routing_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0006-1",
+        "prompt": "I need a support system for navigating college more confidently.",
+        "response": "User referenced being first-gen and not knowing which campus resources to trust. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "summarization",
+        "template_id": "template.summarize_clearly"
+      },
+      {
+        "chat_id": "UMD_SYN_0006-2",
+        "prompt": "I do not always know which questions are okay to ask or who to ask.",
+        "response": "User referenced being first-gen and not knowing which campus resources to trust. User mentioned urgent money stress affecting attendance or focus.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "summarization",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "summary_builder",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "takeaways",
+    "source_profile_id": "UMD_SYN_0006"
+  },
+  {
+    "user_id": "UMD_SYN_0008",
+    "display_name": "Student 0008",
+    "routing_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0008-1",
+        "prompt": "I want to find emergency support and cheaper day-to-day options.",
+        "response": "User mentioned urgent money stress affecting attendance or focus. User referenced being first-gen and not knowing which campus resources to trust.",
+        "selected_label": "summarization",
+        "template_id": "template.summarize_clearly"
+      },
+      {
+        "chat_id": "UMD_SYN_0008-2",
+        "prompt": "A sudden expense is making it hard to focus on school.",
+        "response": "User mentioned urgent money stress affecting attendance or focus. User referenced being first-gen and not knowing which campus resources to trust.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "summarization",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "summary_builder",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "takeaways",
+    "source_profile_id": "UMD_SYN_0008"
+  },
+  {
+    "user_id": "UMD_SYN_0009",
+    "display_name": "Student 0009",
+    "routing_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0009-1",
+        "prompt": "I need support with campus life and language confidence.",
+        "response": "Conversation history suggests the student is still learning UMD systems and expectations. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "summarization",
+        "template_id": "template.summarize_clearly"
+      },
+      {
+        "chat_id": "UMD_SYN_0009-2",
+        "prompt": "UMD systems and forms feel unfamiliar and overwhelming.",
+        "response": "Conversation history suggests the student is still learning UMD systems and expectations. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "summarization",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "summary_builder",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "takeaways",
+    "source_profile_id": "UMD_SYN_0009"
+  },
+  {
+    "user_id": "UMD_SYN_0012",
+    "display_name": "Student 0012",
+    "routing_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0012-1",
+        "prompt": "I want help understanding UMD systems and communicating comfortably.",
+        "response": "User mentioned language confidence, adjustment, or visa-related uncertainty. Conversation history shows stress spikes before exams and deadlines.",
+        "selected_label": "summarization",
+        "template_id": "template.summarize_clearly"
+      },
+      {
+        "chat_id": "UMD_SYN_0012-2",
+        "prompt": "UMD systems and forms feel unfamiliar and overwhelming.",
+        "response": "User mentioned language confidence, adjustment, or visa-related uncertainty. Conversation history shows stress spikes before exams and deadlines.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "summarization",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "summary_builder",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "takeaways",
+    "source_profile_id": "UMD_SYN_0012"
+  },
+  {
+    "user_id": "UMD_SYN_0025",
+    "display_name": "Student 0025",
+    "routing_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "summarization",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0025-1",
+        "prompt": "I need help staying enrolled while dealing with money problems.",
+        "response": "User mentioned urgent money stress affecting attendance or focus. User asked about renting, transportation, shopping, or commuting logistics.",
+        "selected_label": "summarization",
+        "template_id": "template.summarize_clearly"
+      },
+      {
+        "chat_id": "UMD_SYN_0025-2",
+        "prompt": "I need short-term support and do not know which office can actually help.",
+        "response": "User mentioned urgent money stress affecting attendance or focus. User asked about renting, transportation, shopping, or commuting logistics.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "summarization",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "summary_builder",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "takeaways",
+    "source_profile_id": "UMD_SYN_0025"
+  },
+  {
+    "user_id": "UMD_SYN_0007",
+    "display_name": "Student 0007",
+    "routing_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0007-1",
+        "prompt": "I want to feel less lost on campus during my first semester.",
+        "response": "User asked where buildings are, how orientation works, and how to get around campus. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "image_analysis",
+        "template_id": "template.analyze_image"
+      },
+      {
+        "chat_id": "UMD_SYN_0007-2",
+        "prompt": "I am confused about orientation tasks, registration, and what matters first.",
+        "response": "User asked where buildings are, how orientation works, and how to get around campus. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "image_analysis",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "visual_explainer",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "screenshot",
+    "source_profile_id": "UMD_SYN_0007"
+  },
+  {
+    "user_id": "UMD_SYN_0018",
+    "display_name": "Student 0018",
+    "routing_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0018-1",
+        "prompt": "I need a checklist for getting started at UMD.",
+        "response": "Conversation history indicates first-semester confusion about campus systems. User asked about renting, transportation, shopping, or commuting logistics.",
+        "selected_label": "image_analysis",
+        "template_id": "template.analyze_image"
+      },
+      {
+        "chat_id": "UMD_SYN_0018-2",
+        "prompt": "I do not know campus well enough to feel comfortable between classes.",
+        "response": "Conversation history indicates first-semester confusion about campus systems. User asked about renting, transportation, shopping, or commuting logistics.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "image_analysis",
+    "expected_stress_band": "elevated",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "visual_explainer",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "screenshot",
+    "source_profile_id": "UMD_SYN_0018"
+  },
+  {
+    "user_id": "UMD_SYN_0022",
+    "display_name": "Student 0022",
+    "routing_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0022-1",
+        "prompt": "I want to feel less lost on campus during my first semester.",
+        "response": "User asked where buildings are, how orientation works, and how to get around campus. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "image_analysis",
+        "template_id": "template.analyze_image"
+      },
+      {
+        "chat_id": "UMD_SYN_0022-2",
+        "prompt": "I am confused about orientation tasks, registration, and what matters first.",
+        "response": "User asked where buildings are, how orientation works, and how to get around campus. Conversation history shows repeated concern about class difficulty and professor choice.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "image_analysis",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "visual_explainer",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "screenshot",
+    "source_profile_id": "UMD_SYN_0022"
+  },
+  {
+    "user_id": "UMD_SYN_0024",
+    "display_name": "Student 0024",
+    "routing_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "recent_label_keys": [
+      "image_analysis",
+      "planning"
+    ],
+    "label_signal_sources": [
+      "Google Calendar"
+    ],
+    "history": [
+      {
+        "chat_id": "UMD_SYN_0024-1",
+        "prompt": "I want to feel less lost on campus during my first semester.",
+        "response": "Conversation history indicates first-semester confusion about campus systems. User asked about renting, transportation, shopping, or commuting logistics.",
+        "selected_label": "image_analysis",
+        "template_id": "template.analyze_image"
+      },
+      {
+        "chat_id": "UMD_SYN_0024-2",
+        "prompt": "I still do not know the fastest way to find buildings or transit options.",
+        "response": "Conversation history indicates first-semester confusion about campus systems. User asked about renting, transportation, shopping, or commuting logistics.",
+        "selected_label": "planning",
+        "template_id": "template.plan_next_steps"
+      }
+    ],
+    "expected_primary_label": "image_analysis",
+    "expected_stress_band": "high",
+    "expected_tool_ids": [
+      "chat_history_lookup",
+      "stress_report_summarizer",
+      "visual_explainer",
+      "calendar_signal_review"
+    ],
+    "expected_prompt_keyword": "screenshot",
+    "source_profile_id": "UMD_SYN_0024"
+  }
+]
