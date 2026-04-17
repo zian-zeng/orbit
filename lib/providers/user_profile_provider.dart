@@ -1,15 +1,22 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:chatbotapp/constants/constants.dart';
 import 'package:chatbotapp/hive/boxes.dart';
+import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/user_model.dart';
 import 'package:chatbotapp/models/prompt_recommendation.dart';
+import 'package:chatbotapp/models/support_intelligence.dart';
 import 'package:chatbotapp/services/label_enrichment_service.dart';
+import 'package:chatbotapp/services/support_intelligence_service.dart';
+import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 
 class UserProfileProvider extends ChangeNotifier {
   static const LabelEnrichmentService _labelEnrichmentService =
       LabelEnrichmentService();
+  static const SupportIntelligenceService _supportIntelligenceService =
+      SupportIntelligenceService();
 
   String _uid = '';
   String _name = 'You';
@@ -228,6 +235,20 @@ class UserProfileProvider extends ChangeNotifier {
   Future<void> refreshEnrichedLabels() async {
     _refreshRoutingLabels();
     notifyListeners();
+  }
+
+  SupportIntelligenceBundle? buildSupportIntelligence({
+    List<String> recentLabelKeys = const [],
+  }) {
+    final history = Hive.isBoxOpen(Constants.chatHistoryBox)
+        ? Boxes.getChatHistory().values.toList(growable: false)
+        : const <ChatHistory>[];
+    return _supportIntelligenceService.buildBundle(
+      routingLabelKeys: routingLabelKeys,
+      recentLabelKeys: recentLabelKeys,
+      labelSignalSources: labelSignalSources,
+      history: history,
+    );
   }
 
   Future<void> mergeImportedLabelSignals({

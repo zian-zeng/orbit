@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:chatbotapp/apis/api_service.dart';
 import 'package:chatbotapp/models/prompt_recommendation.dart';
+import 'package:chatbotapp/models/support_intelligence.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
@@ -11,6 +13,7 @@ import 'package:chatbotapp/screens/settings_screen.dart';
 import 'package:chatbotapp/services/prompt_router.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
 import 'package:chatbotapp/utilities/app_motion.dart';
+import 'package:chatbotapp/utilities/app_snackbar.dart';
 import 'package:chatbotapp/widgets/app_screen_scaffold.dart';
 import 'package:chatbotapp/widgets/chat/chat_empty_state.dart';
 import 'package:chatbotapp/widgets/chat/chat_header.dart';
@@ -215,20 +218,46 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _applyRecommendation(PromptRecommendation recommendation) {
+    _applyPrompt(
+      prompt: recommendation.promptTemplate,
+      label: recommendation.label,
+    );
+
+    setState(() {
+      _selectedRecommendation = recommendation;
+    });
+  }
+
+  void _applyPrompt({
+    required String prompt,
+    SupportLabel? label,
+  }) {
     _isApplyingRecommendation = true;
     _composerController.value = TextEditingValue(
-      text: recommendation.promptTemplate,
+      text: prompt,
       selection: TextSelection.collapsed(
-        offset: recommendation.promptTemplate.length,
+        offset: prompt.length,
       ),
     );
     _isApplyingRecommendation = false;
 
     setState(() {
-      _draftText = recommendation.promptTemplate;
-      _selectedLabel = recommendation.label;
-      _selectedRecommendation = recommendation;
+      _draftText = prompt;
+      _selectedLabel = label;
+      if (label == null) {
+        _selectedRecommendation = null;
+      }
     });
+  }
+
+  Future<void> _copySkillBlueprint(AgentSkillBlueprint skill) async {
+    await Clipboard.setData(
+      ClipboardData(text: skill.toMarkdown()),
+    );
+    if (!mounted) {
+      return;
+    }
+    showAppSnackBar(context, 'Agent skill copied');
   }
 
   Future<void> _openPage(Widget page) async {
@@ -265,6 +294,9 @@ class _ChatScreenState extends State<ChatScreen> {
         );
         final recommendations = _promptRouter.recommend(
           context: routingContext,
+        );
+        final supportBundle = userProfile.buildSupportIntelligence(
+          recentLabelKeys: chatProvider.recentLabelKeys(),
         );
         final showJumpButton = chatProvider.hasMessages && _showJumpToLatest;
         final motionDuration =
@@ -319,10 +351,18 @@ class _ChatScreenState extends State<ChatScreen> {
                                   apiConfigured: ApiService.isConfigured,
                                   showStarterPrompts:
                                       settingsProvider.showStarterPrompts,
+                                  supportBundle: supportBundle,
                                   labels: _promptRouter.labels,
                                   recommendations: recommendations,
                                   selectedLabel: _selectedLabel,
                                   onSuggestionTap: _applyRecommendation,
+                                  onInsightPromptTap: (prompt) =>
+                                      _applyPrompt(prompt: prompt),
+                                  onCopySkillTap: supportBundle == null
+                                      ? null
+                                      : () => _copySkillBlueprint(
+                                            supportBundle.skill,
+                                          ),
                                   onLabelSelected: _selectLabel,
                                 ),
                               ),

@@ -206,6 +206,7 @@ void main() {
       ]),
     );
     expect(find.text('How can I help?'), findsOneWidget);
+    expect(find.text('Support pulse'), findsOneWidget);
     expect(find.text('Reflect and regroup'), findsOneWidget);
     expect(find.text('Welcome to Orbit'), findsNothing);
   });
