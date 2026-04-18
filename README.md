@@ -1,39 +1,93 @@
-# ORBIT - UMD Student Support Agent
+# ORBIT - Multi-Role AI Assistant for Student Well-Being
 
-ORBIT is a Flutter app for a UMD-first student support assistant. It is not just
-a chatbot: it combines onboarding labels, chat history, Canvas-style deadlines,
-calendar pressure, campus resources, course/professor planning, food/location
-preferences, stress monitoring, and local multi-agent orchestration into a
-student action plan.
+ORBIT is a multi-agent AI assistant Flutter application designed to provide
+intelligent, personalized support for college students. It is a label-driven,
+skill-compositional agentic system that delivers context-aware support across
+academic planning, stress monitoring, campus resources, career strategy, course
+planning, and everyday life logistics.
 
-The current build is a strong business-demo MVP. It runs without cloud LLMs by
-using deterministic agent skills and optional local Ollama/Gemma synthesis. It
-also has an optional local Student Data Proxy for Canvas, Google Calendar,
-Google Places, Google Routes, and PlanetTerp-style course planning.
+## Overview
 
-## What The Demo Can Show Now
+ORBIT addresses a core challenge facing students today: information
+fragmentation across disconnected institutional systems. Academic deadlines live
+in Canvas, schedules live in calendars, course difficulty information lives in
+campus tools and review sites, career opportunities are dispersed across
+platforms, and mental health resources remain siloed. Students are forced to
+manually integrate these signals while already under pressure.
 
-- Local email-based demo signup and 20-question onboarding intake.
-- Durable student labels such as `vegan`, `plant_based`, `commuter`,
-  `movement_breaks`, `canvas`, `google_calendar`, and `career_builder`.
-- Multi-agent routing across academic planning, stress monitoring, campus
-  resources, career planning, life logistics, and course/professor planning.
-- UMD Demo Path for a vegan UMD student with Canvas deadlines, calendar
-  pressure, food/location needs, walking route context, and stress alerts.
-- Student Monitor with stress score, workload chart, monitor history, focus
-  break simulation, notification policy, and privacy/live-data toggle.
-- Next Best Action Plan that converts signals into concrete student-safe steps,
-  agent handoff, and a generated skill prompt.
-- Course Planner for next-semester course/professor recommendations using
-  workload, stress, credits, profile labels, and PlanetTerp-style signals.
-- Connected Apps screen showing proxy, Canvas, Calendar, Maps/Places,
-  PlanetTerp/Testudo/umd.io, device activity, notifications, and permissions.
-- Intelligence Dashboard with saved skills, feedback signal, audit trail, and
-  Evaluation Readiness against the 40-user fixture.
-- Deterministic demo fallback when live credentials or local LLM are missing.
-- Optional Ollama/Gemma local LLM synthesis.
+Rather than asking students to repeatedly explain their situation, ORBIT
+constructs a dynamic ecosystem of specialized AI roles. Each role is composed of
+modular agent skills that activate based on user-specific labels, chat history,
+profile preferences, and behavioral state signals.
 
-## Exact Setup On This Windows Machine
+ORBIT combines:
+
+- **Multi-Agent Architecture**: Specialized agents for student support domains.
+- **Label-Driven Personalization**: Durable profile labels such as `vegan`,
+  `commuter`, `movement_breaks`, `career_builder`, `canvas`, and
+  `google_calendar`.
+- **Local-First Processing**: Deterministic skill outputs with optional local
+  Ollama/Gemma synthesis.
+- **Real Data Integration**: Optional Canvas, Google Calendar, Google Maps,
+  Google Places, and course/professor planning signals.
+- **Student Monitor**: Stress, workload, notification, history, and action-plan
+  surfaces.
+- **Offline Demo Capability**: A deterministic UMD scenario when credentials or
+  network access are unavailable.
+- **Privacy-Aware Design**: Live data is opt-in and can be routed through a
+  local Student Data Proxy.
+
+### Key Components
+
+- **ORBIT Agent Orchestrator**: Routes student requests to specialist roles and
+  builds adaptive runtime skill priority.
+- **Role Agents**: Academic planning, stress monitoring, campus resources,
+  career strategy, life logistics, and course/professor planning.
+- **Local LLM Client**: Optional Ollama-compatible client for local response
+  synthesis.
+- **Student Context Aggregator**: Builds unified snapshots from Canvas,
+  Calendar, Places, Routes, proxy, and demo fixtures.
+- **Support Intelligence Layer**: Converts labels, chat history, and imported
+  signals into stress reports, follow-up questions, suggestions, and agent-ready
+  skill blueprints.
+- **Next Best Action Plan**: Converts student signals into concrete steps,
+  tool/agent handoff, and a generated execution prompt.
+- **Student Data Proxy**: Local Node backend scaffold for keeping Canvas/Google
+  tokens outside the Flutter client.
+- **Evaluation Fixture**: Reproducible 40-user UMD support-intelligence fixture
+  used by tests and the Evaluation Readiness dashboard.
+
+## Current Demo Features
+
+- Local demo account with school email.
+- 20-question onboarding intake.
+- Initial support labels and durable profile labels.
+- History-based preference extraction.
+- Canvas/Calendar/Places/Routes demo snapshot.
+- UMD Demo Path for a vegan student with deadlines, calendar pressure,
+  food/location needs, route context, and stress alerts.
+- Student Monitor with stress meter, workload chart, monitor history, focus
+  break simulation, notification policy, and live/demo toggle.
+- Configurable 45-minute default focus-break recommendation.
+- Next Best Action Plan for converting signals into concrete steps.
+- Course Planner with stress-aware semester balance, course workload, professor
+  signal, PlanetTerp-style data, and chat export.
+- Connected Apps screen for data sources, permissions, and tool status.
+- Intelligence Dashboard with saved skills, feedback signal, agent audit trail,
+  and Evaluation Readiness.
+- Local deterministic fallback when Ollama or live credentials are missing.
+
+## Quick Start
+
+### Prerequisites
+
+- Flutter SDK 3.4.1 or later.
+- Dart, included with Flutter.
+- Node.js, only needed for the optional Student Data Proxy.
+- Ollama, optional for local LLM synthesis.
+- Android Studio or a physical Android device for mobile testing.
+
+### Windows Setup
 
 Open PowerShell in the project root:
 
@@ -47,13 +101,13 @@ Install dependencies:
 & 'C:\Users\zianz\flutter\bin\flutter.bat' pub get
 ```
 
-If `.env` does not exist, create it from the example:
+If `.env` does not exist:
 
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-For a safe no-token judge demo, keep these values:
+Recommended no-token demo `.env`:
 
 ```env
 LOCAL_LLM_ENDPOINT=http://127.0.0.1:11434
@@ -71,9 +125,11 @@ CAMPUS_ROUTE_ORIGIN=McKeldin Library, College Park, MD
 CAMPUS_ROUTE_DESTINATION=University Health Center, College Park, MD
 ```
 
-## Run The Desktop App
+## Run The App
 
-Check devices:
+### Desktop
+
+Check available devices:
 
 ```powershell
 & 'C:\Users\zianz\flutter\bin\flutter.bat' devices
@@ -92,41 +148,41 @@ If Windows desktop support is not enabled:
 & 'C:\Users\zianz\flutter\bin\flutter.bat' run -d windows
 ```
 
-Desktop is the recommended judge path because it has the most room for the
-monitor, course planner, connected apps, and dashboard screens.
+Desktop is the best current demo path because it has the most room for the
+monitor, planner, dashboards, and connected-apps surfaces.
 
-## Run The Web App
+### Web
 
-Run Chrome/web:
+Run in Chrome:
 
 ```powershell
 & 'C:\Users\zianz\flutter\bin\flutter.bat' run -d chrome
 ```
 
-Build web for a static demo:
+Build web:
 
 ```powershell
 & 'C:\Users\zianz\flutter\bin\flutter.bat' build web
 ```
 
-Web is the best backup if Windows desktop has platform setup issues.
+### Mobile
 
-## Run The Mobile App
+Start an Android emulator or connect a physical Android phone with USB
+debugging enabled.
 
-Start an Android emulator from Android Studio, or connect a physical Android
-phone with USB debugging enabled. Then check devices:
+Check devices:
 
 ```powershell
 & 'C:\Users\zianz\flutter\bin\flutter.bat' devices
 ```
 
-Run on Android:
+Run Android:
 
 ```powershell
 & 'C:\Users\zianz\flutter\bin\flutter.bat' run -d android
 ```
 
-Build an Android APK:
+Build APK:
 
 ```powershell
 & 'C:\Users\zianz\flutter\bin\flutter.bat' build apk
@@ -138,10 +194,32 @@ APK output:
 build\app\outputs\flutter-apk\app-release.apk
 ```
 
-On Windows, iOS cannot be built locally. Use Android, Windows desktop, or web
-for judging.
+On Windows, iOS cannot be built locally. Use Android, Windows desktop, or web.
 
-## Optional Local LLM: Ollama/Gemma
+## Demo Walkthrough
+
+Use this path for testing the implemented product surfaces:
+
+1. Start the desktop or web app.
+2. Complete signup with a UMD-style email.
+3. Complete the 20-question onboarding intake.
+4. On the chat screen, confirm recommendation chips and support pulse appear.
+5. Open **UMD Demo Path** from the chat header.
+6. Review the student profile labels and signal summary.
+7. Review **Next Best Action Plan**.
+8. Review **Stress Monitor**, **Monitor History**, and **Notification Center**.
+9. Click `Simulate 45m laptop block` and confirm the laptop-break nudge.
+10. Change the focus-break threshold and confirm the recommendation updates.
+11. Review **Personalized Food Search** for vegan/location-aware routing.
+12. Review **Next Semester Plan** for course/professor planning.
+13. Review **UMD Resource Cards** and **Agent Execution Path**.
+14. Click `Use this prompt in chat`.
+15. Open **Course Planner** from the chat header and export a plan to chat.
+16. Open **Connected Apps** and review data sources and permissions.
+17. Open **Intelligence Dashboard** and review skill registry, feedback, audit
+    trail, and Evaluation Readiness.
+
+## Optional Local LLM Synthesis
 
 Install Ollama, then in a separate terminal:
 
@@ -157,13 +235,13 @@ LOCAL_LLM_ENDPOINT=http://127.0.0.1:11434
 LOCAL_LLM_MODEL=gemma2:2b
 ```
 
-If Ollama is not running, the app still works through deterministic agent
-fallbacks. That is intentional for low-compute laptops and mobile devices.
+If Ollama is unavailable, ORBIT still works through deterministic agent
+fallbacks.
 
 ## Optional Live Data Demo
 
-The no-token demo is the safest judge path. For live-data rehearsal, run the
-Student Data Proxy in a second PowerShell window:
+The deterministic no-token demo is safest for repeatable presentations. For
+live-data testing, start the local proxy in a second terminal:
 
 ```powershell
 cd C:\Users\zianz\OneDrive\Documents\GitHub\xfoundry\backend\student-data-proxy
@@ -176,7 +254,7 @@ Default proxy URL:
 http://127.0.0.1:8787
 ```
 
-In the Flutter app `.env`, enable the proxy:
+Configure Flutter `.env`:
 
 ```env
 EXTERNAL_DATA_ENABLED=true
@@ -187,8 +265,8 @@ STUDENT_DATA_PROXY_USER_ID=demo
 Then in the app:
 
 1. Open Settings.
-2. Open Real Data Consent / Connected Apps.
-3. Turn on live Canvas/Google data.
+2. Open Real Data Consent or Connected Apps.
+3. Enable live Canvas/Google data.
 4. Return to the chat screen.
 5. Open UMD Demo Path and refresh live signals.
 
@@ -212,79 +290,42 @@ Invoke-RestMethod `
   -Body '{"userId":"demo","baseUrl":"https://umd.instructure.com","accessToken":"YOUR_CANVAS_TOKEN"}'
 ```
 
-Do not put real tokens in Git.
+Do not commit real tokens.
 
-## Judge Demo Script
+## Configuration
 
-Use this path for a polished 5-8 minute pitch.
+### Core Variables
 
-1. Start Windows desktop or Chrome:
+| Variable | Default | Description |
+| --- | --- | --- |
+| `LOCAL_LLM_ENDPOINT` | `http://127.0.0.1:11434` | Ollama-compatible endpoint. |
+| `LOCAL_LLM_MODEL` | `gemma2:2b` | Local model name. |
+| `EXTERNAL_DATA_ENABLED` | `false` | Enables live connector fetching. |
+| `EXTERNAL_DATA_CACHE_SECONDS` | `300` | Snapshot cache duration. |
+| `EXTERNAL_DATA_TIMEOUT_SECONDS` | `8` | Connector timeout. |
+| `STUDENT_DATA_PROXY_URL` | empty | Optional local proxy URL. |
+| `STUDENT_DATA_PROXY_USER_ID` | `demo` | Proxy user id. |
 
-   ```powershell
-   & 'C:\Users\zianz\flutter\bin\flutter.bat' run -d windows
-   ```
+### Canvas Variables
 
-2. Complete signup:
-   - Use a school email such as `maya.chen@umd.edu`.
-   - Answer the 20 intake questions with a vegan, busy, stress-sensitive,
-     career-building UMD student profile.
+| Variable | Description |
+| --- | --- |
+| `CANVAS_BASE_URL` | Canvas instance URL, usually `https://umd.instructure.com`. |
+| `CANVAS_ACCESS_TOKEN` | Canvas API token for direct testing only. |
 
-3. On the chat screen, explain the core idea:
-   - ORBIT remembers labels and uses them to route agents and tools.
-   - A vegan student does not need to re-prompt "vegan" every time.
-   - A stressed student gets smaller, safer plans.
+### Google Variables
 
-4. Open the UMD Demo Path from the chat header.
-   Show:
-   - Student profile labels.
-   - Stress Monitor.
-   - Next Best Action Plan.
-   - Monitor History.
-   - Notification Center and the 45-minute focus-break simulation.
-   - Personalized Food Search.
-   - Next Semester Plan.
-   - UMD Resource Cards.
-   - Agent Execution Path.
-   - Data & Privacy live/demo toggle.
+| Variable | Description |
+| --- | --- |
+| `GOOGLE_ACCESS_TOKEN` | Google token for direct Calendar testing. |
+| `GOOGLE_MAPS_API_KEY` | Google Maps/Places/Routes API key. |
+| `CAMPUS_ROUTE_ORIGIN` | Route origin. |
+| `CAMPUS_ROUTE_DESTINATION` | Route destination. |
 
-5. Click `Simulate 45m laptop block`.
-   Show that ORBIT recommends a break at the configured threshold.
+## Testing
 
-6. Use the focus-break control to change the threshold.
-   Show that this is customizable and not hard-coded.
-
-7. Click `Use this prompt in chat`.
-   The chat composer should load the vegan UMD scenario prompt.
-
-8. Open Course Planner from the chat header.
-   Show:
-   - Stress-aware semester balance.
-   - Credits and heavy-course risk.
-   - Professor/review-style signals.
-   - `Use in chat` export.
-
-9. Open Connected Apps from Settings or the header path.
-   Show:
-   - Which data sources are connected, demo-only, approval-required, or blocked.
-   - Canvas, Google Calendar, Maps/Places, PlanetTerp/Testudo/umd.io, device
-     activity, and notification permissions.
-
-10. Open Intelligence Dashboard.
-    Show:
-    - Skill Registry.
-    - Feedback Signal.
-    - Agent Audit Trail.
-    - Evaluation Readiness with 40-user fixture coverage and production gaps.
-
-11. Close with the product differentiation:
-    - Generic chatbots answer a prompt.
-    - ORBIT monitors the student's academic, schedule, campus, preference, and
-      stress signals, then creates a safe next action and agent workflow.
-
-## Test Commands
-
-Prefer the bundled Dart + Flutter tool command below on this machine. It avoids
-the plain `dart` PATH issue and keeps tests bounded.
+Prefer the bundled Dart and Flutter tool command on this Windows machine. It
+avoids the plain `dart` PATH issue.
 
 Analyze:
 
@@ -292,7 +333,7 @@ Analyze:
 & 'C:\Users\zianz\flutter\bin\cache\dart-sdk\bin\dart.exe' analyze lib test
 ```
 
-Focused tests for the latest demo work:
+Focused demo tests:
 
 ```powershell
 & 'C:\Users\zianz\flutter\bin\cache\dart-sdk\bin\dart.exe' 'C:\Users\zianz\flutter\bin\cache\flutter_tools.snapshot' --no-version-check --suppress-analytics test --no-pub test\services\student_action_plan_service_test.dart test\services\evaluation_readiness_service_test.dart test\widget_test.dart
@@ -304,7 +345,7 @@ Full test suite:
 & 'C:\Users\zianz\flutter\bin\cache\dart-sdk\bin\dart.exe' 'C:\Users\zianz\flutter\bin\cache\flutter_tools.snapshot' --no-version-check --suppress-analytics test --no-pub
 ```
 
-Latest verification:
+Latest local verification:
 
 ```text
 dart analyze lib test: passed
@@ -312,120 +353,195 @@ focused demo tests: passed
 full Flutter test suite: 95 tests passed
 ```
 
-If Flutter says it cannot open
+If Flutter cannot open
 `C:\Users\zianz\flutter\bin\cache\lockfile`, run the same command from a normal
-PowerShell terminal with user permissions. The app tests themselves are not
-supposed to take hours; the current full suite completes in seconds on this
-machine once the Flutter SDK cache lock is accessible.
+PowerShell terminal with access to the Flutter SDK cache. The current test suite
+should complete in seconds once the SDK lockfile is accessible.
 
-## Updates From This Afternoon
-
-Commit summary:
+## Project Structure
 
 ```text
-Build production-shaped ORBIT student demo path
+xfoundry/
+├── backend/
+│   └── student-data-proxy/  # Local proxy for Canvas/Google/course data
+├── docs/                    # Architecture and roadmap docs
+├── lib/
+│   ├── agents/              # Multi-agent system
+│   ├── apis/                # External API clients
+│   ├── constants/           # App constants and environment config
+│   ├── data_sources/        # Data access and UMD resource catalog
+│   ├── demo/                # Deterministic demo scenario
+│   ├── hive/                # Local persistence schemas
+│   ├── models/              # Support, planning, and signal models
+│   ├── providers/           # Provider state management
+│   ├── screens/             # Chat, monitor, planner, dashboard, settings
+│   ├── services/            # Business logic and recommendation services
+│   ├── themes/              # App themes
+│   ├── utilities/           # Helpers
+│   ├── widgets/             # Reusable UI components
+│   └── main.dart
+├── test/                    # Unit, service, data-source, and widget tests
+├── .env.example             # Local environment template
+├── pubspec.yaml
+└── README.md
 ```
 
-Commit description:
+## Architecture Deep Dive
+
+### Problem Statement
+
+University students operate inside fragmented digital ecosystems. The core
+challenge is not the lack of tools, but the absence of cognitive coordination
+across tools. Students must manually extract, prioritize, and act on information
+scattered across:
+
+- Canvas assignment deadlines.
+- Google Calendar events.
+- Course difficulty and professor signals.
+- Internship and career timelines.
+- Campus mental health and academic resources.
+- Dining, transportation, and life logistics.
+
+This burden is especially severe for students navigating unfamiliar academic
+norms, first-generation students, students with ADHD or executive-function
+challenges, financially constrained students, international students, and
+students under sustained stress.
+
+### Multi-Role Agentic Architecture
+
+ORBIT avoids a monolithic chatbot design. It uses specialized role agents and
+skill units that produce structured intermediate outputs before final response
+synthesis.
+
+Role areas include:
+
+- Academic planning.
+- Stress monitoring.
+- Campus resource navigation.
+- Course and professor planning.
+- Career strategy.
+- Life logistics.
+
+### Agent Skills As Compositional Units
+
+Agent skills are structured computational units containing:
+
+- Constrained prompt templates.
+- Optional retrieval components.
+- Explicit tool or API access.
+- Tool permission policy.
+- Structured output expectations.
+
+Skills are invoked by a deterministic workflow controller. This improves:
+
+- Modularity.
+- Interpretability.
+- Efficiency on low-compute devices.
+- Debuggability through independent tests.
+- Safety, because irreversible actions can be blocked or approval-gated.
+
+Example academic workflow:
 
 ```text
-- add Connected Apps screen for proxy, Canvas, Calendar, Maps/Places,
-  PlanetTerp/Testudo/umd.io, device activity, notifications, data-use summaries,
-  and tool permission status
-- add UMD course/professor planning flow with stress-aware credit balance,
-  professor/workload signals, PlanetTerp hydration, and chat export
-- improve notification policy with configurable 45-minute default focus break,
-  quiet hours, sensitivity, and disabled-notification states
-- add Evaluation Readiness service and dashboard panel for 40-user fixture
-  coverage, fulfillment checks, feedback/audit evidence, course-plan balance,
-  and production gaps
-- add Next Best Action Plan service that converts Canvas deadlines, calendar
-  pressure, vegan/location context, stress score, UMD resources, and focus-break
-  settings into concrete steps, agent handoff, and a generated skill prompt
-- surface the action plan in the UMD Demo Path / Student Monitor screen
-- expand widget and service tests for connected apps, course planning,
-  notification controls, readiness dashboard, and action-plan demo path
-- document the judge demo flow, desktop/mobile/web run commands, live-data
-  proxy path, and remaining business-level gaps
+Deadline extraction
+  -> calendar density analysis
+  -> stress projection
+  -> intervention selection
+  -> resource or course-planning handoff
 ```
 
-## Current Architecture
+### Label-Driven Personalization
 
-```text
-Onboarding labels
-  -> profile and routing labels
-  -> recommendation and support-intelligence bundle
-  -> adaptive skill blueprint
-  -> multi-agent orchestrator
-  -> optional local LLM synthesis
+ORBIT uses labelization as structural configuration, not only tone
+personalization. Labels influence which agents activate, which tools are
+prioritized, and what constraints should be remembered.
 
-Canvas / Calendar / Places / Routes / course data
-  -> StudentSignalSnapshot
-  -> stress and workload monitor
-  -> next-best-action plan
-  -> agent tool priority
-  -> UMD resources and course planner
-```
+Examples:
 
-Core modules:
+| Label | Effect |
+| --- | --- |
+| `vegan` / `plant_based` | Food/location search automatically avoids meat-centered suggestions. |
+| `commuter` | Route, timing, and schedule planning become more important. |
+| `movement_breaks` | Focus-session and break nudges become eligible. |
+| `stress_sensitive` | Plans become smaller, safer, and less overload-prone. |
+| `career_builder` | Course and schedule plans consider career/internship readiness. |
+| `canvas` / `google_calendar` | Agent skills can prioritize imported academic and schedule signals. |
 
-```text
-lib/agents/                         multi-agent orchestration
-lib/data_sources/                   Canvas/Google/proxy/UMD resource data
-lib/demo/                           deterministic UMD judge scenario
-lib/hive/                           local persistence models
-lib/models/                         support, planning, and data models
-lib/providers/                      app state and profile flow
-lib/screens/                        chat, monitor, planner, dashboard, settings
-lib/services/                       business logic and recommendation services
-backend/student-data-proxy/         local OAuth/token proxy scaffold
-test/                               unit, service, data-source, and widget tests
-```
+Labels are extracted from:
 
-## What Is Still Missing For Production
+1. Initial onboarding intake.
+2. Recent chat history.
+3. Saved profile preferences.
+4. Imported student signals.
+5. Demo or live connector snapshots.
 
-The current version is strong enough for a business demo, but not yet a fully
-production student-health company. The biggest remaining work:
+### Contextual Behavioral Integration
 
-- Real backend auth with email verification, session management, and account
-  sync across devices.
-- Production OAuth for Canvas and Google under the signed-in student.
-- Encrypted token storage, token revocation, consent records, and audit logs.
-- Real OS notifications on Android/iOS/desktop with permission prompts, quiet
-  hours, and background scheduling.
-- Real device activity/screen-time integrations instead of the current
-  simulation/policy layer.
-- Deeper evaluation dashboard with longitudinal user feedback, not only local
-  fixture checks.
-- More realistic datasets and partner-consented UMD data exports.
-- Official Testudo/umd.io section availability and registration constraints in
-  the course planner.
-- Human-in-the-loop safety escalation for crisis, self-harm, harassment, legal,
-  and medical situations.
-- Security review for the Student Data Proxy: HTTPS, CSRF protection, rate
-  limiting, encrypted storage, and deployment hardening.
-- Privacy/legal work: FERPA, HIPAA-adjacent wellbeing boundaries, data retention
-  policy, and university partner approvals.
+ORBIT integrates structured and behavioral data streams to reason about student
+state:
 
-## Business-Level Differentiation
+- Canvas assignments and due dates.
+- Google Calendar density.
+- Campus route and place results.
+- Course/professor workload signals.
+- Optional focus-session and notification state.
+- Student profile and preference labels.
 
-To compete against generic chatbots, ORBIT should stay vertical:
+The purpose is contextual reasoning, not surveillance. Data should remain
+consent-based, explainable, and removable.
 
-- UMD-first resource graph instead of generic advice.
-- Canvas + Calendar + campus routes + dining/location + course/professor
-  planning in one workflow.
-- Preference memory, such as vegan food routing without repeated prompting.
-- Stress and workload monitoring, not just chat.
-- Proactive next-best-action planning when deadlines, focus, or stress cross
-  thresholds.
-- Local-first AI path for privacy, cost, and offline demos.
-- Skill-generating multi-agent system with visible tool permissions and traces.
-- Student wellbeing and academic success evaluation, not only conversation
-  quality.
+### Stress Modeling And Visualization
 
-No product can guarantee winning a $2M competition, but the best path is to make
-the demo prove one thing clearly: ORBIT reduces student cognitive load by
-turning scattered campus signals into safe, personal next actions.
+The monitor computes stress risk from workload clustering, calendar pressure,
+deadline density, and profile context. The app visualizes:
+
+- Stress risk.
+- Weekly workload shape.
+- Monitor history.
+- Notifications and focus-break policy.
+- Actionable student support steps.
+
+Visualization is not just decoration. Monitor outputs feed future skill
+selection and agent handoff.
+
+### Chat Flow
+
+1. User enters a message or selects a recommendation.
+2. Profile labels, routing labels, and chat history are gathered.
+3. Optional live/demo student signals are loaded.
+4. The ORBIT orchestrator selects role agents and tool priorities.
+5. Support intelligence creates questions, suggestions, and skill blueprints.
+6. The action-plan layer converts signals into concrete next steps.
+7. Ollama/Gemma can synthesize the final response when available.
+8. Deterministic fallback is used when the local model is unavailable.
+9. Feedback, audit traces, and chat history are stored locally.
+
+## Security Notes
+
+- Never commit `.env` files.
+- Keep real Canvas and Google tokens outside the Flutter client.
+- Prefer the Student Data Proxy for live-data testing.
+- Keep demo fixture mode available for reliable presentations.
+- Treat mental health output as support and routing, not diagnosis or therapy.
+- Block or approval-gate irreversible actions.
+- Production should add encrypted token storage, HTTPS, CSRF protection, rate
+  limits, consent records, and revocation.
+
+## Production Roadmap
+
+The current app is a strong business-demo MVP, not a finished production
+student-health platform. Important remaining work:
+
+- Real backend auth with email verification.
+- Account sync across devices.
+- Production OAuth for Canvas and Google.
+- Encrypted storage for tokens and sensitive local data.
+- OS-level notifications on Android, iOS, desktop, and web.
+- Real device activity/screen-time integration.
+- Longitudinal evaluation and feedback dashboard.
+- Official Testudo/umd.io section availability for course planning.
+- Stronger crisis, self-harm, harassment, legal, and medical safety flows.
+- Privacy and compliance review for student-data handling.
 
 ## Build Commands
 
@@ -446,15 +562,6 @@ Windows:
 ```powershell
 & 'C:\Users\zianz\flutter\bin\flutter.bat' build windows
 ```
-
-## Security Notes
-
-- Do not commit `.env` files.
-- Keep real Canvas and Google tokens outside the Flutter client.
-- Prefer the Student Data Proxy for live demos.
-- Keep demo fixture mode available for judging reliability.
-- Treat mental health output as support and routing, not diagnosis or therapy.
-- Block irreversible actions unless the student explicitly approves them.
 
 ## More Documentation
 
