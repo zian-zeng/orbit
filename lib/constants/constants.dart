@@ -7,6 +7,8 @@ class Constants {
   static const String settingsBox = 'settings';
   static const String monitorHistoryBox = 'monitor_history';
   static const String assistantFeedbackBox = 'assistant_feedback';
+  static const String agentAuditLogBox = 'agent_audit_log';
+  static const String skillRegistryBox = 'skill_registry';
 
   static const String chatMessagesBox = 'chat_messages_';
 

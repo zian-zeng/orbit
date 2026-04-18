@@ -12,6 +12,7 @@ import 'package:chatbotapp/screens/chat_history_screen.dart';
 import 'package:chatbotapp/screens/demo_status_screen.dart';
 import 'package:chatbotapp/screens/settings_screen.dart';
 import 'package:chatbotapp/services/prompt_router.dart';
+import 'package:chatbotapp/services/skill_registry_service.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
 import 'package:chatbotapp/utilities/app_motion.dart';
 import 'package:chatbotapp/utilities/app_snackbar.dart';
@@ -31,6 +32,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final PromptRouter _promptRouter = const PromptRouter();
+  final SkillRegistryService _skillRegistryService =
+      const SkillRegistryService();
   final TextEditingController _composerController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   int _lastMessageCount = 0;
@@ -278,6 +281,28 @@ class _ChatScreenState extends State<ChatScreen> {
     showAppSnackBar(context, 'Agent skill copied');
   }
 
+  Future<void> _saveSkillBlueprint(SupportIntelligenceBundle bundle) async {
+    final entry = await _skillRegistryService.saveBlueprint(
+      blueprint: bundle.skill,
+      sourceLabels: [
+        bundle.primaryLabel.storageKey,
+        bundle.secondaryLabel.storageKey,
+      ],
+      stressBand: bundle.stressReport.band,
+    );
+    if (!mounted) {
+      return;
+    }
+    if (entry == null) {
+      showAppSnackBar(context, 'Skill registry is not ready yet');
+      return;
+    }
+    showAppSnackBar(
+      context,
+      'Saved ${entry.title} ${entry.versionLabel}',
+    );
+  }
+
   Future<T?> _openPage<T>(Widget page) async {
     final reduceMotion = context.read<SettingsProvider>().reduceMotion;
     final route = reduceMotion
@@ -395,6 +420,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                       ? null
                                       : () => _copySkillBlueprint(
                                             supportBundle.skill,
+                                          ),
+                                  onSaveSkillTap: supportBundle == null
+                                      ? null
+                                      : () => _saveSkillBlueprint(
+                                            supportBundle,
                                           ),
                                   onLabelSelected: _selectLabel,
                                 ),

@@ -1,8 +1,10 @@
 import 'package:chatbotapp/constants/constants.dart';
+import 'package:chatbotapp/hive/agent_audit_log_entry.dart';
 import 'package:chatbotapp/hive/assistant_feedback_entry.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/monitor_history_entry.dart';
 import 'package:chatbotapp/hive/settings.dart';
+import 'package:chatbotapp/hive/skill_registry_entry.dart';
 import 'package:chatbotapp/hive/user_model.dart';
 import 'package:hive/hive.dart';
 
@@ -25,4 +27,12 @@ class Boxes {
   // get assistant feedback box
   static Box<AssistantFeedbackEntry> getAssistantFeedback() =>
       Hive.box<AssistantFeedbackEntry>(Constants.assistantFeedbackBox);
+
+  // get agent audit log box
+  static Box<AgentAuditLogEntry> getAgentAuditLog() =>
+      Hive.box<AgentAuditLogEntry>(Constants.agentAuditLogBox);
+
+  // get skill registry box
+  static Box<SkillRegistryEntry> getSkillRegistry() =>
+      Hive.box<SkillRegistryEntry>(Constants.skillRegistryBox);
 }

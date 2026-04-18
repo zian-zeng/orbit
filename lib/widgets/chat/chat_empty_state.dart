@@ -15,6 +15,7 @@ class ChatEmptyState extends StatelessWidget {
     required this.onSuggestionTap,
     required this.onInsightPromptTap,
     required this.onCopySkillTap,
+    required this.onSaveSkillTap,
     required this.onLabelSelected,
   });
 
@@ -27,6 +28,7 @@ class ChatEmptyState extends StatelessWidget {
   final ValueChanged<PromptRecommendation> onSuggestionTap;
   final ValueChanged<String> onInsightPromptTap;
   final VoidCallback? onCopySkillTap;
+  final VoidCallback? onSaveSkillTap;
   final ValueChanged<SupportLabel?> onLabelSelected;
 
   @override
@@ -46,8 +48,8 @@ class ChatEmptyState extends StatelessWidget {
           Text(
             'Choose a focus or try a recommendation below',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+                  color: colorScheme.onSurfaceVariant,
+                ),
             textAlign: TextAlign.center,
           ),
           if (supportBundle != null) ...[
@@ -56,6 +58,7 @@ class ChatEmptyState extends StatelessWidget {
               bundle: supportBundle!,
               onPromptTap: onInsightPromptTap,
               onCopySkillTap: onCopySkillTap,
+              onSaveSkillTap: onSaveSkillTap,
             ),
           ],
           if (showStarterPrompts) ...[
@@ -114,8 +117,8 @@ class ChatEmptyState extends StatelessWidget {
                   Text(
                     'Set API_KEY to start',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSecondaryContainer,
-                    ),
+                          color: colorScheme.onSecondaryContainer,
+                        ),
                   ),
                 ],
               ),
@@ -132,11 +135,13 @@ class _SupportPulseCard extends StatelessWidget {
     required this.bundle,
     required this.onPromptTap,
     required this.onCopySkillTap,
+    required this.onSaveSkillTap,
   });
 
   final SupportIntelligenceBundle bundle;
   final ValueChanged<String> onPromptTap;
   final VoidCallback? onCopySkillTap;
+  final VoidCallback? onSaveSkillTap;
 
   @override
   Widget build(BuildContext context) {
@@ -270,9 +275,18 @@ class _SupportPulseCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
-                    TextButton(
-                      onPressed: onCopySkillTap,
-                      child: const Text('Copy skill'),
+                    Wrap(
+                      spacing: 6,
+                      children: [
+                        TextButton(
+                          onPressed: onCopySkillTap,
+                          child: const Text('Copy'),
+                        ),
+                        TextButton(
+                          onPressed: onSaveSkillTap,
+                          child: const Text('Save'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -359,8 +373,8 @@ class _RecommendationCard extends StatelessWidget {
                     child: Text(
                       recommendation.label.displayName,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onPrimaryContainer,
-                      ),
+                            color: colorScheme.onPrimaryContainer,
+                          ),
                     ),
                   ),
                 ],
@@ -374,8 +388,8 @@ class _RecommendationCard extends StatelessWidget {
               Text(
                 recommendation.reason,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
               ),
             ],
           ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:chatbotapp/hive/agent_audit_log_entry.dart';
 import 'package:chatbotapp/models/message.dart';
+import 'package:chatbotapp/services/agent_audit_log_service.dart';
 import 'package:chatbotapp/services/assistant_feedback_service.dart';
 import 'package:chatbotapp/utilities/app_snackbar.dart';
 import 'package:chatbotapp/widgets/chat/assistant_response_content.dart';
@@ -21,7 +23,9 @@ class AssistantMessageWidget extends StatefulWidget {
 class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
   static const AssistantFeedbackService _feedbackService =
       AssistantFeedbackService();
+  static const AgentAuditLogService _auditLogService = AgentAuditLogService();
   String? _selectedFeedback;
+  AgentAuditLogEntry? _auditLog;
 
   @override
   void initState() {
@@ -41,6 +45,7 @@ class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
   void _loadFeedback() {
     _selectedFeedback =
         _feedbackService.loadForMessage(widget.message)?.feedbackType;
+    _auditLog = _auditLogService.loadForMessage(widget.message);
   }
 
   @override
@@ -123,6 +128,10 @@ class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
                 if (traceText != null) ...[
                   const SizedBox(height: 12),
                   _AgentTracePill(traceText: traceText),
+                ],
+                if (_auditLog != null) ...[
+                  const SizedBox(height: 12),
+                  _AgentAuditPanel(auditLog: _auditLog!),
                 ],
                 const SizedBox(height: 12),
                 _FeedbackBar(
@@ -283,6 +292,125 @@ class _AgentTracePill extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AgentAuditPanel extends StatelessWidget {
+  const _AgentAuditPanel({required this.auditLog});
+
+  final AgentAuditLogEntry auditLog;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final modelStatus =
+        auditLog.usedLocalModel ? 'Local model' : 'Deterministic fallback';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                CupertinoIcons.doc_text_search,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Agent audit',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              Text(
+                '${auditLog.latencyMs} ms',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _AuditLine(
+              label: 'Mode', value: '$modelStatus: ${auditLog.modelName}'),
+          _AuditLine(
+            label: 'Roles',
+            value: _shortList(auditLog.activatedRoles),
+          ),
+          _AuditLine(
+            label: 'Tools',
+            value: auditLog.toolNames.isEmpty
+                ? 'No tool priority'
+                : _shortList(auditLog.toolNames),
+          ),
+          _AuditLine(
+            label: 'Sources',
+            value: auditLog.dataSources.isEmpty
+                ? 'Local labels/history'
+                : _shortList(auditLog.dataSources),
+          ),
+          if (auditLog.fallbackReason.isNotEmpty)
+            _AuditLine(label: 'Fallback', value: auditLog.fallbackReason),
+        ],
+      ),
+    );
+  }
+
+  String _shortList(List<String> values) {
+    if (values.isEmpty) {
+      return 'None';
+    }
+    if (values.length <= 4) {
+      return values.join(', ');
+    }
+    return '${values.take(4).join(', ')} +${values.length - 4}';
+  }
+}
+
+class _AuditLine extends StatelessWidget {
+  const _AuditLine({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: RichText(
+        text: TextSpan(
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
       ),
     );
   }

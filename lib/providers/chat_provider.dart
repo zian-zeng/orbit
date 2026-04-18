@@ -7,13 +7,16 @@ import 'package:chatbotapp/agents/orbit_models.dart';
 import 'package:chatbotapp/apis/api_service.dart';
 import 'package:chatbotapp/constants/constants.dart';
 import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
+import 'package:chatbotapp/hive/agent_audit_log_entry.dart';
 import 'package:chatbotapp/hive/assistant_feedback_entry.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/monitor_history_entry.dart';
 import 'package:chatbotapp/hive/settings.dart';
+import 'package:chatbotapp/hive/skill_registry_entry.dart';
 import 'package:chatbotapp/hive/user_model.dart';
 import 'package:chatbotapp/models/message.dart';
+import 'package:chatbotapp/services/agent_audit_log_service.dart';
 import 'package:chatbotapp/services/student_preference_extractor.dart';
 import 'package:chatbotapp/utilities/chat_error_formatter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -25,6 +28,7 @@ import 'package:uuid/uuid.dart';
 class ChatProvider extends ChangeNotifier {
   static const _requestTimeout = Duration(seconds: 75);
   static const _preferenceExtractor = StudentPreferenceExtractor();
+  static const _auditLogService = AgentAuditLogService();
 
   ChatProvider({
     OrbitAgentOrchestrator? agentOrchestrator,
@@ -330,6 +334,7 @@ class ChatProvider extends ChangeNotifier {
     String? templateId,
   }) async {
     final profileLabels = _profileLabelKeys();
+    final stopwatch = Stopwatch()..start();
     final externalSnapshot = await _contextAggregator.loadSnapshot(
       allowExternalData: _allowExternalStudentData(),
       taskText: message,
@@ -360,10 +365,23 @@ class ChatProvider extends ChangeNotifier {
           ),
         )
         .timeout(_requestTimeout);
+    stopwatch.stop();
 
     _applyAssistantText(
       assistantMessage: assistantMessage,
       text: response.text.trim(),
+    );
+    await _auditLogService.record(
+      assistantMessage: assistantMessage,
+      userMessage: message,
+      response: response,
+      snapshot: externalSnapshot,
+      labelKeys: {
+        ...profileLabels,
+        ...externalSnapshot.inferredLabelKeys,
+        if (selectedLabel != null) selectedLabel,
+      },
+      latencyMs: stopwatch.elapsedMilliseconds,
     );
   }
 
@@ -674,6 +692,18 @@ class ChatProvider extends ChangeNotifier {
       await Hive.openBox<AssistantFeedbackEntry>(
         Constants.assistantFeedbackBox,
       );
+    }
+    if (!Hive.isAdapterRegistered(5)) {
+      Hive.registerAdapter(AgentAuditLogEntryAdapter());
+      await Hive.openBox<AgentAuditLogEntry>(Constants.agentAuditLogBox);
+    } else if (!Hive.isBoxOpen(Constants.agentAuditLogBox)) {
+      await Hive.openBox<AgentAuditLogEntry>(Constants.agentAuditLogBox);
+    }
+    if (!Hive.isAdapterRegistered(6)) {
+      Hive.registerAdapter(SkillRegistryEntryAdapter());
+      await Hive.openBox<SkillRegistryEntry>(Constants.skillRegistryBox);
+    } else if (!Hive.isBoxOpen(Constants.skillRegistryBox)) {
+      await Hive.openBox<SkillRegistryEntry>(Constants.skillRegistryBox);
     }
   }
 }

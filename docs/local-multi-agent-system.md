@@ -206,6 +206,19 @@ id, response preview, timestamp, and agent trace. This gives the recommender a
 measurable learning signal for future ranking, evaluation dashboards, and
 per-user adaptation without requiring a backend for the demo.
 
+Each assistant response also writes a local agent audit record. The record keeps
+activated roles, generated skill ids, inferred tool priorities, data sources,
+labels, model/fallback status, latency, and message previews. Assistant bubbles
+surface the audit details when available so the demo can explain why ORBIT made
+its routing decision instead of presenting the answer as an opaque chatbot
+response.
+
+Generated support skills can now be saved into a local versioned registry.
+Saving the current support-pulse skill stores the skill id, version, title,
+summary, system prompt, starter prompt, tools, source labels, and stress band.
+Repeated saves create `v1`, `v2`, and later versions, giving the demo a concrete
+path from runtime skill generation to persistent skill assets.
+
 Recommended local model choices:
 
 - `gemma2:2b` for lower-memory laptops and quick demos.
