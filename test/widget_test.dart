@@ -188,6 +188,20 @@ void main() {
     expect(textField.controller?.text, contains('Canvas deadlines'));
   });
 
+  testWidgets('Intelligence dashboard opens from chat header', (
+    WidgetTester tester,
+  ) async {
+    await pumpChatScreen(tester);
+
+    await tester.tap(find.byTooltip('Intelligence dashboard'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Intelligence Dashboard'), findsOneWidget);
+    expect(find.text('Skill Registry'), findsOneWidget);
+    expect(find.text('Feedback Signal'), findsOneWidget);
+    expect(find.text('Agent Audit Trail'), findsOneWidget);
+  });
+
   testWidgets('Home screen shows onboarding before chat for first-run users', (
     WidgetTester tester,
   ) async {

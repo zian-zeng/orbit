@@ -10,6 +10,7 @@ import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/providers/voice_input_provider.dart';
 import 'package:chatbotapp/screens/chat_history_screen.dart';
 import 'package:chatbotapp/screens/demo_status_screen.dart';
+import 'package:chatbotapp/screens/intelligence_dashboard_screen.dart';
 import 'package:chatbotapp/screens/settings_screen.dart';
 import 'package:chatbotapp/services/prompt_router.dart';
 import 'package:chatbotapp/services/skill_registry_service.dart';
@@ -383,6 +384,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 onOpenHistory: () => _openPage<void>(const ChatHistoryScreen()),
                 onOpenSettings: () => _openPage<void>(const SettingsScreen()),
                 onOpenDemo: _openDemoPath,
+                onOpenIntelligence: () =>
+                    _openPage<void>(const IntelligenceDashboardScreen()),
                 onNewChat: () => _startNewChat(chatProvider),
               ),
               const SizedBox(height: 16),

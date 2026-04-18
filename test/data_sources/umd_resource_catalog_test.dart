@@ -36,6 +36,9 @@ void main() {
     );
 
     expect(matches.first.name, 'UMD Dining Services');
+    expect(matches.first.whenToUse, contains('vegan'));
+    expect(matches.first.action, contains('Dining'));
+    expect(matches.first.url, contains('dining.umd.edu'));
   });
 
   test('matches legal aid for lease and conduct concerns', () {
@@ -87,5 +90,20 @@ void main() {
         contains('UMD Guardian App'));
     expect(supportMatches.map((resource) => resource.name),
         contains('Help Center at UMD'));
+  });
+
+  test('resource cards include official next-action metadata', () {
+    const catalog = UmdResourceCatalog();
+
+    final matches = catalog.match(
+      message: 'I am overwhelmed and need anonymous help tonight.',
+      labels: const ['stress', 'wellbeing_checkin'],
+      limit: 3,
+    );
+
+    expect(matches.first.whenToUse, isNotEmpty);
+    expect(matches.first.eligibility, isNotEmpty);
+    expect(matches.first.action, isNotEmpty);
+    expect(matches.first.agentBrief, contains('Official page:'));
   });
 }

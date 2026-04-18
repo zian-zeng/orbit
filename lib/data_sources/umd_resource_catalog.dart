@@ -5,6 +5,10 @@ class UmdResource {
     required this.category,
     required this.summary,
     required this.tags,
+    this.whenToUse =
+        'Use when the student need matches this category and live retrieval is unavailable.',
+    this.eligibility = 'Check the official page for current eligibility.',
+    this.action = 'Open the official resource page.',
     this.url,
   });
 
@@ -13,7 +17,15 @@ class UmdResource {
   final String category;
   final String summary;
   final List<String> tags;
+  final String whenToUse;
+  final String eligibility;
+  final String action;
   final String? url;
+
+  String get agentBrief {
+    final linkText = url == null ? '' : ' Official page: $url';
+    return '$name ($category): $summary Use when: $whenToUse Action: $action$linkText';
+  }
 }
 
 class UmdResourceCatalog {
@@ -26,6 +38,12 @@ class UmdResourceCatalog {
       category: 'Academic accommodation',
       summary:
           'Support path for accommodations, accessibility barriers, testing needs, and disability-related academic planning.',
+      whenToUse:
+          'A disability, injury, ADHD, testing barrier, or accessibility issue is affecting coursework.',
+      eligibility:
+          'UMD students seeking disability-related accommodations or accessibility support.',
+      action:
+          'Review ADS guidance and prepare documentation or accommodation questions.',
       url: 'https://ads.umd.edu/',
       tags: [
         'adhd',
@@ -43,6 +61,12 @@ class UmdResourceCatalog {
       category: 'Mental health and wellbeing',
       summary:
           'Starting point for counseling, crisis consultation, stress support, and wellbeing referrals.',
+      whenToUse:
+          'Stress, anxiety, crisis concern, burnout, or emotional pressure is affecting the student.',
+      eligibility:
+          'UMD students seeking counseling, consultation, crisis, or referral support.',
+      action:
+          'Use the get-help-now page for urgent options or schedule counseling support.',
       url: 'https://counseling.umd.edu/get-help-now',
       tags: [
         'stress',
@@ -109,6 +133,12 @@ class UmdResourceCatalog {
       category: 'Food and dietary needs',
       summary:
           'Campus dining anchor for meal planning, dining halls, dietary preference filtering, and allergy-aware food decisions.',
+      whenToUse:
+          'The student asks about campus food, allergies, vegan/vegetarian needs, or dining choices.',
+      eligibility:
+          'UMD students and campus diners using dining halls or campus food resources.',
+      action:
+          'Open Dining guidance before recommending meals with dietary constraints.',
       url: 'https://dining.umd.edu/allergy',
       tags: [
         'food',
@@ -132,6 +162,12 @@ class UmdResourceCatalog {
       category: 'Food security',
       summary:
           'Support path for students who need low-cost food access or help managing food insecurity.',
+      whenToUse:
+          'Food access, grocery cost, or food insecurity is part of the student problem.',
+      eligibility:
+          'UMD community members seeking pantry support; check official requirements.',
+      action:
+          'Review pantry access instructions and plan a discreet next step.',
       url: 'https://dining.umd.edu/sustainability/campus-pantry',
       tags: [
         'food',
@@ -164,6 +200,12 @@ class UmdResourceCatalog {
       category: 'Transportation',
       summary:
           'Transportation anchor for parking, shuttle, biking, commute, and campus mobility planning.',
+      whenToUse:
+          'The student asks about shuttle routes, parking, biking, commuting, or campus mobility.',
+      eligibility:
+          'UMD students, staff, faculty, and visitors using DOTS services.',
+      action:
+          'Open DOTS route, parking, or shuttle guidance for current details.',
       url: 'https://transportation.umd.edu/shuttle-um-faq',
       tags: [
         'transport',
@@ -215,6 +257,12 @@ class UmdResourceCatalog {
       category: 'Tutoring and academic support',
       summary:
           'Free peer tutoring path for many high-risk and gateway undergraduate courses.',
+      whenToUse:
+          'A student needs course help, tutoring, exam prep, or gateway-class support.',
+      eligibility:
+          'UMD undergraduate students in supported courses; check current course coverage.',
+      action:
+          'Find the course support option and choose tutoring or study sessions.',
       url: 'https://tutoring.umd.edu/',
       tags: [
         'tutoring',
@@ -232,6 +280,11 @@ class UmdResourceCatalog {
       category: 'Course study groups',
       summary:
           'Regular group-review sessions for traditionally difficult courses.',
+      whenToUse:
+          'The student needs structured review for a difficult course before an exam or assignment.',
+      eligibility:
+          'UMD students in supported GSS courses; check current session listings.',
+      action: 'Look up the course and attend the next guided study session.',
       url: 'https://tltc.umd.edu/students/guided-study-sessions',
       tags: [
         'guided_study',
@@ -295,6 +348,12 @@ class UmdResourceCatalog {
       category: 'Legal and conduct support',
       summary:
           'Free legal advice and university charge assistance for eligible undergraduate students.',
+      whenToUse:
+          'Lease, landlord, conduct, traffic, or legal uncertainty is interfering with school.',
+      eligibility:
+          'Eligible UMD undergraduate students; check the office page for scope and limits.',
+      action:
+          'Use Legal Aid to understand options before acting on legal issues.',
       url: 'https://undergradlegalaid.umd.edu/',
       tags: [
         'legal',
@@ -313,6 +372,12 @@ class UmdResourceCatalog {
       category: 'Emergency financial support',
       summary:
           'Emergency financial support path for urgent student needs affecting enrollment, housing, food, or safety.',
+      whenToUse:
+          'An urgent financial issue could affect enrollment, housing, food, safety, or continuity.',
+      eligibility:
+          'UMD students with qualifying urgent needs; check current fund requirements.',
+      action:
+          'Review the crisis fund process and prepare the urgent-need context.',
       url:
           'https://studentaffairs.umd.edu/division-of-student-affairs-crisis-fund',
       tags: [
@@ -347,6 +412,12 @@ class UmdResourceCatalog {
       category: 'Student support navigation',
       summary:
           'Navigation point for complex student issues, resources, advocacy, and support referrals.',
+      whenToUse:
+          'The issue spans multiple offices or the student does not know where to start.',
+      eligibility:
+          'UMD students seeking resource navigation or advocacy support.',
+      action:
+          'Use Dean of Students as the routing point for complex support needs.',
       url: 'https://deanofstudents.umd.edu/',
       tags: [
         'dean',
@@ -381,6 +452,12 @@ class UmdResourceCatalog {
       category: 'Confidential advocacy',
       summary:
           'Confidential advocacy and therapy support for power-based violence, relationship violence, stalking, and sexual harassment.',
+      whenToUse:
+          'The student mentions relationship violence, stalking, sexual harassment, or power-based harm.',
+      eligibility:
+          'UMD community members seeking confidential advocacy or therapy support.',
+      action:
+          'Prioritize confidential support and avoid forcing disclosure details.',
       url: 'https://health.umd.edu/node/39',
       tags: [
         'care',
@@ -399,6 +476,12 @@ class UmdResourceCatalog {
       category: 'Civil rights and Title IX',
       summary:
           'University office for discrimination, harassment, sexual misconduct, Title IX, and rights-related support.',
+      whenToUse:
+          'The student asks about discrimination, harassment, sexual misconduct, or Title IX reporting.',
+      eligibility:
+          'UMD community members seeking civil rights or Title IX resources.',
+      action:
+          'Use OCRSM resources for reporting options, rights, and support pathways.',
       url: 'https://ocrsm.umd.edu/resources',
       tags: [
         'title_ix',
@@ -416,6 +499,11 @@ class UmdResourceCatalog {
       category: 'Overnight transportation',
       summary:
           'Shuttle-UM overnight service for campus areas not covered by evening routes.',
+      whenToUse:
+          'The student needs late-night campus transportation or feels unsafe walking.',
+      eligibility:
+          'UMD campus riders using Shuttle-UM overnight services; check current service area.',
+      action: 'Use NITE Ride or Terp Ride details before suggesting a route.',
       url: 'https://transportation.umd.edu/shuttle-um/nite-ride',
       tags: [
         'nite_ride',
@@ -434,6 +522,12 @@ class UmdResourceCatalog {
       category: 'Accessible transportation',
       summary:
           'Curb-to-curb Shuttle-UM service for students, faculty, staff, and visitors with temporary or permanent disabilities.',
+      whenToUse:
+          'Accessibility, temporary injury, or disability affects campus transportation.',
+      eligibility:
+          'Students, faculty, staff, and visitors with temporary or permanent disabilities.',
+      action:
+          'Use Paratransit scheduling guidance for accessible campus travel.',
       url: 'https://transportation.umd.edu/shuttle-um/paratransit',
       tags: [
         'paratransit',
@@ -468,6 +562,10 @@ class UmdResourceCatalog {
       category: 'Campus safety',
       summary:
           'Safety app that connects students with UMPD, trusted contacts, and emergency support.',
+      whenToUse:
+          'The student wants late-night safety support, trusted-contact sharing, or emergency access.',
+      eligibility: 'UMD community members using campus safety tools.',
+      action: 'Set up Guardian before the student needs it during a late walk.',
       url: 'https://umpd.umd.edu/resources/safety-information/guardian-app',
       tags: [
         'guardian',
@@ -485,6 +583,12 @@ class UmdResourceCatalog {
       category: 'Peer support',
       summary:
           'Student-run peer counseling and crisis intervention hotline for anonymous, confidential support.',
+      whenToUse:
+          'The student wants anonymous peer support, a confidential hotline, or a lower-friction check-in.',
+      eligibility:
+          'Students seeking peer counseling or anonymous support; check service details.',
+      action:
+          'Use Help Center for peer support when the student wants to talk now.',
       url: 'https://helpcenterumd.org/',
       tags: [
         'help_center',

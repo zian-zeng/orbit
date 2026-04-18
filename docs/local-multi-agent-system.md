@@ -152,6 +152,12 @@ OCRSM/Title IX, ISSS, and the Writing Center. These entries are used as local
 routing anchors and fallback recommendations; live details should come from a
 future UMD resource retrieval backend.
 
+Catalog entries now carry source-backed resource-card metadata: when to use the
+resource, eligibility fit, suggested next action, and official URL. The demo
+monitor surfaces these as UMD Resource Cards, and the campus-resource agent uses
+the same metadata in its skill output so resource routing feels campus-specific
+instead of generic.
+
 ## Demo Readiness
 
 For a business demo, prepare two paths:
@@ -218,6 +224,12 @@ Saving the current support-pulse skill stores the skill id, version, title,
 summary, system prompt, starter prompt, tools, source labels, and stress band.
 Repeated saves create `v1`, `v2`, and later versions, giving the demo a concrete
 path from runtime skill generation to persistent skill assets.
+
+The chat header includes an Intelligence Dashboard that brings these product
+signals together: saved skill versions, feedback counts, recent feedback
+examples, and recent agent audit logs. This gives the demo an explainability and
+learning surface instead of leaving the new persistence layers hidden in local
+storage.
 
 Recommended local model choices:
 

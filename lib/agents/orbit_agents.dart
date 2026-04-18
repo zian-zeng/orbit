@@ -181,10 +181,7 @@ class CampusResourceAgent extends OrbitAgent {
       labels: context.allLabels,
     );
     final resourceLines = resources
-        .map(
-          (resource) =>
-              '${resource.name} (${resource.category}): ${resource.summary}',
-        )
+        .map((resource) => resource.agentBrief)
         .toList(growable: false);
 
     return SkillResult(

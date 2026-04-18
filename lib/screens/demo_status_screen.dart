@@ -1,4 +1,5 @@
 import 'package:chatbotapp/demo/orbit_business_demo_scenario.dart';
+import 'package:chatbotapp/data_sources/umd_resource_catalog.dart';
 import 'package:chatbotapp/hive/monitor_history_entry.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
@@ -27,6 +28,7 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
   static const StudentNotificationPolicy _notificationPolicy =
       StudentNotificationPolicy();
   static const MonitorHistoryService _historyService = MonitorHistoryService();
+  static const UmdResourceCatalog _resourceCatalog = UmdResourceCatalog();
   bool _didRequestLiveSignals = false;
   DateTime? _focusStartedAt;
   bool _preferDemoFixture = false;
@@ -83,6 +85,11 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
       report: report,
       focusStartedAt: _focusStartedAt,
       focusBreakMinutes: settings.focusBreakMinutes,
+    );
+    final resourceMatches = _resourceCatalog.match(
+      message: report.prompt,
+      labels: report.profileLabels,
+      limit: 4,
     );
     _recordMonitorCheckpoint(report);
 
@@ -175,6 +182,8 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
                   final right = Column(
                     children: [
                       _SearchPanel(report: report),
+                      const SizedBox(height: 12),
+                      _ResourcePanel(resources: resourceMatches),
                       const SizedBox(height: 12),
                       _AgentPanel(report: report),
                       const SizedBox(height: 12),
@@ -726,6 +735,122 @@ class _AgentPanel extends StatelessWidget {
                 : 'The deterministic controller keeps tool use reliable, while Gemma/Ollama handles the final natural-language synthesis.',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ResourcePanel extends StatelessWidget {
+  const _ResourcePanel({required this.resources});
+
+  final List<UmdResource> resources;
+
+  @override
+  Widget build(BuildContext context) {
+    return _DemoPanel(
+      title: 'UMD Resource Cards',
+      subtitle: 'Source-backed campus routing',
+      icon: CupertinoIcons.link_circle,
+      child: resources.isEmpty
+          ? const Text(
+              'No resource match yet. Ask a campus, food, transport, academic, or wellbeing question.',
+            )
+          : Column(
+              children: resources
+                  .map(
+                    (resource) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _ResourceCard(resource: resource),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+    );
+  }
+}
+
+class _ResourceCard extends StatelessWidget {
+  const _ResourceCard({required this.resource});
+
+  final UmdResource resource;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  resource.name,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              _DemoChip(label: resource.category),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(resource.summary),
+          const SizedBox(height: 8),
+          _ResourceLine(label: 'Use when', value: resource.whenToUse),
+          _ResourceLine(label: 'Eligibility', value: resource.eligibility),
+          _ResourceLine(label: 'Action', value: resource.action),
+          if (resource.url != null) ...[
+            const SizedBox(height: 8),
+            SelectableText(
+              resource.url!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.primary,
+                  ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ResourceLine extends StatelessWidget {
+  const _ResourceLine({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: RichText(
+        text: TextSpan(
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
       ),
     );
   }
