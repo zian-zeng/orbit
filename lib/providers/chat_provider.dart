@@ -7,8 +7,10 @@ import 'package:chatbotapp/agents/orbit_models.dart';
 import 'package:chatbotapp/apis/api_service.dart';
 import 'package:chatbotapp/constants/constants.dart';
 import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
+import 'package:chatbotapp/hive/assistant_feedback_entry.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
+import 'package:chatbotapp/hive/monitor_history_entry.dart';
 import 'package:chatbotapp/hive/settings.dart';
 import 'package:chatbotapp/hive/user_model.dart';
 import 'package:chatbotapp/models/message.dart';
@@ -656,6 +658,22 @@ class ChatProvider extends ChangeNotifier {
       await Hive.openBox<Settings>(Constants.settingsBox);
     } else if (!Hive.isBoxOpen(Constants.settingsBox)) {
       await Hive.openBox<Settings>(Constants.settingsBox);
+    }
+    if (!Hive.isAdapterRegistered(3)) {
+      Hive.registerAdapter(MonitorHistoryEntryAdapter());
+      await Hive.openBox<MonitorHistoryEntry>(Constants.monitorHistoryBox);
+    } else if (!Hive.isBoxOpen(Constants.monitorHistoryBox)) {
+      await Hive.openBox<MonitorHistoryEntry>(Constants.monitorHistoryBox);
+    }
+    if (!Hive.isAdapterRegistered(4)) {
+      Hive.registerAdapter(AssistantFeedbackEntryAdapter());
+      await Hive.openBox<AssistantFeedbackEntry>(
+        Constants.assistantFeedbackBox,
+      );
+    } else if (!Hive.isBoxOpen(Constants.assistantFeedbackBox)) {
+      await Hive.openBox<AssistantFeedbackEntry>(
+        Constants.assistantFeedbackBox,
+      );
     }
   }
 }

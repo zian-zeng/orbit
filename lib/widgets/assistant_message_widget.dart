@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:chatbotapp/models/message.dart';
+import 'package:chatbotapp/services/assistant_feedback_service.dart';
 import 'package:chatbotapp/utilities/app_snackbar.dart';
 import 'package:chatbotapp/widgets/chat/assistant_response_content.dart';
 
-class AssistantMessageWidget extends StatelessWidget {
+class AssistantMessageWidget extends StatefulWidget {
   const AssistantMessageWidget({
     super.key,
     required this.message,
@@ -14,9 +15,38 @@ class AssistantMessageWidget extends StatelessWidget {
   final Message message;
 
   @override
+  State<AssistantMessageWidget> createState() => _AssistantMessageWidgetState();
+}
+
+class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
+  static const AssistantFeedbackService _feedbackService =
+      AssistantFeedbackService();
+  String? _selectedFeedback;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFeedback();
+  }
+
+  @override
+  void didUpdateWidget(covariant AssistantMessageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.message.messageId != widget.message.messageId ||
+        oldWidget.message.chatId != widget.message.chatId) {
+      _loadFeedback();
+    }
+  }
+
+  void _loadFeedback() {
+    _selectedFeedback =
+        _feedbackService.loadForMessage(widget.message)?.feedbackType;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final text = message.message.toString();
+    final text = widget.message.message.toString();
     final traceText = _extractOrbitTrace(text);
     final visibleText = _withoutOrbitTrace(text);
     final hasCodeBlocks = AssistantResponseContent.containsCodeBlocks(
@@ -94,6 +124,16 @@ class AssistantMessageWidget extends StatelessWidget {
                   const SizedBox(height: 12),
                   _AgentTracePill(traceText: traceText),
                 ],
+                const SizedBox(height: 12),
+                _FeedbackBar(
+                  selectedFeedback: _selectedFeedback,
+                  onSelected: (feedbackType) => _recordFeedback(
+                    context: context,
+                    feedbackType: feedbackType,
+                    visibleText: visibleText,
+                    agentTrace: traceText ?? '',
+                  ),
+                ),
               ],
             ],
           ),
@@ -122,6 +162,88 @@ class AssistantMessageWidget extends StatelessWidget {
     }
     return lines.join('\n').trimRight();
   }
+
+  Future<void> _recordFeedback({
+    required BuildContext context,
+    required String feedbackType,
+    required String visibleText,
+    required String agentTrace,
+  }) async {
+    await _feedbackService.recordFeedback(
+      message: widget.message,
+      feedbackType: feedbackType,
+      visibleText: visibleText,
+      agentTrace: agentTrace,
+    );
+    if (!mounted || !context.mounted) {
+      return;
+    }
+    setState(() {
+      _selectedFeedback = feedbackType;
+    });
+    showAppSnackBar(context, 'Feedback saved', bottomOffset: 132);
+  }
+}
+
+class _FeedbackBar extends StatelessWidget {
+  const _FeedbackBar({
+    required this.selectedFeedback,
+    required this.onSelected,
+  });
+
+  static const _options = [
+    _FeedbackOption(id: 'helpful', label: 'Helpful'),
+    _FeedbackOption(id: 'not_helpful', label: 'Not helpful'),
+    _FeedbackOption(id: 'wrong_context', label: 'Wrong context'),
+    _FeedbackOption(id: 'too_much', label: 'Too much'),
+  ];
+
+  final String? selectedFeedback;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Was this useful?',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _options
+              .map(
+                (option) => ChoiceChip(
+                  label: Text(option.label),
+                  selected: selectedFeedback == option.id,
+                  onSelected: (_) => onSelected(option.id),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              )
+              .toList(growable: false),
+        ),
+      ],
+    );
+  }
+}
+
+class _FeedbackOption {
+  const _FeedbackOption({
+    required this.id,
+    required this.label,
+  });
+
+  final String id;
+  final String label;
 }
 
 class _AgentTracePill extends StatelessWidget {

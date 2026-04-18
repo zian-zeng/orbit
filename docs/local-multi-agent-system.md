@@ -193,6 +193,19 @@ demo monitor panel. This is intentionally implemented as a pure policy layer
 first so it can later drive Android/iOS or desktop local notifications without
 changing the alert logic.
 
+The monitor now persists local daily checkpoints in Hive. Each checkpoint saves
+the student key, live/demo source, stress score, deadline count, calendar hours,
+place/route counts, and active labels. The demo-status screen renders these
+entries as a monitor-history trend so the pitch shows workload changing over
+time instead of only a single snapshot. Same-day entries are upserted to avoid
+spamming history during refreshes.
+
+Assistant answers now include lightweight feedback chips: Helpful, Not helpful,
+Wrong context, and Too much. Feedback is stored locally with the chat/message
+id, response preview, timestamp, and agent trace. This gives the recommender a
+measurable learning signal for future ranking, evaluation dashboards, and
+per-user adaptation without requiring a backend for the demo.
+
 Recommended local model choices:
 
 - `gemma2:2b` for lower-memory laptops and quick demos.

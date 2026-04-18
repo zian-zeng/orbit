@@ -1,6 +1,8 @@
 import 'package:chatbotapp/demo/orbit_business_demo_scenario.dart';
+import 'package:chatbotapp/hive/monitor_history_entry.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
+import 'package:chatbotapp/services/monitor_history_service.dart';
 import 'package:chatbotapp/services/student_monitor_service.dart';
 import 'package:chatbotapp/services/student_notification_policy.dart';
 import 'package:chatbotapp/widgets/app_icon_button.dart';
@@ -24,9 +26,14 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
   static const StudentMonitorService _monitorService = StudentMonitorService();
   static const StudentNotificationPolicy _notificationPolicy =
       StudentNotificationPolicy();
+  static const MonitorHistoryService _historyService = MonitorHistoryService();
   bool _didRequestLiveSignals = false;
   DateTime? _focusStartedAt;
   bool _preferDemoFixture = false;
+  List<MonitorHistoryEntry> _history = const [];
+  String _lastRecordedMonitorSignature = '';
+  bool _isRecordingMonitorHistory = false;
+  bool _skipNextMonitorRecord = false;
 
   @override
   void initState() {
@@ -36,6 +43,7 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
         return;
       }
       _refreshLiveSignals();
+      _loadMonitorHistory(email: DemoStatusScreen.scenario.email);
     });
   }
 
@@ -76,6 +84,7 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
       focusStartedAt: _focusStartedAt,
       focusBreakMinutes: settings.focusBreakMinutes,
     );
+    _recordMonitorCheckpoint(report);
 
     return AppScreenScaffold(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -140,6 +149,12 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
                       _ScenarioPanel(report: report),
                       const SizedBox(height: 12),
                       _StressPanel(report: report),
+                      const SizedBox(height: 12),
+                      _HistoryPanel(
+                        report: report,
+                        history: _history,
+                        onClear: () => _clearMonitorHistory(report),
+                      ),
                       const SizedBox(height: 12),
                       _NotificationPanel(
                         plan: notificationPlan,
@@ -221,6 +236,62 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
   void _endFocusSession() {
     setState(() {
       _focusStartedAt = null;
+    });
+  }
+
+  void _recordMonitorCheckpoint(StudentMonitorReport report) {
+    final signature = [
+      report.email,
+      report.isLive ? 'live' : 'demo',
+      report.snapshot.stressRiskScore.toStringAsFixed(3),
+      report.snapshot.deadlinesNextSevenDays,
+      report.snapshot.calendarHoursNextSevenDays.toStringAsFixed(2),
+      report.snapshot.places.length,
+      report.snapshot.routes.length,
+    ].join('|');
+    if (_lastRecordedMonitorSignature == signature ||
+        _isRecordingMonitorHistory) {
+      return;
+    }
+    if (_skipNextMonitorRecord) {
+      _skipNextMonitorRecord = false;
+      _lastRecordedMonitorSignature = signature;
+      return;
+    }
+    _lastRecordedMonitorSignature = signature;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) {
+        return;
+      }
+      _isRecordingMonitorHistory = true;
+      await _historyService.recordReport(report);
+      if (!mounted) {
+        return;
+      }
+      _loadMonitorHistory(email: report.email);
+      _isRecordingMonitorHistory = false;
+    });
+  }
+
+  void _loadMonitorHistory({required String email}) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _history = _historyService.loadRecent(email: email);
+    });
+  }
+
+  Future<void> _clearMonitorHistory(StudentMonitorReport report) async {
+    await _historyService.clearForStudent(email: report.email);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _history = const [];
+      _lastRecordedMonitorSignature = '';
+      _skipNextMonitorRecord = true;
     });
   }
 }
@@ -335,6 +406,107 @@ class _StressPanel extends StatelessWidget {
               child: _AlertRow(alert: alert),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryPanel extends StatelessWidget {
+  const _HistoryPanel({
+    required this.report,
+    required this.history,
+    required this.onClear,
+  });
+
+  final StudentMonitorReport report;
+  final List<MonitorHistoryEntry> history;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = history.isEmpty
+        ? [
+            MonitorHistoryEntry(
+              id: 'preview',
+              createdAt: DateTime.now(),
+              studentEmail: report.email,
+              source: report.isLive ? 'live' : 'demo',
+              stressScore: report.snapshot.stressRiskScore,
+              deadlines: report.snapshot.deadlinesNextSevenDays,
+              calendarHours: report.snapshot.calendarHoursNextSevenDays,
+              placeCount: report.snapshot.places.length,
+              routeCount: report.snapshot.routes.length,
+              labels: report.profileLabels,
+              sourceNote: 'Preview until the first checkpoint is stored.',
+            ),
+          ]
+        : history;
+    final latest = entries.last;
+    final averageStress =
+        entries.fold<double>(0, (total, entry) => total + entry.stressScore) /
+            entries.length;
+
+    return _DemoPanel(
+      title: 'Monitor History',
+      subtitle: '${entries.length} saved daily checkpoint'
+          '${entries.length == 1 ? '' : 's'}',
+      icon: CupertinoIcons.chart_bar_alt_fill,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: 'Latest',
+                  value: '${(latest.stressScore * 100).round()}%',
+                  detail: latest.source,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Avg risk',
+                  value: '${(averageStress * 100).round()}%',
+                  detail: 'saved',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 150,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: entries
+                  .take(14)
+                  .map(
+                    (entry) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: _HistoryBar(entry: entry),
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Daily checkpoints turn the monitor into a trend: stress, deadlines, calendar hours, and live/demo source are saved locally.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+          if (history.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            OutlinedButton(
+              style: _outlinedButtonStyle(),
+              onPressed: onClear,
+              child: const Text('Clear monitor history'),
+            ),
+          ],
         ],
       ),
     );
@@ -873,6 +1045,49 @@ class _DayBar extends StatelessWidget {
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HistoryBar extends StatelessWidget {
+  const _HistoryBar({required this.entry});
+
+  final MonitorHistoryEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final score = entry.stressScore.clamp(0.0, 1.0);
+    final height = 20 + (score * 68);
+    final color = score >= 0.72
+        ? colorScheme.error
+        : score >= 0.48
+            ? colorScheme.tertiary
+            : colorScheme.primary;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          '${(score * 100).round()}%',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+        const SizedBox(height: 5),
+        Container(
+          width: 20,
+          height: height,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          entry.dayLabel,
+          style: Theme.of(context).textTheme.labelSmall,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
