@@ -70,4 +70,21 @@ void main() {
     expect(reloaded.preferDemoFixture, isTrue);
     expect(reloaded.allowLiveStudentData, isFalse);
   });
+
+  test('persists notification controls', () {
+    final provider = SettingsProvider();
+
+    provider.toggleStudentNotifications(value: false);
+    provider.toggleQuietHours(value: true);
+    provider.setQuietHours(start: 23, end: 7);
+    provider.setNotificationSensitivity(value: 2);
+
+    final reloaded = SettingsProvider()..getSavedSettings();
+    expect(reloaded.enableStudentNotifications, isFalse);
+    expect(reloaded.enableQuietHours, isTrue);
+    expect(reloaded.quietHoursStart, 23);
+    expect(reloaded.quietHoursEnd, 7);
+    expect(reloaded.notificationSensitivity, 2);
+    expect(reloaded.notificationSensitivityLabel, 'High');
+  });
 }

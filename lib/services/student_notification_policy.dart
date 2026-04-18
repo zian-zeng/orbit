@@ -7,11 +7,17 @@ class StudentNotificationPlan {
     required this.generatedAt,
     required this.focusDuration,
     required this.notifications,
+    this.notificationsEnabled = true,
+    this.quietHoursActive = false,
+    this.suppressedCount = 0,
   });
 
   final DateTime generatedAt;
   final Duration focusDuration;
   final List<DemoAlert> notifications;
+  final bool notificationsEnabled;
+  final bool quietHoursActive;
+  final int suppressedCount;
 
   bool get hasActiveFocusSession => focusDuration > Duration.zero;
   bool get needsBreak => notifications.any(
@@ -39,8 +45,19 @@ class StudentNotificationPolicy {
     DateTime? focusStartedAt,
     DateTime? now,
     int focusBreakMinutes = 45,
+    bool notificationsEnabled = true,
+    bool quietHoursEnabled = true,
+    int quietHoursStart = 22,
+    int quietHoursEnd = 8,
+    int sensitivity = 1,
   }) {
     final generatedAt = now ?? DateTime.now();
+    final quietActive = quietHoursEnabled &&
+        _isQuietHours(
+          generatedAt,
+          startHour: quietHoursStart,
+          endHour: quietHoursEnd,
+        );
     final breakThreshold = Duration(
       minutes: focusBreakMinutes.clamp(15, 180),
     );
@@ -48,18 +65,47 @@ class StudentNotificationPolicy {
       focusStartedAt: focusStartedAt,
       now: generatedAt,
     );
-    final notifications = <DemoAlert>[
-      ..._stressNotifications(report),
-      ..._deadlineNotifications(report.snapshot, generatedAt),
+    if (!notificationsEnabled) {
+      return StudentNotificationPlan(
+        generatedAt: generatedAt,
+        focusDuration: focusDuration,
+        notifications: const [
+          DemoAlert(
+            title: 'Notifications paused',
+            detail:
+                'Student nudges are off. Orbit will still update the monitor when opened.',
+            severity: DemoAlertSeverity.info,
+          ),
+        ],
+        notificationsEnabled: false,
+        quietHoursActive: quietActive,
+      );
+    }
+
+    final sensitivityLevel = sensitivity.clamp(0, 2);
+    final rawNotifications = <DemoAlert>[
+      ..._stressNotifications(report, sensitivityLevel),
+      ..._deadlineNotifications(report.snapshot, generatedAt, sensitivityLevel),
       ..._focusNotifications(focusDuration, breakThreshold),
     ];
+    final suppressedCount = quietActive
+        ? rawNotifications
+            .where((alert) => alert.severity != DemoAlertSeverity.urgent)
+            .length
+        : 0;
+    final notifications = quietActive
+        ? rawNotifications
+            .where((alert) => alert.severity == DemoAlertSeverity.urgent)
+            .toList(growable: false)
+        : rawNotifications;
 
     if (notifications.isEmpty) {
       notifications.add(
-        const DemoAlert(
-          title: 'No urgent nudges',
-          detail:
-              'Orbit is watching workload, deadlines, and focus duration. No immediate intervention is needed.',
+        DemoAlert(
+          title: quietActive ? 'Quiet hours active' : 'No urgent nudges',
+          detail: quietActive
+              ? 'Non-urgent nudges are muted until quiet hours end. Urgent deadline or stress alerts can still appear.'
+              : 'Orbit is watching workload, deadlines, and focus duration. No immediate intervention is needed.',
           severity: DemoAlertSeverity.info,
         ),
       );
@@ -69,12 +115,23 @@ class StudentNotificationPolicy {
       generatedAt: generatedAt,
       focusDuration: focusDuration,
       notifications: notifications,
+      notificationsEnabled: true,
+      quietHoursActive: quietActive,
+      suppressedCount: suppressedCount,
     );
   }
 
-  List<DemoAlert> _stressNotifications(StudentMonitorReport report) {
+  List<DemoAlert> _stressNotifications(
+    StudentMonitorReport report,
+    int sensitivity,
+  ) {
     final score = report.snapshot.stressRiskScore;
-    if (score >= 0.72) {
+    final adjustment = switch (sensitivity) {
+      0 => 0.1,
+      2 => -0.1,
+      _ => 0.0,
+    };
+    if (score >= 0.72 + adjustment) {
       return const [
         DemoAlert(
           title: 'Stress limit reached',
@@ -84,7 +141,7 @@ class StudentNotificationPolicy {
         ),
       ];
     }
-    if (score >= 0.48) {
+    if (score >= 0.48 + adjustment) {
       return const [
         DemoAlert(
           title: 'Stress is rising',
@@ -100,6 +157,7 @@ class StudentNotificationPolicy {
   List<DemoAlert> _deadlineNotifications(
     StudentSignalSnapshot snapshot,
     DateTime now,
+    int sensitivity,
   ) {
     final upcoming = snapshot.assignments.where((assignment) {
       final dueAt = assignment.dueAt;
@@ -113,7 +171,12 @@ class StudentNotificationPolicy {
 
     final nearest = upcoming.first;
     final timeLeft = nearest.dueAt!.difference(now);
-    if (timeLeft > const Duration(hours: 24)) {
+    final deadlineWindow = switch (sensitivity) {
+      0 => const Duration(hours: 12),
+      2 => const Duration(hours: 36),
+      _ => const Duration(hours: 24),
+    };
+    if (timeLeft > deadlineWindow) {
       return const [];
     }
 
@@ -171,5 +234,22 @@ class StudentNotificationPolicy {
       return Duration.zero;
     }
     return duration;
+  }
+
+  bool _isQuietHours(
+    DateTime now, {
+    required int startHour,
+    required int endHour,
+  }) {
+    final start = startHour.clamp(0, 23);
+    final end = endHour.clamp(0, 23);
+    if (start == end) {
+      return false;
+    }
+    final hour = now.hour;
+    if (start < end) {
+      return hour >= start && hour < end;
+    }
+    return hour >= start || hour < end;
   }
 }

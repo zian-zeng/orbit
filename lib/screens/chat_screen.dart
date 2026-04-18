@@ -9,6 +9,7 @@ import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/providers/voice_input_provider.dart';
 import 'package:chatbotapp/screens/chat_history_screen.dart';
+import 'package:chatbotapp/screens/course_planner_screen.dart';
 import 'package:chatbotapp/screens/demo_status_screen.dart';
 import 'package:chatbotapp/screens/intelligence_dashboard_screen.dart';
 import 'package:chatbotapp/screens/settings_screen.dart';
@@ -330,6 +331,19 @@ class _ChatScreenState extends State<ChatScreen> {
     showAppSnackBar(context, 'Demo prompt loaded');
   }
 
+  Future<void> _openCoursePlanner() async {
+    final prompt = await _openPage<String>(const CoursePlannerScreen());
+    if (!mounted || prompt == null || prompt.trim().isEmpty) {
+      return;
+    }
+
+    _applyPrompt(
+      prompt: prompt,
+      label: SupportLabel.planning,
+    );
+    showAppSnackBar(context, 'Course plan loaded');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<ChatProvider, SettingsProvider, VoiceInputProvider>(
@@ -384,6 +398,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 onOpenHistory: () => _openPage<void>(const ChatHistoryScreen()),
                 onOpenSettings: () => _openPage<void>(const SettingsScreen()),
                 onOpenDemo: _openDemoPath,
+                onOpenCoursePlanner: _openCoursePlanner,
                 onOpenIntelligence: () =>
                     _openPage<void>(const IntelligenceDashboardScreen()),
                 onNewChat: () => _startNewChat(chatProvider),

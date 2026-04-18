@@ -21,6 +21,11 @@ class SettingsProvider extends ChangeNotifier {
   int _focusBreakMinutes = 45;
   bool _allowExternalStudentData = false;
   bool _preferDemoFixture = false;
+  bool _enableStudentNotifications = true;
+  bool _enableQuietHours = true;
+  int _quietHoursStart = 22;
+  int _quietHoursEnd = 8;
+  int _notificationSensitivity = 1;
 
   AppThemeMode get appThemeMode => _appThemeMode;
 
@@ -57,6 +62,22 @@ class SettingsProvider extends ChangeNotifier {
   bool get allowLiveStudentData =>
       allowExternalStudentData && !preferDemoFixture;
 
+  bool get enableStudentNotifications => _enableStudentNotifications;
+
+  bool get enableQuietHours => _enableQuietHours;
+
+  int get quietHoursStart => _quietHoursStart;
+
+  int get quietHoursEnd => _quietHoursEnd;
+
+  int get notificationSensitivity => _notificationSensitivity;
+
+  String get notificationSensitivityLabel => switch (notificationSensitivity) {
+        0 => 'Low',
+        2 => 'High',
+        _ => 'Balanced',
+      };
+
   AppThemeMode _themeModeFromSettings(Settings settings) {
     final storedIndex = settings.themeModeIndex;
     if (storedIndex >= 0 && storedIndex < AppThemeMode.values.length) {
@@ -85,6 +106,11 @@ class SettingsProvider extends ChangeNotifier {
       _focusBreakMinutes = settings.focusBreakMinutes.clamp(15, 180);
       _allowExternalStudentData = settings.allowExternalStudentData;
       _preferDemoFixture = settings.preferDemoFixture;
+      _enableStudentNotifications = settings.enableStudentNotifications;
+      _enableQuietHours = settings.enableQuietHours;
+      _quietHoursStart = settings.quietHoursStart.clamp(0, 23);
+      _quietHoursEnd = settings.quietHoursEnd.clamp(0, 23);
+      _notificationSensitivity = settings.notificationSensitivity.clamp(0, 2);
     }
   }
 
@@ -105,6 +131,11 @@ class SettingsProvider extends ChangeNotifier {
           focusBreakMinutes: focusBreakMinutes,
           allowExternalStudentData: allowExternalStudentData,
           preferDemoFixture: preferDemoFixture,
+          enableStudentNotifications: enableStudentNotifications,
+          enableQuietHours: enableQuietHours,
+          quietHoursStart: quietHoursStart,
+          quietHoursEnd: quietHoursEnd,
+          notificationSensitivity: notificationSensitivity,
         );
   }
 
@@ -260,6 +291,60 @@ class SettingsProvider extends ChangeNotifier {
     _saveSettings(current);
 
     _preferDemoFixture = value;
+    notifyListeners();
+  }
+
+  void toggleStudentNotifications({
+    required bool value,
+    Settings? settings,
+  }) {
+    final current = _currentSettings(settings);
+    current.enableStudentNotifications = value;
+    _saveSettings(current);
+
+    _enableStudentNotifications = value;
+    notifyListeners();
+  }
+
+  void toggleQuietHours({
+    required bool value,
+    Settings? settings,
+  }) {
+    final current = _currentSettings(settings);
+    current.enableQuietHours = value;
+    _saveSettings(current);
+
+    _enableQuietHours = value;
+    notifyListeners();
+  }
+
+  void setQuietHours({
+    required int start,
+    required int end,
+    Settings? settings,
+  }) {
+    final normalizedStart = start.clamp(0, 23);
+    final normalizedEnd = end.clamp(0, 23);
+    final current = _currentSettings(settings);
+    current.quietHoursStart = normalizedStart;
+    current.quietHoursEnd = normalizedEnd;
+    _saveSettings(current);
+
+    _quietHoursStart = normalizedStart;
+    _quietHoursEnd = normalizedEnd;
+    notifyListeners();
+  }
+
+  void setNotificationSensitivity({
+    required int value,
+    Settings? settings,
+  }) {
+    final normalized = value.clamp(0, 2);
+    final current = _currentSettings(settings);
+    current.notificationSensitivity = normalized;
+    _saveSettings(current);
+
+    _notificationSensitivity = normalized;
     notifyListeners();
   }
 }

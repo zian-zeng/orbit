@@ -4,6 +4,7 @@ import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/providers/voice_input_provider.dart';
 import 'package:chatbotapp/screens/chat_screen.dart';
+import 'package:chatbotapp/screens/connected_apps_screen.dart';
 import 'package:chatbotapp/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -123,6 +124,21 @@ Future<void> pumpHomeScreen(
   );
 }
 
+Future<void> pumpConnectedAppsScreen(WidgetTester tester) async {
+  await tester.pumpWidget(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+      ],
+      child: MaterialApp(
+        home: const ConnectedAppsScreen(),
+        theme: ThemeData(useMaterial3: true),
+      ),
+    ),
+  );
+}
+
 void main() {
   testWidgets('Chat screen renders empty state', (WidgetTester tester) async {
     await pumpChatScreen(tester);
@@ -170,6 +186,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('UMD Demo Path'), findsOneWidget);
+    expect(find.text('Next Best Action Plan'), findsOneWidget);
     expect(find.text('Personalized Food Search'), findsOneWidget);
     expect(find.text('Next Semester Plan'), findsOneWidget);
     expect(find.text('Notification Center'), findsOneWidget);
@@ -198,9 +215,48 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Intelligence Dashboard'), findsOneWidget);
+    expect(find.text('Evaluation Readiness'), findsOneWidget);
     expect(find.text('Skill Registry'), findsOneWidget);
     expect(find.text('Feedback Signal'), findsOneWidget);
     expect(find.text('Agent Audit Trail'), findsOneWidget);
+  });
+
+  testWidgets('Course planner opens and loads a plan into chat', (
+    WidgetTester tester,
+  ) async {
+    await pumpChatScreen(tester);
+
+    await tester.tap(find.byTooltip('Course planner'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Course Planner'), findsOneWidget);
+    expect(find.text('Balanced Plan'), findsOneWidget);
+    expect(find.text('Professor Comparison'), findsOneWidget);
+    expect(find.text('Fetch PlanetTerp'), findsOneWidget);
+    expect(
+      find.text('CMSC216 - Introduction to Computer Systems'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Use in chat'));
+    await tester.pumpAndSettle();
+
+    final textField = tester.widget<TextField>(find.byType(TextField).first);
+    expect(textField.controller?.text, contains('next semester courses'));
+    expect(textField.controller?.text, contains('PlanetTerp'));
+  });
+
+  testWidgets('Connected apps screen shows data sources and permissions', (
+    WidgetTester tester,
+  ) async {
+    await pumpConnectedAppsScreen(tester);
+
+    expect(find.text('Connected Apps'), findsOneWidget);
+    expect(find.text('ORBIT Student Data Proxy'), findsOneWidget);
+    expect(find.text('UMD ELMS-Canvas'), findsOneWidget);
+    expect(find.text('PlanetTerp'), findsOneWidget);
+    expect(find.textContaining('course_professor_planner'), findsWidgets);
+    expect(find.textContaining('requires approval'), findsWidgets);
   });
 
   testWidgets('Home screen shows onboarding before chat for first-run users', (

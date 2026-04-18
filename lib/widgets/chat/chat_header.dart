@@ -11,6 +11,7 @@ class ChatHeader extends StatelessWidget {
     required this.onOpenHistory,
     required this.onOpenSettings,
     required this.onOpenDemo,
+    required this.onOpenCoursePlanner,
     required this.onOpenIntelligence,
     required this.onNewChat,
   });
@@ -21,6 +22,7 @@ class ChatHeader extends StatelessWidget {
   final VoidCallback onOpenHistory;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenDemo;
+  final VoidCallback onOpenCoursePlanner;
   final VoidCallback onOpenIntelligence;
   final VoidCallback onNewChat;
 
@@ -88,6 +90,12 @@ class ChatHeader extends StatelessWidget {
               icon: CupertinoIcons.chart_bar_alt_fill,
               tooltip: 'Demo status',
               onTap: onOpenDemo,
+            ),
+            const SizedBox(width: 8),
+            AppIconButton(
+              icon: CupertinoIcons.calendar_badge_plus,
+              tooltip: 'Course planner',
+              onTap: onOpenCoursePlanner,
             ),
             const SizedBox(width: 8),
             AppIconButton(

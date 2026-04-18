@@ -34,6 +34,21 @@ void main() {
     expect(professor.reviewCount, 2);
     expect(professor.studentNotes.first, contains('structured'));
   });
+
+  test('hydrates course candidates with professor review signals', () async {
+    final dataSource = PlanetterpCourseDataSource(
+      httpClient: _FakeHttpJsonClient(),
+    );
+
+    final course = await dataSource.fetchCourseWithProfessorSignals(
+      courseId: 'CMSC216',
+    );
+
+    expect(course, isNotNull);
+    expect(course!.professors.first.averageRating, 4.1);
+    expect(course.professors.first.reviewCount, 2);
+    expect(course.professors.first.studentNotes.last, contains('start early'));
+  });
 }
 
 class _FakeHttpJsonClient extends HttpJsonClient {
@@ -54,6 +69,17 @@ class _FakeHttpJsonClient extends HttpJsonClient {
       };
     }
     if (uri.path == '/v1/professor') {
+      if (uri.queryParameters['name'] == 'Nelson Padua-Perez') {
+        return {
+          'name': 'Nelson Padua-Perez',
+          'slug': 'nelson_padua_perez',
+          'average_rating': 3.7,
+          'average_gpa': 2.88,
+          'reviews': [
+            {'review': 'Helpful, but exams require practice.'},
+          ],
+        };
+      }
       expect(uri.queryParameters['name'], 'Larry Herman');
       return {
         'name': 'Larry Herman',

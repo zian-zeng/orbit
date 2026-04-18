@@ -46,6 +46,21 @@ class Settings extends HiveObject {
   @HiveField(13)
   bool preferDemoFixture = false;
 
+  @HiveField(14)
+  bool enableStudentNotifications = true;
+
+  @HiveField(15)
+  bool enableQuietHours = true;
+
+  @HiveField(16)
+  int quietHoursStart = 22;
+
+  @HiveField(17)
+  int quietHoursEnd = 8;
+
+  @HiveField(18)
+  int notificationSensitivity = 1;
+
   // constructor
   Settings({
     required this.isDarkTheme,
@@ -62,5 +77,10 @@ class Settings extends HiveObject {
     this.focusBreakMinutes = 45,
     this.allowExternalStudentData = false,
     this.preferDemoFixture = false,
+    this.enableStudentNotifications = true,
+    this.enableQuietHours = true,
+    this.quietHoursStart = 22,
+    this.quietHoursEnd = 8,
+    this.notificationSensitivity = 1,
   });
 }

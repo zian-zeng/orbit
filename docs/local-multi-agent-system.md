@@ -217,6 +217,13 @@ alerts, prompt, and agent-tool path. If no connected signals are available, it
 falls back to the deterministic UMD demo fixture instead of showing a blank
 dashboard.
 
+The monitor also generates a Next Best Action Plan. This is the student-facing
+decision layer that converts the closest Canvas deadline, current calendar
+pressure, vegan/location matches, stress score, focus-break threshold, and
+highest-matching UMD resource into concrete steps with the agent handoff and
+skill prompt that would execute them. This makes the demo feel like a campus
+support operating system instead of a generic chat answer.
+
 The monitor also includes an in-app notification policy. It can raise stress,
 deadline, and focus-duration nudges, including a demo control that simulates a
 focused laptop block and recommends a walking/reset break when the student's
@@ -225,6 +232,12 @@ the threshold from 15 to 180 minutes in Settings > Monitor or directly from the
 demo monitor panel. This is intentionally implemented as a pure policy layer
 first so it can later drive Android/iOS or desktop local notifications without
 changing the alert logic.
+
+Students can also control the notification policy before OS-level notification
+plugins are added. Settings > Monitor now includes a student-nudge toggle, quiet
+hours, quiet start/end sliders, and low/balanced/high sensitivity. Quiet hours
+mute non-urgent nudges while still allowing urgent stress or deadline alerts,
+and sensitivity changes how early deadline/stress nudges appear.
 
 The monitor now persists local daily checkpoints in Hive. Each checkpoint saves
 the student key, live/demo source, stress score, deadline count, calendar hours,
@@ -272,6 +285,19 @@ agent runtime also routes course/professor questions to
 `course_professor_planner`, which is approval-required because it may query
 connected or public external data.
 
+The chat header also opens a dedicated Course Planner screen. It starts from a
+deterministic UMD candidate fixture for reliable offline demos, then can fetch
+live PlanetTerp course/professor signals when network access is available. The
+screen compares target credits, stress pressure, course workload, professor
+rating/review confidence, and GPA signals, then exports the plan back into chat
+as structured agent context.
+
+Settings now includes a Connected Apps screen. It shows the readiness and data
+policy for the student-data proxy, Canvas, Google Calendar, Maps/Places,
+PlanetTerp, Testudo/umd.io, device activity, and local notifications. Each card
+lists what data the connector can use and the current tool permission level, so
+approval-required tools are visible before ORBIT becomes more autonomous.
+
 Source-backed live expansion is shaped around:
 
 - PlanetTerp, which describes itself as a UMD community for informed course and
@@ -295,6 +321,12 @@ signals together: saved skill versions, feedback counts, recent feedback
 examples, and recent agent audit logs. This gives the demo an explainability and
 learning surface instead of leaving the new persistence layers hidden in local
 storage.
+
+The Intelligence Dashboard also includes an Evaluation Readiness panel. It
+summarizes the 40-user fixture coverage, fulfillment thresholds, local feedback
+and audit evidence, course-plan balance, and the remaining production gaps. This
+is the judge-facing proof surface for why ORBIT is a measured student-support
+system rather than a generic chatbot demo.
 
 Recommended local model choices:
 

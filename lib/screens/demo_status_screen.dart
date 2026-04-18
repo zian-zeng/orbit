@@ -5,6 +5,7 @@ import 'package:chatbotapp/models/course_planning.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/services/monitor_history_service.dart';
+import 'package:chatbotapp/services/student_action_plan_service.dart';
 import 'package:chatbotapp/services/student_monitor_service.dart';
 import 'package:chatbotapp/services/student_notification_policy.dart';
 import 'package:chatbotapp/services/umd_course_planning_service.dart';
@@ -33,6 +34,8 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
   static const UmdResourceCatalog _resourceCatalog = UmdResourceCatalog();
   static const UmdCoursePlanningService _coursePlanningService =
       UmdCoursePlanningService();
+  static const StudentActionPlanService _actionPlanService =
+      StudentActionPlanService();
   bool _didRequestLiveSignals = false;
   DateTime? _focusStartedAt;
   List<MonitorHistoryEntry> _history = const [];
@@ -91,6 +94,11 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
       report: report,
       focusStartedAt: _focusStartedAt,
       focusBreakMinutes: settings.focusBreakMinutes,
+      notificationsEnabled: settings.enableStudentNotifications,
+      quietHoursEnabled: settings.enableQuietHours,
+      quietHoursStart: settings.quietHoursStart,
+      quietHoursEnd: settings.quietHoursEnd,
+      sensitivity: settings.notificationSensitivity,
     );
     final resourceMatches = _resourceCatalog.match(
       message: report.prompt,
@@ -100,6 +108,11 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
     final coursePlan = _coursePlanningService.buildDemoPlan(
       labels: report.profileLabels,
       stressScore: report.snapshot.stressRiskScore,
+    );
+    final actionPlan = _actionPlanService.build(
+      report: report,
+      resources: resourceMatches,
+      focusBreakMinutes: settings.focusBreakMinutes,
     );
     _recordMonitorCheckpoint(report);
 
@@ -164,6 +177,8 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
                   final left = Column(
                     children: [
                       _ScenarioPanel(report: report),
+                      const SizedBox(height: 12),
+                      _ActionPlanPanel(plan: actionPlan),
                       const SizedBox(height: 12),
                       _StressPanel(report: report),
                       const SizedBox(height: 12),
@@ -357,6 +372,156 @@ class _ScenarioPanel extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(report.prompt),
             icon: const Icon(CupertinoIcons.arrow_turn_down_right, size: 16),
             label: const Text('Use this prompt in chat'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionPlanPanel extends StatelessWidget {
+  const _ActionPlanPanel({required this.plan});
+
+  final StudentActionPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return _DemoPanel(
+      title: 'Next Best Action Plan',
+      subtitle: 'Signals converted into student-safe steps',
+      icon: CupertinoIcons.checkmark_alt_circle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            plan.headline,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 6),
+          Text(plan.summary),
+          const SizedBox(height: 12),
+          ...plan.steps.map(
+            (step) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _ActionStepCard(step: step),
+            ),
+          ),
+          if (plan.agentHandoff.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Agent handoff',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: plan.agentHandoff
+                  .map((agent) => _DemoChip(label: agent))
+                  .toList(growable: false),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+              ),
+            ),
+            child: Text(
+              plan.skillPrompt,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionStepCard extends StatelessWidget {
+  const _ActionStepCard({required this.step});
+
+  final StudentActionPlanStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final urgencyColor = switch (step.urgency) {
+      StudentActionUrgency.now => colorScheme.error,
+      StudentActionUrgency.soon => colorScheme.tertiary,
+      StudentActionUrgency.later => colorScheme.primary,
+    };
+    final urgencyLabel = switch (step.urgency) {
+      StudentActionUrgency.now => 'Now',
+      StudentActionUrgency.soon => 'Soon',
+      StudentActionUrgency.later => 'Later',
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: urgencyColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  urgencyLabel,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: urgencyColor,
+                      ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  step.title,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(step.detail),
+          const SizedBox(height: 6),
+          Text(
+            step.why,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _DemoChip(label: step.source),
+              _DemoChip(label: step.toolId),
+            ],
           ),
         ],
       ),
@@ -570,6 +735,13 @@ class _NotificationPanel extends StatelessWidget {
               _DemoChip(
                 label: plan.needsBreak ? 'Break due' : 'Watching',
               ),
+              if (!plan.notificationsEnabled) const _DemoChip(label: 'Paused'),
+              if (plan.quietHoursActive)
+                _DemoChip(
+                  label: plan.suppressedCount > 0
+                      ? 'Quiet: ${plan.suppressedCount} muted'
+                      : 'Quiet hours',
+                ),
             ],
           ),
           const SizedBox(height: 12),

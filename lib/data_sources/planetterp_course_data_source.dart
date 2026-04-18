@@ -48,6 +48,38 @@ class PlanetterpCourseDataSource {
     );
   }
 
+  Future<CourseCandidate?> fetchCourseWithProfessorSignals({
+    required String courseId,
+    int professorLimit = 6,
+  }) async {
+    final course = await fetchCourse(courseId: courseId);
+    if (course == null) {
+      return null;
+    }
+    final professorSignals = <ProfessorSignal>[];
+    for (final professor in course.professors.take(professorLimit)) {
+      final signal = await fetchProfessor(
+        professorName: professor.name,
+        includeReviews: true,
+      );
+      professorSignals.add(signal ?? professor);
+    }
+    return CourseCandidate(
+      courseId: course.courseId,
+      title: course.title,
+      credits: course.credits,
+      requirementTag: course.requirementTag,
+      workloadLevel: course.workloadLevel,
+      projectLevel: course.projectLevel,
+      averageGpa: course.averageGpa,
+      description: course.description,
+      sourceUrl: course.sourceUrl,
+      professors:
+          professorSignals.isEmpty ? course.professors : professorSignals,
+      forumSignals: course.forumSignals,
+    );
+  }
+
   Future<ProfessorSignal?> fetchProfessor({
     required String professorName,
     bool includeReviews = false,

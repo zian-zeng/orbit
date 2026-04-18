@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chatbotapp/data_sources/integration_config.dart';
 import 'package:chatbotapp/models/prompt_recommendation.dart';
+import 'package:chatbotapp/screens/connected_apps_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
@@ -80,6 +81,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       showAppSnackBar(context, 'Could not open photos');
     }
+  }
+
+  Future<void> _openConnectedApps() async {
+    final route = context.read<SettingsProvider>().reduceMotion
+        ? PageRouteBuilder<void>(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const ConnectedAppsScreen(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          )
+        : CupertinoPageRoute<void>(
+            builder: (context) => const ConnectedAppsScreen(),
+          );
+    await Navigator.of(context).push(route);
   }
 
   void _beginEditing(UserProfileProvider userProfile) {
@@ -645,6 +660,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                   ),
+                  const Divider(height: 1),
+                  _ActionTile(
+                    icon: CupertinoIcons.link_circle,
+                    title: 'Connected apps & permissions',
+                    subtitle:
+                        'Review data sources, approval gates, and planned connectors',
+                    onTap: _openConnectedApps,
+                  ),
                 ],
               ),
             ),
@@ -766,6 +789,109 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       label: '${settingsProvider.focusBreakMinutes} min',
                       onChanged: (value) {
                         settingsProvider.setFocusBreakMinutes(
+                          value: value.round(),
+                        );
+                      },
+                    ),
+                    const Divider(height: 22),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      secondary: const Icon(CupertinoIcons.bell),
+                      title: const Text('Student nudges'),
+                      subtitle: const Text(
+                        'Show stress, deadline, and focus-break recommendations.',
+                      ),
+                      value: settingsProvider.enableStudentNotifications,
+                      onChanged: (value) {
+                        settingsProvider.toggleStudentNotifications(
+                          value: value,
+                        );
+                      },
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      secondary: const Icon(CupertinoIcons.moon),
+                      title: const Text('Quiet hours'),
+                      subtitle: Text(
+                        'Mute non-urgent nudges from ${settingsProvider.quietHoursStart}:00 to ${settingsProvider.quietHoursEnd}:00.',
+                      ),
+                      value: settingsProvider.enableQuietHours,
+                      onChanged: (value) {
+                        settingsProvider.toggleQuietHours(value: value);
+                      },
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Quiet start',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                        Text('${settingsProvider.quietHoursStart}:00'),
+                      ],
+                    ),
+                    Slider(
+                      min: 0,
+                      max: 23,
+                      divisions: 23,
+                      value: settingsProvider.quietHoursStart.toDouble(),
+                      label: '${settingsProvider.quietHoursStart}:00',
+                      onChanged: settingsProvider.enableQuietHours
+                          ? (value) {
+                              settingsProvider.setQuietHours(
+                                start: value.round(),
+                                end: settingsProvider.quietHoursEnd,
+                              );
+                            }
+                          : null,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Quiet end',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                        Text('${settingsProvider.quietHoursEnd}:00'),
+                      ],
+                    ),
+                    Slider(
+                      min: 0,
+                      max: 23,
+                      divisions: 23,
+                      value: settingsProvider.quietHoursEnd.toDouble(),
+                      label: '${settingsProvider.quietHoursEnd}:00',
+                      onChanged: settingsProvider.enableQuietHours
+                          ? (value) {
+                              settingsProvider.setQuietHours(
+                                start: settingsProvider.quietHoursStart,
+                                end: value.round(),
+                              );
+                            }
+                          : null,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Alert sensitivity',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                        Text(settingsProvider.notificationSensitivityLabel),
+                      ],
+                    ),
+                    Slider(
+                      min: 0,
+                      max: 2,
+                      divisions: 2,
+                      value:
+                          settingsProvider.notificationSensitivity.toDouble(),
+                      label: settingsProvider.notificationSensitivityLabel,
+                      onChanged: (value) {
+                        settingsProvider.setNotificationSensitivity(
                           value: value.round(),
                         );
                       },

@@ -32,13 +32,18 @@ class SettingsAdapter extends TypeAdapter<Settings> {
       focusBreakMinutes: fields[11] as int? ?? 45,
       allowExternalStudentData: fields[12] as bool? ?? false,
       preferDemoFixture: fields[13] as bool? ?? false,
+      enableStudentNotifications: fields[14] as bool? ?? true,
+      enableQuietHours: fields[15] as bool? ?? true,
+      quietHoursStart: fields[16] as int? ?? 22,
+      quietHoursEnd: fields[17] as int? ?? 8,
+      notificationSensitivity: fields[18] as int? ?? 1,
     );
   }
 
   @override
   void write(BinaryWriter writer, Settings obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(19)
       ..writeByte(0)
       ..write(obj.isDarkTheme)
       ..writeByte(1)
@@ -66,7 +71,17 @@ class SettingsAdapter extends TypeAdapter<Settings> {
       ..writeByte(12)
       ..write(obj.allowExternalStudentData)
       ..writeByte(13)
-      ..write(obj.preferDemoFixture);
+      ..write(obj.preferDemoFixture)
+      ..writeByte(14)
+      ..write(obj.enableStudentNotifications)
+      ..writeByte(15)
+      ..write(obj.enableQuietHours)
+      ..writeByte(16)
+      ..write(obj.quietHoursStart)
+      ..writeByte(17)
+      ..write(obj.quietHoursEnd)
+      ..writeByte(18)
+      ..write(obj.notificationSensitivity);
   }
 
   @override

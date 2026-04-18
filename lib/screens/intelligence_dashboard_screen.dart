@@ -3,6 +3,7 @@ import 'package:chatbotapp/hive/assistant_feedback_entry.dart';
 import 'package:chatbotapp/hive/skill_registry_entry.dart';
 import 'package:chatbotapp/services/agent_audit_log_service.dart';
 import 'package:chatbotapp/services/assistant_feedback_service.dart';
+import 'package:chatbotapp/services/evaluation_readiness_service.dart';
 import 'package:chatbotapp/services/skill_registry_service.dart';
 import 'package:chatbotapp/widgets/app_icon_button.dart';
 import 'package:chatbotapp/widgets/app_screen_scaffold.dart';
@@ -17,6 +18,8 @@ class IntelligenceDashboardScreen extends StatelessWidget {
   static const AssistantFeedbackService _feedbackService =
       AssistantFeedbackService();
   static const AgentAuditLogService _auditLogService = AgentAuditLogService();
+  static const EvaluationReadinessService _evaluationService =
+      EvaluationReadinessService();
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +31,11 @@ class IntelligenceDashboardScreen extends StatelessWidget {
     final issueCount = feedbackCounts.entries
         .where((entry) => entry.key != 'helpful')
         .fold<int>(0, (total, entry) => total + entry.value);
+    final evaluationReport = _evaluationService.buildDemoReport(
+      feedbackCount: feedback.length,
+      auditCount: audits.length,
+      savedSkillCount: skills.length,
+    );
 
     return AppScreenScaffold(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -82,6 +90,8 @@ class IntelligenceDashboardScreen extends StatelessWidget {
                   final left = Column(
                     children: [
                       overview,
+                      const SizedBox(height: 12),
+                      _EvaluationPanel(report: evaluationReport),
                       const SizedBox(height: 12),
                       _SkillRegistryPanel(skills: skills),
                     ],
@@ -193,6 +203,97 @@ class _SkillRegistryPanel extends StatelessWidget {
                   )
                   .toList(growable: false),
             ),
+    );
+  }
+}
+
+class _EvaluationPanel extends StatelessWidget {
+  const _EvaluationPanel({required this.report});
+
+  final EvaluationReadinessReport report;
+
+  @override
+  Widget build(BuildContext context) {
+    return _DashboardPanel(
+      title: 'Evaluation Readiness',
+      subtitle: report.readinessLabel,
+      icon: CupertinoIcons.checkmark_seal_fill,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _MetricTile(
+                  label: 'Fixture users', value: '${report.fixtureSize}'),
+              _MetricTile(
+                label: 'High stress',
+                value: '${report.highStressCases}',
+              ),
+              _MetricTile(
+                label: 'Elevated',
+                value: '${report.elevatedCases}',
+              ),
+              _MetricTile(label: 'Steady', value: '${report.steadyCases}'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...report.metrics.map(
+            (metric) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _MetricCheck(metric: metric),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Course planner proof: ${report.coursePlan.plannedCredits}/${report.coursePlan.targetCredits} credits, '
+            '${report.coursePlan.recommendations.where((item) => item.course.isHeavy).length} heavy course, '
+            '${report.coursePlan.recommendations.length} recommendations.',
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Remaining production gaps',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 6),
+          ...report.productionGaps.take(4).map(
+                (gap) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('- $gap'),
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricCheck extends StatelessWidget {
+  const _MetricCheck({required this.metric});
+
+  final EvaluationMetric metric;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          metric.passed
+              ? CupertinoIcons.checkmark_circle_fill
+              : CupertinoIcons.exclamationmark_triangle_fill,
+          size: 16,
+          color: metric.passed ? colorScheme.primary : colorScheme.tertiary,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            '${metric.label}: ${metric.value} (target ${metric.target})',
+          ),
+        ),
+      ],
     );
   }
 }
