@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:chatbotapp/constants/constants.dart';
+import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/user_model.dart';
@@ -17,6 +18,8 @@ class UserProfileProvider extends ChangeNotifier {
       LabelEnrichmentService();
   static const SupportIntelligenceService _supportIntelligenceService =
       SupportIntelligenceService();
+  final StudentContextAggregator _contextAggregator =
+      StudentContextAggregator();
 
   String _uid = '';
   String _name = 'You';
@@ -280,5 +283,24 @@ class UserProfileProvider extends ChangeNotifier {
       importedSources: const [],
       importedSourceRankings: const [],
     );
+  }
+
+  Future<void> refreshExternalStudentSignals() async {
+    try {
+      final import = await _contextAggregator.loadLabelImport();
+      if (import.labelKeys.isEmpty) {
+        return;
+      }
+      await mergeImportedLabelSignals(
+        labelKeys: import.labelKeys,
+        sourceName: import.sourceName,
+      );
+    } catch (error, stackTrace) {
+      log(
+        'Failed to refresh external student signals',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

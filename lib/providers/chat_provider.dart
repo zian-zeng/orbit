@@ -2,13 +2,17 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:chatbotapp/agents/orbit_agent_orchestrator.dart';
+import 'package:chatbotapp/agents/orbit_models.dart';
 import 'package:chatbotapp/apis/api_service.dart';
 import 'package:chatbotapp/constants/constants.dart';
+import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/settings.dart';
 import 'package:chatbotapp/hive/user_model.dart';
 import 'package:chatbotapp/models/message.dart';
+import 'package:chatbotapp/services/student_preference_extractor.dart';
 import 'package:chatbotapp/utilities/chat_error_formatter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path;
@@ -17,10 +21,19 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatProvider extends ChangeNotifier {
-  static const _requestTimeout = Duration(seconds: 40);
+  static const _requestTimeout = Duration(seconds: 75);
+  static const _preferenceExtractor = StudentPreferenceExtractor();
+
+  ChatProvider({
+    OrbitAgentOrchestrator? agentOrchestrator,
+    StudentContextAggregator? contextAggregator,
+  })  : _agentOrchestrator = agentOrchestrator ?? OrbitAgentOrchestrator(),
+        _contextAggregator = contextAggregator ?? StudentContextAggregator();
 
   final List<Message> _inChatMessages = [];
   List<XFile>? _imagesFileList = [];
+  final OrbitAgentOrchestrator _agentOrchestrator;
+  final StudentContextAggregator _contextAggregator;
   String _currentChatId = '';
   GenerativeModel? _model;
   GenerativeModel? _textModel;
@@ -100,9 +113,8 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> setModel({required bool isTextOnly}) async {
-    final modelName = isTextOnly
-        ? Constants.geminiTextModel
-        : Constants.geminiVisionModel;
+    final modelName =
+        isTextOnly ? Constants.geminiTextModel : Constants.geminiVisionModel;
     setCurrentModel(newModel: modelName);
     final generationConfig = GenerationConfig(
       temperature: isTextOnly ? 0.45 : 0.35,
@@ -212,14 +224,12 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
-    await setModel(isTextOnly: isTextOnly);
+    setCurrentModel(newModel: Constants.localAgentModel);
     setLoading(value: true);
     String chatId = getChatId();
     final imageFiles = isTextOnly
         ? const <XFile>[]
         : await _storeDraftImages(chatId: chatId, draftImages: draftImages);
-    List<Content> history = [];
-    history = await getHistory(chatId: chatId);
     List<String> imagesUrls = getImagesUrls(imageFiles: imageFiles);
     final messagesBox = await Hive.openBox(
       '${Constants.chatMessagesBox}$chatId',
@@ -246,9 +256,7 @@ class ChatProvider extends ChangeNotifier {
     await sendMessageAndWaitForResponse(
       message: trimmedMessage,
       chatId: chatId,
-      isTextOnly: isTextOnly,
       imageFiles: imageFiles,
-      history: history,
       userMessage: userMessage,
       modelMessageId: assistantMessageId.toString(),
       messagesBox: messagesBox,
@@ -262,9 +270,7 @@ class ChatProvider extends ChangeNotifier {
   Future<void> sendMessageAndWaitForResponse({
     required String message,
     required String chatId,
-    required bool isTextOnly,
     required List<XFile> imageFiles,
-    required List<Content> history,
     required Message userMessage,
     required String modelMessageId,
     required Box messagesBox,
@@ -272,14 +278,6 @@ class ChatProvider extends ChangeNotifier {
     String? recommendedSkillId,
     String? templateId,
   }) async {
-    final chatSession = _model!.startChat(
-      history: history.isEmpty || !isTextOnly ? null : history,
-    );
-    final content = await getContent(
-      message: message,
-      isTextOnly: isTextOnly,
-      imageFiles: imageFiles,
-    );
     final assistantMessage = userMessage.copyWith(
       messageId: modelMessageId,
       role: Role.assistant,
@@ -291,9 +289,13 @@ class ChatProvider extends ChangeNotifier {
 
     try {
       await _requestAssistantResponse(
-        chatSession: chatSession,
-        content: content,
+        chatId: chatId,
+        message: message,
+        imageFiles: imageFiles,
         assistantMessage: assistantMessage,
+        selectedLabel: selectedLabel,
+        recommendedSkillId: recommendedSkillId,
+        templateId: templateId,
       );
       await saveMessagesToDB(
         chatID: chatId,
@@ -317,31 +319,138 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> _requestAssistantResponse({
-    required ChatSession chatSession,
-    required Content content,
+    required String chatId,
+    required String message,
+    required List<XFile> imageFiles,
     required Message assistantMessage,
+    String? selectedLabel,
+    String? recommendedSkillId,
+    String? templateId,
   }) async {
-    try {
-      final response = await chatSession
-          .sendMessage(content)
-          .timeout(_requestTimeout);
-      _applyAssistantText(
-        assistantMessage: assistantMessage,
-        text: response.text?.trim() ?? '',
-      );
-    } catch (error) {
-      if (!shouldRetryRequest(error)) {
-        rethrow;
-      }
+    final profileLabels = _profileLabelKeys();
+    final externalSnapshot = await _contextAggregator.loadSnapshot(
+      taskText: message,
+      preferenceTags: profileLabels,
+    );
+    final hasExternalSignals = externalSnapshot.assignments.isNotEmpty ||
+        externalSnapshot.calendarEvents.isNotEmpty ||
+        externalSnapshot.routes.isNotEmpty ||
+        externalSnapshot.places.isNotEmpty;
+    final response = await _agentOrchestrator
+        .respond(
+          OrbitAgentRequest(
+            message: message,
+            historySummary: await _conversationSummaryForAgent(chatId: chatId),
+            selectedLabelKey: selectedLabel,
+            recommendedSkillId: recommendedSkillId,
+            templateId: templateId,
+            profileLabelKeys: [
+              ...profileLabels,
+              ...externalSnapshot.inferredLabelKeys,
+            ],
+            recentLabelKeys: recentLabelKeys(),
+            imageCount: imageFiles.length,
+            externalContextSummary: externalSnapshot.agentContextSummary,
+            externalLabelKeys: externalSnapshot.inferredLabelKeys,
+            externalStressScore:
+                hasExternalSignals ? externalSnapshot.stressRiskScore : null,
+          ),
+        )
+        .timeout(_requestTimeout);
 
-      final retryResponse = await chatSession
-          .sendMessage(content)
-          .timeout(_requestTimeout);
-      _applyAssistantText(
-        assistantMessage: assistantMessage,
-        text: retryResponse.text?.trim() ?? '',
-      );
+    _applyAssistantText(
+      assistantMessage: assistantMessage,
+      text: response.text.trim(),
+    );
+  }
+
+  Future<String> _conversationSummaryForAgent({required String chatId}) async {
+    if (currentChatId.isEmpty) {
+      return '';
     }
+
+    final messages = await loadMessagesFromDB(chatId: chatId);
+    if (messages.isEmpty) {
+      return '';
+    }
+
+    final recentMessages =
+        messages.length <= 8 ? messages : messages.sublist(messages.length - 8);
+
+    return recentMessages.map((message) {
+      final role = message.role == Role.user ? 'user' : 'assistant';
+      return '$role: ${_truncateForContext(message.message.toString())}';
+    }).join('\n');
+  }
+
+  List<String> _profileLabelKeys() {
+    if (!Hive.isBoxOpen(Constants.userBox) || Boxes.getUser().isEmpty) {
+      return _uniqueLabels([
+        ...StudentContext.assumedOnboardingLabels,
+        ..._historyPreferenceLabels(),
+      ]);
+    }
+
+    final user = Boxes.getUser().getAt(0);
+    if (user == null) {
+      return _uniqueLabels([
+        ...StudentContext.assumedOnboardingLabels,
+        ..._historyPreferenceLabels(),
+      ]);
+    }
+
+    return _uniqueLabels([
+      ...StudentContext.assumedOnboardingLabels,
+      ...user.preferredLabels,
+      ...user.importedLabels,
+      ..._importedSourceRankingLabels(user.importedSourceRankings),
+      ..._historyPreferenceLabels(),
+    ]);
+  }
+
+  List<String> _historyPreferenceLabels() {
+    if (!Hive.isBoxOpen(Constants.chatHistoryBox)) {
+      return const [];
+    }
+
+    final history = Boxes.getChatHistory().values.toList(growable: false)
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final texts = history
+        .take(24)
+        .expand((chat) => [chat.prompt, chat.response])
+        .where((text) => text.trim().isNotEmpty);
+    return _preferenceExtractor.extractFromTexts(texts);
+  }
+
+  List<String> _uniqueLabels(Iterable<String> labels) {
+    return labels
+        .map((label) => label.trim())
+        .where((label) => label.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+  }
+
+  List<String> _importedSourceRankingLabels(List<String> rankings) {
+    return rankings
+        .expand((entry) {
+          final parts = entry.split('::');
+          if (parts.length != 2) {
+            return const <String>[];
+          }
+          return parts.last.split(',');
+        })
+        .map((label) => label.trim())
+        .where((label) => label.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+  }
+
+  String _truncateForContext(String text) {
+    final normalized = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (normalized.length <= 220) {
+      return normalized;
+    }
+    return '${normalized.substring(0, 220)}...';
   }
 
   void _removeAssistantDraft(Message assistantMessage) {
@@ -375,9 +484,8 @@ class ChatProvider extends ChangeNotifier {
     String? recommendedSkillId,
     String? templateId,
   }) async {
-    final settings = Boxes.getSettings().isNotEmpty
-        ? Boxes.getSettings().getAt(0)
-        : null;
+    final settings =
+        Boxes.getSettings().isNotEmpty ? Boxes.getSettings().getAt(0) : null;
     final saveChatHistory = settings?.saveChatHistory ?? true;
 
     if (!saveChatHistory) {

@@ -1,0 +1,178 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+class LocalLlmConfig {
+  const LocalLlmConfig({
+    required this.endpoint,
+    required this.model,
+    this.timeout = const Duration(seconds: 45),
+  });
+
+  static const String defaultEndpoint = 'http://127.0.0.1:11434';
+  static const String defaultModel = 'gemma2:2b';
+
+  final String endpoint;
+  final String model;
+  final Duration timeout;
+
+  static LocalLlmConfig fromEnvironment() {
+    const endpointDefine = String.fromEnvironment('LOCAL_LLM_ENDPOINT');
+    const modelDefine = String.fromEnvironment('LOCAL_LLM_MODEL');
+
+    final endpoint = _firstConfiguredValue(
+      dartDefineValue: endpointDefine,
+      envNames: const ['LOCAL_LLM_ENDPOINT', 'OLLAMA_ENDPOINT'],
+      fallback: defaultEndpoint,
+    );
+    final model = _firstConfiguredValue(
+      dartDefineValue: modelDefine,
+      envNames: const ['LOCAL_LLM_MODEL', 'OLLAMA_MODEL'],
+      fallback: defaultModel,
+    );
+
+    return LocalLlmConfig(endpoint: endpoint, model: model);
+  }
+
+  static String _firstConfiguredValue({
+    required String dartDefineValue,
+    required List<String> envNames,
+    required String fallback,
+  }) {
+    final trimmedDefine = dartDefineValue.trim();
+    if (trimmedDefine.isNotEmpty) {
+      return trimmedDefine;
+    }
+
+    if (dotenv.isInitialized) {
+      for (final envName in envNames) {
+        final value = dotenv.env[envName]?.trim();
+        if (value != null && value.isNotEmpty) {
+          return value;
+        }
+      }
+    }
+
+    return fallback;
+  }
+}
+
+class LocalLlmRequest {
+  const LocalLlmRequest({
+    required this.systemPrompt,
+    required this.prompt,
+    this.temperature = 0.25,
+    this.maxTokens = 900,
+  });
+
+  final String systemPrompt;
+  final String prompt;
+  final double temperature;
+  final int maxTokens;
+}
+
+class LocalLlmResult {
+  const LocalLlmResult({
+    required this.text,
+    required this.model,
+    required this.provider,
+  });
+
+  final String text;
+  final String model;
+  final String provider;
+}
+
+abstract class LocalLlmClient {
+  Future<LocalLlmResult> generate(LocalLlmRequest request);
+}
+
+class LocalLlmException implements Exception {
+  const LocalLlmException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+class OllamaLocalLlmClient implements LocalLlmClient {
+  OllamaLocalLlmClient({
+    LocalLlmConfig? config,
+    HttpClient? httpClient,
+  })  : config = config ?? LocalLlmConfig.fromEnvironment(),
+        _httpClient = httpClient ?? HttpClient();
+
+  final LocalLlmConfig config;
+  final HttpClient _httpClient;
+
+  @override
+  Future<LocalLlmResult> generate(LocalLlmRequest request) async {
+    final endpoint = Uri.parse(config.endpoint);
+    final uri =
+        endpoint.replace(path: _joinPath(endpoint.path, 'api/generate'));
+
+    final httpRequest =
+        await _httpClient.postUrl(uri).timeout(const Duration(seconds: 8));
+    httpRequest.headers.contentType = ContentType.json;
+    httpRequest.add(
+      utf8.encode(
+        jsonEncode({
+          'model': config.model,
+          'system': request.systemPrompt,
+          'prompt': request.prompt,
+          'stream': false,
+          'options': {
+            'temperature': request.temperature,
+            'num_predict': request.maxTokens,
+            'num_ctx': 4096,
+          },
+        }),
+      ),
+    );
+
+    final response = await httpRequest.close().timeout(config.timeout);
+    final body = await response.transform(utf8.decoder).join();
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw LocalLlmException(
+        'Local model returned HTTP ${response.statusCode}: ${_shorten(body)}',
+      );
+    }
+
+    final decoded = jsonDecode(body);
+    if (decoded is! Map<String, dynamic>) {
+      throw const LocalLlmException(
+          'Local model returned an invalid response.');
+    }
+
+    final text = (decoded['response'] as String?)?.trim();
+    if (text == null || text.isEmpty) {
+      throw const LocalLlmException('Local model returned an empty response.');
+    }
+
+    return LocalLlmResult(
+      text: text,
+      model: (decoded['model'] as String?) ?? config.model,
+      provider: 'ollama',
+    );
+  }
+
+  String _joinPath(String basePath, String suffix) {
+    final normalizedBase = basePath.trim();
+    if (normalizedBase.isEmpty || normalizedBase == '/') {
+      return '/$suffix';
+    }
+    return '${normalizedBase.replaceAll(RegExp(r'/+$'), '')}/$suffix';
+  }
+
+  String _shorten(String value) {
+    final normalized = value.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (normalized.length <= 160) {
+      return normalized;
+    }
+    return '${normalized.substring(0, 160)}...';
+  }
+}

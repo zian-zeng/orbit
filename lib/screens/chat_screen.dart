@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:chatbotapp/apis/api_service.dart';
+import 'package:chatbotapp/constants/constants.dart';
 import 'package:chatbotapp/models/prompt_recommendation.dart';
 import 'package:chatbotapp/models/support_intelligence.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
@@ -38,6 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
   SupportLabel? _selectedLabel;
   PromptRecommendation? _selectedRecommendation;
   bool _isApplyingRecommendation = false;
+  bool _didRequestExternalSignalSync = false;
 
   @override
   void initState() {
@@ -74,6 +75,19 @@ class _ChatScreenState extends State<ChatScreen> {
       _draftText = '';
       _selectedLabel = null;
       _selectedRecommendation = null;
+    });
+  }
+
+  void _requestExternalSignalSync() {
+    if (_didRequestExternalSignalSync) {
+      return;
+    }
+    _didRequestExternalSignalSync = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      context.read<UserProfileProvider>().refreshExternalStudentSignals();
     });
   }
 
@@ -184,6 +198,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   String _modelLabel(String modelType) {
+    if (modelType == Constants.localAgentModel) {
+      return 'Local';
+    }
     return modelType.contains('flash') ? 'Flash' : 'Vision';
   }
 
@@ -282,6 +299,7 @@ class _ChatScreenState extends State<ChatScreen> {
           settingsProvider: settingsProvider,
         );
         final userProfile = context.watch<UserProfileProvider>();
+        _requestExternalSignalSync();
         final userName = userProfile.firstName;
         final routingContext = RoutingContext(
           draftText: _draftText,
@@ -348,7 +366,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   bottom: contentBottomPadding,
                                 ),
                                 child: ChatEmptyState(
-                                  apiConfigured: ApiService.isConfigured,
+                                  apiConfigured: true,
                                   showStarterPrompts:
                                       settingsProvider.showStarterPrompts,
                                   supportBundle: supportBundle,
