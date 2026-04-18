@@ -3,6 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class IntegrationConfig {
   const IntegrationConfig({
     required this.externalDataEnabled,
+    required this.studentDataProxyUrl,
+    this.studentDataProxyUserId = 'demo',
     required this.canvasBaseUrl,
     required this.canvasAccessToken,
     required this.googleAccessToken,
@@ -21,6 +23,8 @@ class IntegrationConfig {
   static const Duration defaultRequestTimeout = Duration(seconds: 8);
 
   final bool externalDataEnabled;
+  final String studentDataProxyUrl;
+  final String studentDataProxyUserId;
   final String canvasBaseUrl;
   final String canvasAccessToken;
   final String googleAccessToken;
@@ -34,10 +38,15 @@ class IntegrationConfig {
       externalDataEnabled &&
       canvasBaseUrl.startsWith('https://') &&
       canvasAccessToken.isNotEmpty;
+  bool get hasStudentDataProxy =>
+      externalDataEnabled &&
+      (studentDataProxyUrl.startsWith('http://') ||
+          studentDataProxyUrl.startsWith('https://'));
   bool get hasGoogleCalendar =>
       externalDataEnabled && googleAccessToken.isNotEmpty;
   bool get hasGoogleMaps => externalDataEnabled && googleMapsApiKey.isNotEmpty;
-  bool get hasAnyRealData => hasCanvas || hasGoogleCalendar || hasGoogleMaps;
+  bool get hasAnyRealData =>
+      hasStudentDataProxy || hasCanvas || hasGoogleCalendar || hasGoogleMaps;
 
   static IntegrationConfig fromEnvironment() {
     return IntegrationConfig(
@@ -45,6 +54,16 @@ class IntegrationConfig {
         const String.fromEnvironment('EXTERNAL_DATA_ENABLED'),
         'EXTERNAL_DATA_ENABLED',
         false,
+      ),
+      studentDataProxyUrl: _value(
+        const String.fromEnvironment('STUDENT_DATA_PROXY_URL'),
+        'STUDENT_DATA_PROXY_URL',
+        '',
+      ),
+      studentDataProxyUserId: _value(
+        const String.fromEnvironment('STUDENT_DATA_PROXY_USER_ID'),
+        'STUDENT_DATA_PROXY_USER_ID',
+        'demo',
       ),
       canvasBaseUrl: _value(
         const String.fromEnvironment('CANVAS_BASE_URL'),

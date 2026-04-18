@@ -87,6 +87,12 @@ identity provider while keeping the same label contract.
 
 `StudentContextAggregator` can fetch a real-data snapshot from:
 
+- ORBIT Student Data Proxy
+  - URL: `STUDENT_DATA_PROXY_URL`
+  - recommended for desktop/web demos because OAuth tokens stay outside the
+    Flutter client
+  - current pull: unified Canvas, Google Calendar, Google Routes, and Google
+    Places snapshot through `GET /student/snapshot`
 - UMD ELMS-Canvas via Canvas REST API
   - default base URL: `https://umd.instructure.com`
   - token: `CANVAS_ACCESS_TOKEN`
@@ -130,6 +136,19 @@ backend-backed OAuth flow. Snapshot fetches are cached for the configured TTL an
 deduplicated while a request is in flight, so chat messages do not repeatedly
 hammer Canvas or Google APIs.
 
+For the production-shaped demo path, run the local proxy in
+`backend/student-data-proxy` and set:
+
+```env
+EXTERNAL_DATA_ENABLED=true
+STUDENT_DATA_PROXY_URL=http://127.0.0.1:8787
+STUDENT_DATA_PROXY_USER_ID=demo
+```
+
+When the proxy is configured, the app asks it for the full student snapshot
+before trying direct client-side connectors. If the proxy fails or is missing a
+source, ORBIT records source notes and keeps the older direct/demo fallback path.
+
 The app also has a student-facing consent gate in Settings > Real Data Consent.
 Automatic Canvas, Calendar, Maps, and Places context requires both:
 
@@ -166,8 +185,9 @@ For a business demo, prepare two paths:
    shows support intelligence, uses onboarding/history labels, returns
    deterministic agent fallbacks if Ollama is offline, and grounds resource
    suggestions in the local UMD catalog.
-2. Real-data path: run a desktop build with `.env` credentials for Canvas,
-   Google Calendar, and Google Maps/Places, and set
+2. Real-data path: run `backend/student-data-proxy` on the demo laptop, connect
+   Canvas and Google under the demo user, point the app at
+   `STUDENT_DATA_PROXY_URL`, and set
    `EXTERNAL_DATA_ENABLED=true`. In Settings > Real Data Consent, turn on
    `Canvas/Google live data` for the demo student. ORBIT imports those signals,
    refreshes routing labels, updates the support pulse, runs personalized live
@@ -247,7 +267,7 @@ desktop/web build for heavier integration work.
 - Mobile: local assistant, labels, chat history, deterministic fallback, optional
   connection to a local model server on the same network.
 - Desktop: best place to run Ollama plus Canvas/Google fetches with user-owned
-  demo credentials.
+  demo credentials or the local student-data proxy.
 - Web: viable if served with a small backend/proxy that owns OAuth token
   exchange, because browser apps should not store long-lived Canvas or Google
   secrets directly.

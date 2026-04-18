@@ -54,6 +54,7 @@ void main() {
 IntegrationConfig _config() {
   return const IntegrationConfig(
     externalDataEnabled: true,
+    studentDataProxyUrl: '',
     canvasBaseUrl: IntegrationConfig.umdCanvasBaseUrl,
     canvasAccessToken: '',
     googleAccessToken: '',

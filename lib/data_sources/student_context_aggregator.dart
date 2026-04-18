@@ -5,6 +5,7 @@ import 'package:chatbotapp/data_sources/google_calendar_data_source.dart';
 import 'package:chatbotapp/data_sources/google_places_data_source.dart';
 import 'package:chatbotapp/data_sources/google_routes_data_source.dart';
 import 'package:chatbotapp/data_sources/integration_config.dart';
+import 'package:chatbotapp/data_sources/student_data_proxy_source.dart';
 import 'package:chatbotapp/data_sources/student_data_models.dart';
 
 class StudentContextAggregator {
@@ -14,6 +15,7 @@ class StudentContextAggregator {
     GoogleCalendarDataSource? calendarDataSource,
     GooglePlacesDataSource? placesDataSource,
     GoogleRoutesDataSource? routesDataSource,
+    StudentDataProxySource? proxyDataSource,
   }) {
     final resolvedConfig = config ?? IntegrationConfig.fromEnvironment();
     return StudentContextAggregator._(
@@ -26,6 +28,8 @@ class StudentContextAggregator {
           placesDataSource ?? GooglePlacesDataSource(config: resolvedConfig),
       routesDataSource:
           routesDataSource ?? GoogleRoutesDataSource(config: resolvedConfig),
+      proxyDataSource:
+          proxyDataSource ?? StudentDataProxySource(config: resolvedConfig),
     );
   }
 
@@ -35,16 +39,19 @@ class StudentContextAggregator {
     required GoogleCalendarDataSource calendarDataSource,
     required GooglePlacesDataSource placesDataSource,
     required GoogleRoutesDataSource routesDataSource,
+    required StudentDataProxySource proxyDataSource,
   })  : _canvasDataSource = canvasDataSource,
         _calendarDataSource = calendarDataSource,
         _placesDataSource = placesDataSource,
-        _routesDataSource = routesDataSource;
+        _routesDataSource = routesDataSource,
+        _proxyDataSource = proxyDataSource;
 
   final IntegrationConfig config;
   final CanvasDataSource _canvasDataSource;
   final GoogleCalendarDataSource _calendarDataSource;
   final GooglePlacesDataSource _placesDataSource;
   final GoogleRoutesDataSource _routesDataSource;
+  final StudentDataProxySource _proxyDataSource;
   StudentSignalSnapshot? _cachedSnapshot;
   String _cachedSnapshotKey = '';
   Future<StudentSignalSnapshot>? _inFlightSnapshot;
@@ -122,6 +129,21 @@ class StudentContextAggregator {
     }
 
     final sourceNotes = <String>[];
+    if (_proxyDataSource.isConfigured) {
+      final proxySnapshot = await _guardedSnapshot(
+        label: 'Student data proxy',
+        sourceNotes: sourceNotes,
+        fetch: () => _proxyDataSource.fetchSnapshot(
+          taskText: taskText,
+          preferenceTags: preferenceTags,
+        ),
+        timeout: timeout,
+      );
+      if (proxySnapshot != null) {
+        return proxySnapshot;
+      }
+    }
+
     final assignmentsFuture = _guarded(
       label: 'Canvas',
       sourceNotes: sourceNotes,
@@ -177,6 +199,23 @@ class StudentContextAggregator {
       places: results[3] as List<CampusPlace>,
       sourceNotes: sourceNotes,
     );
+  }
+
+  Future<StudentSignalSnapshot?> _guardedSnapshot({
+    required String label,
+    required List<String> sourceNotes,
+    required Future<StudentSignalSnapshot> Function() fetch,
+    required Duration timeout,
+  }) async {
+    try {
+      return await fetch().timeout(timeout);
+    } on TimeoutException {
+      sourceNotes.add('$label fetch timed out.');
+      return null;
+    } catch (error) {
+      sourceNotes.add('$label fetch failed: $error');
+      return null;
+    }
   }
 
   Future<ExternalLabelImport> loadLabelImport({

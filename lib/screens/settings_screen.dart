@@ -578,7 +578,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: CupertinoIcons.lock_shield,
                     title: 'Canvas/Google live data',
                     subtitle:
-                        'Let Orbit use connected Canvas, Calendar, Maps, and Places signals for assistant context.',
+                        'Let Orbit use connected proxy, Canvas, Calendar, Maps, and Places signals for assistant context.',
                     value: settingsProvider.allowExternalStudentData,
                     onChanged: (value) {
                       settingsProvider.toggleExternalStudentData(value: value);
@@ -599,6 +599,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
+                            _ReadinessChip(
+                              label: 'Proxy',
+                              ready: integrationConfig.hasStudentDataProxy,
+                            ),
                             _ReadinessChip(
                               label: 'Canvas',
                               ready: integrationConfig.hasCanvas,

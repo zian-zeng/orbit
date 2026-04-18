@@ -3,6 +3,7 @@ import 'package:chatbotapp/data_sources/google_calendar_data_source.dart';
 import 'package:chatbotapp/data_sources/google_routes_data_source.dart';
 import 'package:chatbotapp/data_sources/integration_config.dart';
 import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
+import 'package:chatbotapp/data_sources/student_data_proxy_source.dart';
 import 'package:chatbotapp/data_sources/student_data_models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -99,11 +100,43 @@ void main() {
 
     expect(canvas.callCount, 2);
   });
+
+  test('configured student data proxy is preferred over direct connectors',
+      () async {
+    final canvas = _FakeCanvasDataSource();
+    final proxy = _FakeProxyDataSource();
+    final aggregator = StudentContextAggregator(
+      config: _config(
+        externalDataEnabled: true,
+        studentDataProxyUrl: 'http://127.0.0.1:8787',
+      ),
+      canvasDataSource: canvas,
+      calendarDataSource: _FakeCalendarDataSource(),
+      routesDataSource: _FakeRoutesDataSource(),
+      proxyDataSource: proxy,
+    );
+
+    final snapshot = await aggregator.loadSnapshot(
+      taskText: 'I need vegan food before class',
+      preferenceTags: const ['vegan'],
+    );
+
+    expect(proxy.callCount, 1);
+    expect(canvas.callCount, 0);
+    expect(snapshot.assignments.single.name, 'Proxy lab report');
+    expect(snapshot.places.single.name, 'UMD Vegan Cafe');
+    expect(
+        snapshot.sourceNotes, contains('Loaded through student data proxy.'));
+  });
 }
 
-IntegrationConfig _config({required bool externalDataEnabled}) {
+IntegrationConfig _config({
+  required bool externalDataEnabled,
+  String studentDataProxyUrl = '',
+}) {
   return IntegrationConfig(
     externalDataEnabled: externalDataEnabled,
+    studentDataProxyUrl: studentDataProxyUrl,
     canvasBaseUrl: IntegrationConfig.umdCanvasBaseUrl,
     canvasAccessToken: externalDataEnabled ? 'canvas-token' : '',
     googleAccessToken: externalDataEnabled ? 'calendar-token' : '',
@@ -113,6 +146,47 @@ IntegrationConfig _config({required bool externalDataEnabled}) {
     cacheTtl: const Duration(minutes: 5),
     requestTimeout: const Duration(seconds: 2),
   );
+}
+
+class _FakeProxyDataSource extends StudentDataProxySource {
+  _FakeProxyDataSource() : super(config: _config(externalDataEnabled: true));
+
+  int callCount = 0;
+
+  @override
+  bool get isConfigured => true;
+
+  @override
+  Future<StudentSignalSnapshot> fetchSnapshot({
+    required String taskText,
+    required Iterable<String> preferenceTags,
+  }) async {
+    callCount++;
+    expect(taskText, contains('vegan food'));
+    expect(preferenceTags, contains('vegan'));
+    return StudentSignalSnapshot(
+      fetchedAt: DateTime.now(),
+      assignments: [
+        StudentAssignment(
+          id: 'proxy-assignment',
+          courseId: 'inst201',
+          name: 'Proxy lab report',
+          dueAt: DateTime.now().add(const Duration(days: 1)),
+        ),
+      ],
+      calendarEvents: const [],
+      routes: const [],
+      places: const [
+        CampusPlace(
+          name: 'UMD Vegan Cafe',
+          formattedAddress: 'College Park, MD',
+          reason: 'Matched vegan profile.',
+          servesVegetarianFood: true,
+        ),
+      ],
+      sourceNotes: const ['Loaded through student data proxy.'],
+    );
+  }
 }
 
 class _FakeCanvasDataSource extends CanvasDataSource {
