@@ -18,6 +18,8 @@ class OrbitAgentOrchestrator {
 
   final LocalLlmClient _llmClient;
   final List<OrbitAgent> _agents;
+  static const OrbitToolPermissionPolicy _toolPermissionPolicy =
+      OrbitToolPermissionPolicy();
 
   Future<OrbitAgentResponse> respond(OrbitAgentRequest request) async {
     final context = StudentContext(
@@ -135,10 +137,16 @@ class OrbitAgentOrchestrator {
     };
     final needsLivePlaces =
         labels.any((label) => livePlaceLabels.contains(label));
+    final needsCoursePlanning = labels.contains('course_selection') ||
+        labels.contains('semester_planning') ||
+        RegExp(
+          r'\b(course|courses|class|classes|professor|semester|registration|testudo|planetterp)\b',
+        ).hasMatch(request.message.toLowerCase());
     final tools = {
       'chat_history_lookup',
       if (labels.contains('planning') || labels.contains('academic_planning'))
         'schedule_builder',
+      if (needsCoursePlanning) 'course_professor_planner',
       if (labels.contains('study_help')) 'canvas_course_scan',
       if (labels.contains('wellbeing_checkin') ||
           labels.contains('stress_sensitive'))
@@ -147,6 +155,10 @@ class OrbitAgentOrchestrator {
       if (labels.contains('campus_navigation')) 'campus_route_planner',
       if (labels.contains('career_builder')) 'career_timeline_builder',
     }.toList(growable: false);
+    final toolPermissions = _toolPermissionPolicy.classify(
+      toolIds: tools,
+      context: context,
+    );
 
     return SkillResult(
       skillId:
@@ -162,9 +174,12 @@ class OrbitAgentOrchestrator {
         if (request.templateId != null)
           'Use template hint: ${request.templateId}',
         'Tool priority: ${tools.isEmpty ? 'none' : tools.join(' -> ')}',
+        if (toolPermissions.isNotEmpty)
+          'Tool permissions: ${toolPermissions.map((item) => '${item.toolId} ${item.level.label}').join(', ')}',
         'Prompt policy: answer the student request directly, but invoke or reference tools only when the structured context supports them.',
       ],
       confidence: 0.9,
+      toolPermissions: toolPermissions,
     );
   }
 

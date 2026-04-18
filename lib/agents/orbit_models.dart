@@ -181,6 +181,21 @@ class StudentContext {
     if (_containsAny(text, const ['deadline', 'assignment', 'exam', 'study'])) {
       labels.add('academic_planning');
     }
+    if (_containsAny(text, const [
+      'course',
+      'courses',
+      'class',
+      'classes',
+      'professor',
+      'teacher',
+      'semester',
+      'schedule',
+      'registration',
+      'testudo',
+    ])) {
+      labels.add('course_selection');
+      labels.add('semester_planning');
+    }
     if (_containsAny(text, const ['internship', 'resume', 'career'])) {
       labels.add('career_builder');
     }
@@ -202,6 +217,107 @@ class StudentContext {
   }
 }
 
+enum OrbitToolPermissionLevel {
+  autoAllowed,
+  approvalRequired,
+  blocked,
+}
+
+extension OrbitToolPermissionLevelPresentation on OrbitToolPermissionLevel {
+  String get label => switch (this) {
+        OrbitToolPermissionLevel.autoAllowed => 'auto allowed',
+        OrbitToolPermissionLevel.approvalRequired => 'requires approval',
+        OrbitToolPermissionLevel.blocked => 'blocked',
+      };
+}
+
+class ToolPermissionDecision {
+  const ToolPermissionDecision({
+    required this.toolId,
+    required this.level,
+    required this.reason,
+  });
+
+  final String toolId;
+  final OrbitToolPermissionLevel level;
+  final String reason;
+
+  String get summary => '$toolId: ${level.label} - $reason';
+}
+
+class OrbitToolPermissionPolicy {
+  const OrbitToolPermissionPolicy();
+
+  List<ToolPermissionDecision> classify({
+    required Iterable<String> toolIds,
+    required StudentContext context,
+  }) {
+    final uniqueTools = toolIds.toSet().toList(growable: false)..sort();
+    return uniqueTools
+        .map((toolId) => _classifyOne(toolId: toolId, context: context))
+        .toList(growable: false);
+  }
+
+  ToolPermissionDecision _classifyOne({
+    required String toolId,
+    required StudentContext context,
+  }) {
+    if (_blockedTools.contains(toolId) ||
+        toolId.startsWith('send_') ||
+        toolId.startsWith('submit_') ||
+        toolId.startsWith('delete_') ||
+        toolId.startsWith('pay_')) {
+      return ToolPermissionDecision(
+        toolId: toolId,
+        level: OrbitToolPermissionLevel.blocked,
+        reason:
+            'This demo can advise, but it cannot take irreversible action for a student.',
+      );
+    }
+
+    if (_approvalRequiredTools.contains(toolId)) {
+      return ToolPermissionDecision(
+        toolId: toolId,
+        level: OrbitToolPermissionLevel.approvalRequired,
+        reason:
+            'This may touch connected account, campus, calendar, route, or location data.',
+      );
+    }
+
+    if (toolId == 'recovery_planner' && context.stressBand == 'elevated') {
+      return const ToolPermissionDecision(
+        toolId: 'recovery_planner',
+        level: OrbitToolPermissionLevel.autoAllowed,
+        reason:
+            'Low-risk wellbeing guidance is allowed when stress signals are elevated.',
+      );
+    }
+
+    return ToolPermissionDecision(
+      toolId: toolId,
+      level: OrbitToolPermissionLevel.autoAllowed,
+      reason:
+          'This is a low-risk local reasoning tool and does not write to outside services.',
+    );
+  }
+
+  static const Set<String> _approvalRequiredTools = {
+    'calendar_signal_review',
+    'campus_route_planner',
+    'canvas_course_scan',
+    'course_professor_planner',
+    'live_places_search',
+    'schedule_builder',
+  };
+
+  static const Set<String> _blockedTools = {
+    'book_appointment',
+    'cancel_class',
+    'message_advisor',
+    'submit_assignment',
+  };
+}
+
 class SkillResult {
   const SkillResult({
     required this.skillId,
@@ -210,6 +326,7 @@ class SkillResult {
     required this.summary,
     required this.recommendations,
     required this.confidence,
+    this.toolPermissions = const [],
   });
 
   final String skillId;
@@ -218,14 +335,18 @@ class SkillResult {
   final String summary;
   final List<String> recommendations;
   final double confidence;
+  final List<ToolPermissionDecision> toolPermissions;
 
   String get asPromptBlock {
     final bulletText = recommendations.map((item) => '- $item').join('\n');
+    final permissionText =
+        toolPermissions.map((item) => '- ${item.summary}').join('\n');
     return [
       '${role.label} / $title',
       'Confidence: ${confidence.toStringAsFixed(2)}',
       summary,
       if (bulletText.isNotEmpty) bulletText,
+      if (permissionText.isNotEmpty) 'Tool permission policy:\n$permissionText',
     ].join('\n');
   }
 }

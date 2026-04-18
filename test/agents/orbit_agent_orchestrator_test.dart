@@ -85,6 +85,83 @@ void main() {
       adaptiveSkill.recommendations.join('\n'),
       contains('live_places_search'),
     );
+    expect(
+      adaptiveSkill.toolPermissions
+          .where((decision) => decision.toolId == 'live_places_search')
+          .single
+          .level,
+      OrbitToolPermissionLevel.approvalRequired,
+    );
+  });
+
+  test('blocks irreversible tool actions in the permission policy', () {
+    final context = StudentContext(
+      profileLabelKeys: const ['academic_planning'],
+      recentLabelKeys: const [],
+      externalLabelKeys: const [],
+      selectedLabelKey: null,
+      recommendedSkillId: null,
+      templateId: null,
+      historySummary: '',
+      externalContextSummary: '',
+      externalStressScore: null,
+      hasImages: false,
+      message: 'Can you submit my assignment?',
+    );
+
+    final decisions = const OrbitToolPermissionPolicy().classify(
+      toolIds: const ['chat_history_lookup', 'submit_assignment'],
+      context: context,
+    );
+
+    expect(
+      decisions
+          .where((decision) => decision.toolId == 'chat_history_lookup')
+          .single
+          .level,
+      OrbitToolPermissionLevel.autoAllowed,
+    );
+    expect(
+      decisions
+          .where((decision) => decision.toolId == 'submit_assignment')
+          .single
+          .level,
+      OrbitToolPermissionLevel.blocked,
+    );
+  });
+
+  test('routes course and professor planning to the course planner tool',
+      () async {
+    final orchestrator = OrbitAgentOrchestrator(
+      llmClient: const _FakeLocalLlmClient('Compare professors and workload.'),
+    );
+
+    final response = await orchestrator.respond(
+      const OrbitAgentRequest(
+        message:
+            'Help me pick next semester courses and the best professor for CMSC216.',
+        historySummary: '',
+        selectedLabelKey: 'planning',
+        recommendedSkillId: null,
+        templateId: null,
+        profileLabelKeys: ['stress_sensitive', 'commuter'],
+        recentLabelKeys: [],
+        imageCount: 0,
+      ),
+    );
+
+    final adaptiveSkill = response.trace.skillResults.first;
+    expect(
+      adaptiveSkill.recommendations.join('\n'),
+      contains('course_professor_planner'),
+    );
+    expect(
+      adaptiveSkill.toolPermissions
+          .where((decision) => decision.toolId == 'course_professor_planner')
+          .single
+          .level,
+      OrbitToolPermissionLevel.approvalRequired,
+    );
   });
 }
 

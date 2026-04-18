@@ -159,6 +159,13 @@ If either condition is missing, ORBIT stays local-first and adds a source note
 explaining why live data was not fetched. Manual one-time imports remain
 available for controlled demos, but automatic assistant context is gated.
 
+Settings also includes a persistent `Use demo fixture` mode. When this is on,
+ORBIT skips live connector calls even if credentials and consent exist, imports
+the polished UMD vegan-student scenario as the current student snapshot, and
+feeds that same fixture into chat, the monitor, label refresh, audit logs, and
+agent synthesis. This gives judges a visible live/demo switch and keeps the
+pitch deterministic without changing environment variables.
+
 The Resource Navigator also has an offline UMD catalog so the demo stays
 grounded without network credentials. It now covers the high-frequency UMD
 student needs found in official campus pages and student forum patterns:
@@ -238,6 +245,44 @@ labels, model/fallback status, latency, and message previews. Assistant bubbles
 surface the audit details when available so the demo can explain why ORBIT made
 its routing decision instead of presenting the answer as an opaque chatbot
 response.
+
+The runtime skill now includes an explicit tool-permission policy. Low-risk
+local reasoning tools are auto-allowed, connected-data tools such as Canvas
+scan, Calendar review, live Places search, route planning, course/professor
+planning, and schedule building are marked approval-required, and irreversible
+actions such as submitting an
+assignment or messaging an advisor are blocked in the demo. This is the
+foundation for future approval gates before ORBIT becomes more autonomous.
+
+## UMD Course And Professor Planning
+
+ORBIT now includes a UMD next-semester planning layer because this is one of the
+highest-value everyday student decisions. The course planner combines:
+
+- profile labels such as `stress_sensitive`, `commuter`, `career_builder`, and
+  `writing`
+- current stress/workload state from the monitor
+- UMD course candidates and requirement tags
+- PlanetTerp course/professor review and historical grade signals
+- cautious forum/reddit workload notes as anecdotal evidence
+
+The demo monitor surfaces a Next Semester Plan panel that balances credits,
+heavy technical classes, professor signal confidence, and workload risk. The
+agent runtime also routes course/professor questions to
+`course_professor_planner`, which is approval-required because it may query
+connected or public external data.
+
+Source-backed live expansion is shaped around:
+
+- PlanetTerp, which describes itself as a UMD community for informed course and
+  professor decisions and exposes course, professor, and grade data.
+- `umd.io`, the open UMD API for official course/professor data.
+- Testudo/Schedule of Classes for final section availability and registration
+  truth.
+
+Forum/reddit opinions should help summarize workload patterns like projects,
+exam count, attendance style, or perceived difficulty, but ORBIT should label
+them as anecdotal and never treat them as the only source.
 
 Generated support skills can now be saved into a local versioned registry.
 Saving the current support-pulse skill stores the skill id, version, title,

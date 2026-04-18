@@ -171,6 +171,7 @@ void main() {
 
     expect(find.text('UMD Demo Path'), findsOneWidget);
     expect(find.text('Personalized Food Search'), findsOneWidget);
+    expect(find.text('Next Semester Plan'), findsOneWidget);
     expect(find.text('Notification Center'), findsOneWidget);
 
     await tester.ensureVisible(find.text('Simulate 45m laptop block'));

@@ -1,11 +1,13 @@
 import 'package:chatbotapp/demo/orbit_business_demo_scenario.dart';
 import 'package:chatbotapp/data_sources/umd_resource_catalog.dart';
 import 'package:chatbotapp/hive/monitor_history_entry.dart';
+import 'package:chatbotapp/models/course_planning.dart';
 import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/services/monitor_history_service.dart';
 import 'package:chatbotapp/services/student_monitor_service.dart';
 import 'package:chatbotapp/services/student_notification_policy.dart';
+import 'package:chatbotapp/services/umd_course_planning_service.dart';
 import 'package:chatbotapp/widgets/app_icon_button.dart';
 import 'package:chatbotapp/widgets/app_screen_scaffold.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,9 +31,10 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
       StudentNotificationPolicy();
   static const MonitorHistoryService _historyService = MonitorHistoryService();
   static const UmdResourceCatalog _resourceCatalog = UmdResourceCatalog();
+  static const UmdCoursePlanningService _coursePlanningService =
+      UmdCoursePlanningService();
   bool _didRequestLiveSignals = false;
   DateTime? _focusStartedAt;
-  bool _preferDemoFixture = false;
   List<MonitorHistoryEntry> _history = const [];
   String _lastRecordedMonitorSignature = '';
   bool _isRecordingMonitorHistory = false;
@@ -44,7 +47,9 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
       if (!mounted) {
         return;
       }
-      _refreshLiveSignals();
+      if (!context.read<SettingsProvider>().preferDemoFixture) {
+        _refreshLiveSignals();
+      }
       _loadMonitorHistory(email: DemoStatusScreen.scenario.email);
     });
   }
@@ -78,7 +83,8 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
         ...profile.routingLabelKeys,
         ...profile.preferredLabelKeys,
       },
-      snapshot: _preferDemoFixture ? null : profile.latestStudentSnapshot,
+      snapshot:
+          settings.preferDemoFixture ? null : profile.latestStudentSnapshot,
       fallback: DemoStatusScreen.scenario,
     );
     final notificationPlan = _notificationPolicy.build(
@@ -90,6 +96,10 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
       message: report.prompt,
       labels: report.profileLabels,
       limit: 4,
+    );
+    final coursePlan = _coursePlanningService.buildDemoPlan(
+      labels: report.profileLabels,
+      stressScore: report.snapshot.stressRiskScore,
     );
     _recordMonitorCheckpoint(report);
 
@@ -183,6 +193,8 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
                     children: [
                       _SearchPanel(report: report),
                       const SizedBox(height: 12),
+                      _CoursePlanPanel(plan: coursePlan),
+                      const SizedBox(height: 12),
                       _ResourcePanel(resources: resourceMatches),
                       const SizedBox(height: 12),
                       _AgentPanel(report: report),
@@ -191,11 +203,12 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
                       const SizedBox(height: 12),
                       _PrivacyPanel(
                         report: report,
-                        preferDemoFixture: _preferDemoFixture,
+                        preferDemoFixture: settings.preferDemoFixture,
                         onPreferDemoFixtureChanged: (value) {
-                          setState(() {
-                            _preferDemoFixture = value;
-                          });
+                          settings.togglePreferDemoFixture(value: value);
+                          if (!value) {
+                            _refreshLiveSignals(forceRefresh: true);
+                          }
                         },
                       ),
                     ],
@@ -734,6 +747,92 @@ class _AgentPanel extends StatelessWidget {
                 ? 'This path is generated from the latest connected student signals.'
                 : 'The deterministic controller keeps tool use reliable, while Gemma/Ollama handles the final natural-language synthesis.',
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoursePlanPanel extends StatelessWidget {
+  const _CoursePlanPanel({required this.plan});
+
+  final SemesterPlanReport plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return _DemoPanel(
+      title: 'Next Semester Plan',
+      subtitle:
+          '${plan.plannedCredits}/${plan.targetCredits} credits with professor/workload signals',
+      icon: CupertinoIcons.calendar_badge_plus,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(plan.balanceSummary),
+          const SizedBox(height: 12),
+          ...plan.recommendations.take(4).map(
+                (recommendation) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color:
+                            colorScheme.outlineVariant.withValues(alpha: 0.55),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${recommendation.course.courseId} - ${recommendation.course.title}',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            ),
+                            _DemoChip(label: recommendation.scoreLabel),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Professor: ${recommendation.professor?.name ?? 'verify current section'}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 6),
+                        ...recommendation.rationale.take(3).map(
+                              (reason) => Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Text('- $reason'),
+                              ),
+                            ),
+                        if (recommendation.riskFlags.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            recommendation.riskFlags.first,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.tertiary,
+                                    ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          if (plan.recommendations.isNotEmpty)
+            Text(
+              'Next action: ${plan.recommendations.first.nextAction}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
         ],
       ),
     );

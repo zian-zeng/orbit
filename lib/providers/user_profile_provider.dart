@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:chatbotapp/constants/constants.dart';
 import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
 import 'package:chatbotapp/data_sources/student_data_models.dart';
+import 'package:chatbotapp/demo/orbit_business_demo_scenario.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/user_model.dart';
@@ -310,6 +311,15 @@ class UserProfileProvider extends ChangeNotifier {
     _isRefreshingExternalSignals = true;
     notifyListeners();
     try {
+      if (_preferDemoFixture()) {
+        final scenario = OrbitBusinessDemoScenario.veganUmdStudent();
+        _latestStudentSnapshot = scenario.snapshot;
+        await mergeImportedLabelSignals(
+          labelKeys: scenario.snapshot.inferredLabelKeys,
+          sourceName: 'UMD Demo Fixture',
+        );
+        return scenario.snapshot;
+      }
       final import = await _contextAggregator.loadLabelImport(
         forceRefresh: forceRefresh,
         allowExternalData: _allowExternalStudentData(),
@@ -345,6 +355,19 @@ class UserProfileProvider extends ChangeNotifier {
     if (settingsBox.isEmpty) {
       return false;
     }
-    return settingsBox.getAt(0)?.allowExternalStudentData ?? false;
+    final settings = settingsBox.getAt(0);
+    return (settings?.allowExternalStudentData ?? false) &&
+        !(settings?.preferDemoFixture ?? false);
+  }
+
+  bool _preferDemoFixture() {
+    if (!Hive.isBoxOpen(Constants.settingsBox)) {
+      return false;
+    }
+    final settingsBox = Boxes.getSettings();
+    if (settingsBox.isEmpty) {
+      return false;
+    }
+    return settingsBox.getAt(0)?.preferDemoFixture ?? false;
   }
 }

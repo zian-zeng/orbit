@@ -72,7 +72,82 @@ async function route(request, response) {
     return;
   }
 
+  if (request.method === 'GET' && url.pathname === '/course-planning/umd') {
+    await umdCoursePlanning(url, response);
+    return;
+  }
+
   sendJson(response, 404, { error: 'not_found' });
+}
+
+async function umdCoursePlanning(url, response) {
+  const courses = (url.searchParams.get('courses') || '')
+    .split(',')
+    .map((course) => course.trim().toUpperCase())
+    .filter(Boolean)
+    .slice(0, 8);
+  if (courses.length === 0) {
+    sendJson(response, 400, {
+      error: 'missing_courses',
+      message: 'Provide courses=CMSC216,STAT400 or similar.',
+    });
+    return;
+  }
+
+  const profileTags = (url.searchParams.get('profileTags') || '')
+    .split(',')
+    .map((tag) => tag.trim().toLowerCase())
+    .filter(Boolean);
+  const sourceNotes = [
+    'PlanetTerp signals are useful but not guaranteed; verify current sections in Testudo.',
+    'Forum/reddit workload sentiment should be treated as anecdotal context.',
+  ];
+  const bundles = [];
+  for (const courseId of courses) {
+    bundles.push(await fetchPlanetTerpCourseBundle(courseId, sourceNotes));
+  }
+  sendJson(response, 200, {
+    fetchedAt: new Date().toISOString(),
+    profileTags,
+    courses: bundles.filter(Boolean),
+    sourceNotes,
+  });
+}
+
+async function fetchPlanetTerpCourseBundle(courseId, sourceNotes) {
+  try {
+    const courseUrl = new URL('https://api.planetterp.com/v1/course');
+    courseUrl.searchParams.set('name', courseId);
+    const course = await fetchJson(courseUrl, { Accept: 'application/json' });
+    if (course.error) return null;
+    const professors = [];
+    for (const professorName of (course.professors || []).slice(0, 5)) {
+      const professorUrl = new URL('https://api.planetterp.com/v1/professor');
+      professorUrl.searchParams.set('name', professorName);
+      const professor = await fetchJson(professorUrl, {
+        Accept: 'application/json',
+      });
+      if (!professor.error) {
+        professors.push({
+          name: professor.name || professorName,
+          averageRating: professor.average_rating ?? null,
+          averageGpa: professor.average_gpa ?? null,
+          url: `https://planetterp.com/professor/${slugify(professor.name || professorName)}`,
+        });
+      }
+    }
+    return {
+      courseId: course.name || courseId,
+      title: course.title || courseId,
+      averageGpa: course.average_gpa ?? null,
+      credits: course.credits ?? null,
+      url: `https://planetterp.com/course/${courseId}`,
+      professors,
+    };
+  } catch (error) {
+    sourceNotes.push(`PlanetTerp course fetch failed for ${courseId}: ${messageOf(error)}`);
+    return null;
+  }
 }
 
 async function startGoogleOAuth(url, response) {
@@ -453,6 +528,14 @@ function userIdFrom(url) {
 
 function cleanId(value) {
   return String(value).replace(/[^a-zA-Z0-9_.@-]/g, '').slice(0, 80) || 'demo';
+}
+
+function slugify(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 }
 
 function hasGoogleOAuthConfig() {

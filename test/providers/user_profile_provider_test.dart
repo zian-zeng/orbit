@@ -192,4 +192,35 @@ void main() {
       hasLength(1),
     );
   });
+
+  test('demo fixture mode imports the polished UMD snapshot', () async {
+    await Hive.box<Settings>(Constants.settingsBox).put(
+      0,
+      Settings(
+        isDarkTheme: false,
+        enableHaptics: true,
+        saveChatHistory: true,
+        autoScroll: true,
+        enableVoiceInput: true,
+        reduceMotion: false,
+        confirmBeforeDeleting: true,
+        themeModeIndex: 0,
+        sendWithEnter: true,
+        autoFocusComposer: false,
+        showStarterPrompts: true,
+        allowExternalStudentData: true,
+        preferDemoFixture: true,
+      ),
+    );
+
+    final snapshot = await provider.refreshExternalStudentSignals();
+
+    expect(snapshot, isNotNull);
+    expect(snapshot!.assignments, isNotEmpty);
+    expect(
+        snapshot.places.map((place) => place.name), contains('NuVegan Cafe'));
+    expect(provider.latestStudentSnapshot, same(snapshot));
+    expect(provider.labelSignalSources, contains('UMD Demo Fixture'));
+    expect(provider.importedLabelKeys, contains('planning'));
+  });
 }

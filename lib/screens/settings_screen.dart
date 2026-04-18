@@ -585,6 +585,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   const Divider(height: 1),
+                  SettingsTile(
+                    icon: CupertinoIcons.rectangle_stack_badge_person_crop,
+                    title: 'Use demo fixture',
+                    subtitle:
+                        'Force the deterministic UMD scenario for pitches, tests, or offline demos.',
+                    value: settingsProvider.preferDemoFixture,
+                    onChanged: (value) {
+                      settingsProvider.togglePreferDemoFixture(value: value);
+                    },
+                  ),
+                  const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                     child: Column(
@@ -620,9 +631,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(height: 10),
                         Text(
                           settingsProvider.allowExternalStudentData
-                              ? integrationConfig.hasAnyRealData
-                                  ? 'Live connectors are allowed. Orbit will still fall back cleanly when a source fails or times out.'
-                                  : 'Consent is on, but no live connector credentials are configured for this build.'
+                              ? settingsProvider.preferDemoFixture
+                                  ? 'Demo fixture mode is on. Orbit will skip live connector calls until this is turned off.'
+                                  : integrationConfig.hasAnyRealData
+                                      ? 'Live connectors are allowed. Orbit will still fall back cleanly when a source fails or times out.'
+                                      : 'Consent is on, but no live connector credentials are configured for this build.'
                               : 'Live connector calls stay off until the student opts in here. Manual imports remain available below.',
                           style: Theme.of(context)
                               .textTheme

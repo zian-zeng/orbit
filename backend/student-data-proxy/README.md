@@ -50,6 +50,7 @@ CAMPUS_ROUTE_DESTINATION=University Health Center, College Park, MD
 - `GET /auth/google/callback`
 - `POST /connect/canvas`
 - `GET /student/snapshot?userId=demo&taskText=food&preferenceTags=vegan`
+- `GET /course-planning/umd?courses=CMSC216,STAT400&profileTags=stress_sensitive,commuter`
 
 Example Canvas connect:
 

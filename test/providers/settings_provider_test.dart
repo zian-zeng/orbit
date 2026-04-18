@@ -54,4 +54,20 @@ void main() {
     reloaded.toggleExternalStudentData(value: false);
     expect(reloaded.allowExternalStudentData, isFalse);
   });
+
+  test('demo fixture mode disables live student data permission', () {
+    final provider = SettingsProvider();
+
+    provider.toggleExternalStudentData(value: true);
+    expect(provider.allowLiveStudentData, isTrue);
+
+    provider.togglePreferDemoFixture(value: true);
+    expect(provider.preferDemoFixture, isTrue);
+    expect(provider.allowLiveStudentData, isFalse);
+
+    final reloaded = SettingsProvider()..getSavedSettings();
+    expect(reloaded.allowExternalStudentData, isTrue);
+    expect(reloaded.preferDemoFixture, isTrue);
+    expect(reloaded.allowLiveStudentData, isFalse);
+  });
 }

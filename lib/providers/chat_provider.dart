@@ -7,6 +7,7 @@ import 'package:chatbotapp/agents/orbit_models.dart';
 import 'package:chatbotapp/apis/api_service.dart';
 import 'package:chatbotapp/constants/constants.dart';
 import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
+import 'package:chatbotapp/demo/orbit_business_demo_scenario.dart';
 import 'package:chatbotapp/hive/agent_audit_log_entry.dart';
 import 'package:chatbotapp/hive/assistant_feedback_entry.dart';
 import 'package:chatbotapp/hive/boxes.dart';
@@ -335,11 +336,13 @@ class ChatProvider extends ChangeNotifier {
   }) async {
     final profileLabels = _profileLabelKeys();
     final stopwatch = Stopwatch()..start();
-    final externalSnapshot = await _contextAggregator.loadSnapshot(
-      allowExternalData: _allowExternalStudentData(),
-      taskText: message,
-      preferenceTags: profileLabels,
-    );
+    final externalSnapshot = _preferDemoFixture()
+        ? OrbitBusinessDemoScenario.veganUmdStudent().snapshot
+        : await _contextAggregator.loadSnapshot(
+            allowExternalData: _allowExternalStudentData(),
+            taskText: message,
+            preferenceTags: profileLabels,
+          );
     final hasExternalSignals = externalSnapshot.assignments.isNotEmpty ||
         externalSnapshot.calendarEvents.isNotEmpty ||
         externalSnapshot.routes.isNotEmpty ||
@@ -393,7 +396,20 @@ class ChatProvider extends ChangeNotifier {
     if (settingsBox.isEmpty) {
       return false;
     }
-    return settingsBox.getAt(0)?.allowExternalStudentData ?? false;
+    final settings = settingsBox.getAt(0);
+    return (settings?.allowExternalStudentData ?? false) &&
+        !(settings?.preferDemoFixture ?? false);
+  }
+
+  bool _preferDemoFixture() {
+    if (!Hive.isBoxOpen(Constants.settingsBox)) {
+      return false;
+    }
+    final settingsBox = Boxes.getSettings();
+    if (settingsBox.isEmpty) {
+      return false;
+    }
+    return settingsBox.getAt(0)?.preferDemoFixture ?? false;
   }
 
   Future<String> _conversationSummaryForAgent({required String chatId}) async {

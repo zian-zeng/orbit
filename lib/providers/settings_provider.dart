@@ -20,6 +20,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _showStarterPrompts = true;
   int _focusBreakMinutes = 45;
   bool _allowExternalStudentData = false;
+  bool _preferDemoFixture = false;
 
   AppThemeMode get appThemeMode => _appThemeMode;
 
@@ -51,6 +52,11 @@ class SettingsProvider extends ChangeNotifier {
 
   bool get allowExternalStudentData => _allowExternalStudentData;
 
+  bool get preferDemoFixture => _preferDemoFixture;
+
+  bool get allowLiveStudentData =>
+      allowExternalStudentData && !preferDemoFixture;
+
   AppThemeMode _themeModeFromSettings(Settings settings) {
     final storedIndex = settings.themeModeIndex;
     if (storedIndex >= 0 && storedIndex < AppThemeMode.values.length) {
@@ -78,6 +84,7 @@ class SettingsProvider extends ChangeNotifier {
       _showStarterPrompts = settings.showStarterPrompts;
       _focusBreakMinutes = settings.focusBreakMinutes.clamp(15, 180);
       _allowExternalStudentData = settings.allowExternalStudentData;
+      _preferDemoFixture = settings.preferDemoFixture;
     }
   }
 
@@ -97,6 +104,7 @@ class SettingsProvider extends ChangeNotifier {
           showStarterPrompts: showStarterPrompts,
           focusBreakMinutes: focusBreakMinutes,
           allowExternalStudentData: allowExternalStudentData,
+          preferDemoFixture: preferDemoFixture,
         );
   }
 
@@ -240,6 +248,18 @@ class SettingsProvider extends ChangeNotifier {
     _saveSettings(current);
 
     _allowExternalStudentData = value;
+    notifyListeners();
+  }
+
+  void togglePreferDemoFixture({
+    required bool value,
+    Settings? settings,
+  }) {
+    final current = _currentSettings(settings);
+    current.preferDemoFixture = value;
+    _saveSettings(current);
+
+    _preferDemoFixture = value;
     notifyListeners();
   }
 }

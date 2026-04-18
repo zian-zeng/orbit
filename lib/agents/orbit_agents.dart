@@ -46,6 +46,14 @@ class AcademicPlanningAgent extends OrbitAgent {
           'study',
           'homework',
           'canvas',
+          'course',
+          'courses',
+          'class',
+          'classes',
+          'professor',
+          'semester',
+          'registration',
+          'testudo',
         ]);
   }
 
@@ -64,6 +72,17 @@ class AcademicPlanningAgent extends OrbitAgent {
       'midterm',
       'final',
     ]);
+    final courseSelectionSignal = containsAny(text, const [
+      'course',
+      'courses',
+      'class',
+      'classes',
+      'professor',
+      'semester',
+      'registration',
+      'testudo',
+      'planetterp',
+    ]);
 
     return SkillResult(
       skillId: skillId,
@@ -76,8 +95,10 @@ class AcademicPlanningAgent extends OrbitAgent {
         'Ask for missing Canvas deadlines or course names before inventing dates.',
         'Create a short triage table: task, due window, effort, next action.',
         'Prefer a 24-hour plan first, then a weekly plan if the user asks.',
+        'For course selection, compare Testudo availability, prerequisite fit, PlanetTerp grade/review signals, and anecdotal workload notes before recommending a professor.',
+        'Do not optimize only for easy grades; balance learning fit, stress load, graduation requirements, and schedule constraints.',
       ],
-      confidence: deadlineSignal ? 0.86 : 0.68,
+      confidence: deadlineSignal || courseSelectionSignal ? 0.86 : 0.68,
     );
   }
 }

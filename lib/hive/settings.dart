@@ -43,6 +43,9 @@ class Settings extends HiveObject {
   @HiveField(12)
   bool allowExternalStudentData = false;
 
+  @HiveField(13)
+  bool preferDemoFixture = false;
+
   // constructor
   Settings({
     required this.isDarkTheme,
@@ -58,5 +61,6 @@ class Settings extends HiveObject {
     required this.showStarterPrompts,
     this.focusBreakMinutes = 45,
     this.allowExternalStudentData = false,
+    this.preferDemoFixture = false,
   });
 }
