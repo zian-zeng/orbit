@@ -44,6 +44,7 @@ void main() {
       () async {
     await provider.saveProfile(
       name: 'Taylor',
+      email: 'taylor@umd.edu',
       imagePath: '',
       preferredLabelKeys: const [
         'planning',
@@ -57,6 +58,7 @@ void main() {
 
     await provider.rememberPreferredLabel('study_help');
 
+    expect(provider.email, 'taylor@umd.edu');
     expect(
       provider.preferredLabelKeys,
       equals([

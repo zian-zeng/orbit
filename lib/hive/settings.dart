@@ -37,6 +37,12 @@ class Settings extends HiveObject {
   @HiveField(10)
   bool showStarterPrompts = true;
 
+  @HiveField(11)
+  int focusBreakMinutes = 45;
+
+  @HiveField(12)
+  bool allowExternalStudentData = false;
+
   // constructor
   Settings({
     required this.isDarkTheme,
@@ -50,5 +56,7 @@ class Settings extends HiveObject {
     required this.sendWithEnter,
     required this.autoFocusComposer,
     required this.showStarterPrompts,
+    this.focusBreakMinutes = 45,
+    this.allowExternalStudentData = false,
   });
 }

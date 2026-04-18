@@ -9,6 +9,7 @@ import 'package:chatbotapp/providers/settings_provider.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/providers/voice_input_provider.dart';
 import 'package:chatbotapp/screens/chat_history_screen.dart';
+import 'package:chatbotapp/screens/demo_status_screen.dart';
 import 'package:chatbotapp/screens/settings_screen.dart';
 import 'package:chatbotapp/services/prompt_router.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
@@ -277,17 +278,30 @@ class _ChatScreenState extends State<ChatScreen> {
     showAppSnackBar(context, 'Agent skill copied');
   }
 
-  Future<void> _openPage(Widget page) async {
+  Future<T?> _openPage<T>(Widget page) async {
     final reduceMotion = context.read<SettingsProvider>().reduceMotion;
     final route = reduceMotion
-        ? PageRouteBuilder<void>(
+        ? PageRouteBuilder<T>(
             pageBuilder: (context, animation, secondaryAnimation) => page,
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           )
-        : CupertinoPageRoute<void>(builder: (context) => page);
+        : CupertinoPageRoute<T>(builder: (context) => page);
 
-    await Navigator.of(context).push(route);
+    return Navigator.of(context).push(route);
+  }
+
+  Future<void> _openDemoPath() async {
+    final prompt = await _openPage<String>(const DemoStatusScreen());
+    if (!mounted || prompt == null || prompt.trim().isEmpty) {
+      return;
+    }
+
+    _applyPrompt(
+      prompt: prompt,
+      label: SupportLabel.planning,
+    );
+    showAppSnackBar(context, 'Demo prompt loaded');
   }
 
   @override
@@ -341,8 +355,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 userName: userName,
                 modelLabel: _modelLabel(chatProvider.modelType),
                 canStartNewChat: chatProvider.hasMessages,
-                onOpenHistory: () => _openPage(const ChatHistoryScreen()),
-                onOpenSettings: () => _openPage(const SettingsScreen()),
+                onOpenHistory: () => _openPage<void>(const ChatHistoryScreen()),
+                onOpenSettings: () => _openPage<void>(const SettingsScreen()),
+                onOpenDemo: _openDemoPath,
                 onNewChat: () => _startNewChat(chatProvider),
               ),
               const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:chatbotapp/data_sources/integration_config.dart';
 import 'package:chatbotapp/models/prompt_recommendation.dart';
 import 'package:flutter/services.dart';
 import 'package:chatbotapp/providers/chat_provider.dart';
@@ -29,6 +30,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _calendarTokenController =
       TextEditingController();
   final TextEditingController _calendarIdController = TextEditingController(
@@ -49,6 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     _calendarTokenController.dispose();
     _calendarIdController.dispose();
     _canvasBaseUrlController.dispose();
@@ -83,6 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _isEditingProfile = true;
       _nameController.text = userProfile.name;
+      _emailController.text = userProfile.email;
       _draftImageFile = null;
     });
   }
@@ -100,6 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     await userProfile.saveProfile(
       name: _nameController.text,
+      email: _emailController.text.trim(),
       imagePath: imagePath,
     );
 
@@ -285,6 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settingsProvider = context.watch<SettingsProvider>();
     final userProfile = context.watch<UserProfileProvider>();
     final colorScheme = Theme.of(context).colorScheme;
+    final integrationConfig = IntegrationConfig.fromEnvironment();
     final motionDuration =
         settingsProvider.reduceMotion ? Duration.zero : AppMotion.regular;
 
@@ -348,7 +354,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Profile',
+                                  userProfile.email.isEmpty
+                                      ? 'Profile'
+                                      : userProfile.email,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium
@@ -376,6 +384,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           controller: _nameController,
                           textCapitalization: TextCapitalization.words,
                           decoration: const InputDecoration(labelText: 'Name'),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'name@umd.edu',
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -551,6 +568,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 18),
+            const _SectionLabel(title: 'Real Data Consent'),
+            const SizedBox(height: 10),
+            Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SettingsTile(
+                    icon: CupertinoIcons.lock_shield,
+                    title: 'Canvas/Google live data',
+                    subtitle:
+                        'Let Orbit use connected Canvas, Calendar, Maps, and Places signals for assistant context.',
+                    value: settingsProvider.allowExternalStudentData,
+                    onChanged: (value) {
+                      settingsProvider.toggleExternalStudentData(value: value);
+                    },
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Connector readiness',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _ReadinessChip(
+                              label: 'Canvas',
+                              ready: integrationConfig.hasCanvas,
+                            ),
+                            _ReadinessChip(
+                              label: 'Calendar',
+                              ready: integrationConfig.hasGoogleCalendar,
+                            ),
+                            _ReadinessChip(
+                              label: 'Maps/Places',
+                              ready: integrationConfig.hasGoogleMaps,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          settingsProvider.allowExternalStudentData
+                              ? integrationConfig.hasAnyRealData
+                                  ? 'Live connectors are allowed. Orbit will still fall back cleanly when a source fails or times out.'
+                                  : 'Consent is on, but no live connector credentials are configured for this build.'
+                              : 'Live connector calls stay off until the student opts in here. Manual imports remain available below.',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
             const _SectionLabel(title: 'Appearance'),
             const SizedBox(height: 10),
             Card(
@@ -630,6 +711,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 18),
+            const _SectionLabel(title: 'Monitor'),
+            const SizedBox(height: 10),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(CupertinoIcons.timer, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Break threshold',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        Text('${settingsProvider.focusBreakMinutes} min'),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'When a focus block reaches this duration, Orbit recommends a walk or reset.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    Slider(
+                      min: 15,
+                      max: 180,
+                      divisions: 11,
+                      value: settingsProvider.focusBreakMinutes
+                          .clamp(15, 180)
+                          .toDouble(),
+                      label: '${settingsProvider.focusBreakMinutes} min',
+                      onChanged: (value) {
+                        settingsProvider.setFocusBreakMinutes(
+                          value: value.round(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
             const _SectionLabel(title: 'Data'),
             const SizedBox(height: 10),
             Card(
@@ -676,6 +804,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ReadinessChip extends StatelessWidget {
+  const _ReadinessChip({
+    required this.label,
+    required this.ready,
+  });
+
+  final String label;
+  final bool ready;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor =
+        ready ? colorScheme.primaryContainer : colorScheme.surfaceContainerHigh;
+    final foregroundColor =
+        ready ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant;
+
+    return Chip(
+      avatar: Icon(
+        ready ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.clock,
+        size: 16,
+        color: foregroundColor,
+      ),
+      label: Text(label),
+      backgroundColor: backgroundColor,
+      labelStyle: TextStyle(color: foregroundColor),
+      side: BorderSide(color: backgroundColor),
     );
   }
 }

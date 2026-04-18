@@ -25,6 +25,9 @@ class UserModel extends HiveObject {
   @HiveField(6)
   final List<String> importedSourceRankings;
 
+  @HiveField(7)
+  final String email;
+
   // constructor
   UserModel({
     required this.uid,
@@ -34,5 +37,6 @@ class UserModel extends HiveObject {
     this.importedLabels = const [],
     this.importedSources = const [],
     this.importedSourceRankings = const [],
+    this.email = '',
   });
 }

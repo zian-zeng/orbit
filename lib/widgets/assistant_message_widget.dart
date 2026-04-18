@@ -17,7 +17,11 @@ class AssistantMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final text = message.message.toString();
-    final hasCodeBlocks = AssistantResponseContent.containsCodeBlocks(text);
+    final traceText = _extractOrbitTrace(text);
+    final visibleText = _withoutOrbitTrace(text);
+    final hasCodeBlocks = AssistantResponseContent.containsCodeBlocks(
+      visibleText,
+    );
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -62,12 +66,14 @@ class AssistantMessageWidget extends StatelessWidget {
                         ),
                   ),
                   const Spacer(),
-                  if (text.isNotEmpty && !hasCodeBlocks)
+                  if (visibleText.isNotEmpty && !hasCodeBlocks)
                     IconButton(
                       tooltip: 'Copy',
                       visualDensity: VisualDensity.compact,
                       onPressed: () async {
-                        await Clipboard.setData(ClipboardData(text: text));
+                        await Clipboard.setData(
+                          ClipboardData(text: visibleText),
+                        );
                         if (context.mounted) {
                           showAppSnackBar(context, 'Copied', bottomOffset: 132);
                         }
@@ -77,16 +83,84 @@ class AssistantMessageWidget extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              if (text.isEmpty)
+              if (visibleText.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 4),
                   child: CupertinoActivityIndicator(),
                 )
-              else
-                AssistantResponseContent(text: text),
+              else ...[
+                AssistantResponseContent(text: visibleText),
+                if (traceText != null) ...[
+                  const SizedBox(height: 12),
+                  _AgentTracePill(traceText: traceText),
+                ],
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  String? _extractOrbitTrace(String text) {
+    final lines = text.split('\n');
+    for (final line in lines.reversed) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('ORBIT trace:')) {
+        return trimmed.substring('ORBIT trace:'.length).trim();
+      }
+    }
+    return null;
+  }
+
+  String _withoutOrbitTrace(String text) {
+    final lines = text.split('\n');
+    while (lines.isNotEmpty &&
+        (lines.last.trim().isEmpty ||
+            lines.last.trim().startsWith('ORBIT trace:'))) {
+      lines.removeLast();
+    }
+    return lines.join('\n').trimRight();
+  }
+}
+
+class _AgentTracePill extends StatelessWidget {
+  const _AgentTracePill({required this.traceText});
+
+  final String traceText;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            CupertinoIcons.chart_bar_alt_fill,
+            size: 16,
+            color: colorScheme.onPrimaryContainer,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Agent trace: $traceText',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

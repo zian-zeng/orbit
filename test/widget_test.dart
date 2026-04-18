@@ -30,15 +30,18 @@ class TestUserProfileProvider extends UserProfileProvider {
     required bool isReady,
     required bool hasCompletedOnboarding,
     String name = 'You',
+    String email = '',
     List<String> preferredLabelKeys = const [],
   })  : _isReady = isReady,
         _hasCompletedOnboarding = hasCompletedOnboarding,
         _name = name,
+        _email = email,
         _preferredLabelKeys = preferredLabelKeys;
 
   bool _isReady;
   bool _hasCompletedOnboarding;
   String _name;
+  String _email;
   List<String> _preferredLabelKeys;
 
   @override
@@ -55,6 +58,9 @@ class TestUserProfileProvider extends UserProfileProvider {
 
   @override
   String get name => _name;
+
+  @override
+  String get email => _email;
 
   @override
   String get firstName => name.split(' ').first;
@@ -80,12 +86,14 @@ class TestUserProfileProvider extends UserProfileProvider {
   Future<void> saveProfile({
     required String name,
     required String imagePath,
+    String? email,
     List<String>? preferredLabelKeys,
     List<String>? importedLabelKeys,
     List<String>? importedSources,
     List<String>? importedSourceRankings,
   }) async {
     _name = name.trim().isEmpty ? 'You' : name.trim();
+    _email = email ?? _email;
     _preferredLabelKeys = preferredLabelKeys ?? _preferredLabelKeys;
     _hasCompletedOnboarding = true;
     _isReady = true;
@@ -153,6 +161,33 @@ void main() {
     expect(find.text('Analyze an image'), findsOneWidget);
   });
 
+  testWidgets('Business demo path can load the UMD scenario prompt', (
+    WidgetTester tester,
+  ) async {
+    await pumpChatScreen(tester);
+
+    await tester.tap(find.byTooltip('Demo status'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('UMD Demo Path'), findsOneWidget);
+    expect(find.text('Personalized Food Search'), findsOneWidget);
+    expect(find.text('Notification Center'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Simulate 45m laptop block'));
+    await tester.tap(find.text('Simulate 45m laptop block'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Laptop break due'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Use this prompt in chat'));
+    await tester.tap(find.text('Use this prompt in chat'));
+    await tester.pumpAndSettle();
+
+    final textField = tester.widget<TextField>(find.byType(TextField).first);
+    expect(textField.controller?.text, contains('I am vegan'));
+    expect(textField.controller?.text, contains('Canvas deadlines'));
+  });
+
   testWidgets('Home screen shows onboarding before chat for first-run users', (
     WidgetTester tester,
   ) async {
@@ -181,33 +216,63 @@ void main() {
     );
 
     await tester.enterText(find.byType(TextField).first, 'Taylor');
-    await tester.ensureVisible(find.text('Feel less overwhelmed'));
-    await tester.tap(find.text('Feel less overwhelmed'));
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Steady support'));
-    await tester.tap(find.text('Steady support'));
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Stress spiral'));
-    await tester.tap(find.text('Stress spiral'));
-    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(1), 'taylor@umd.edu');
+    await _tapOnboardingOption(tester, 'primary_goal', 'feel_less_overwhelmed');
+    await _tapOnboardingOption(tester, 'response_style', 'steady_support');
+    await _tapOnboardingOption(tester, 'blocker', 'stress_spiral');
+    await _tapOnboardingOption(tester, 'semester_load', 'heavy_course_load');
+    await _tapOnboardingOption(tester, 'deadline_pattern', 'overplan');
+    await _tapOnboardingOption(tester, 'class_support', 'practice_plan');
+    await _tapOnboardingOption(tester, 'writing_need', 'draft_from_scratch');
+    await _tapOnboardingOption(tester, 'reading_volume', 'many_readings');
+    await _tapOnboardingOption(tester, 'image_need', 'sometimes_images');
+    await _tapOnboardingOption(tester, 'stress_pattern', 'when_behind');
+    await _tapOnboardingOption(tester, 'energy_pattern', 'long_laptop_blocks');
+    await _tapOnboardingOption(tester, 'schedule_source', 'google_calendar');
+    await _tapOnboardingOption(tester, 'calendar_density', 'very_crowded');
+    await _tapOnboardingOption(tester, 'canvas_habit', 'canvas_daily');
+    await _tapOnboardingOption(tester, 'commute', 'commuter');
+    await _tapOnboardingOption(tester, 'dining_preference', 'vegan_food');
+    await _tapOnboardingOption(
+        tester, 'accessibility_need', 'accessibility_no');
+    await _tapOnboardingOption(tester, 'career_focus', 'career_active');
+    await _tapOnboardingOption(
+        tester, 'campus_confidence', 'somewhat_confident');
+    await _tapOnboardingOption(tester, 'notification_style', 'break_nudges');
     await tester.ensureVisible(find.text('Continue'));
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
 
     expect(
       userProfileProvider.preferredLabelKeys,
-      equals([
+      containsAll([
         'wellbeing_checkin',
         'planning',
         'summarization',
         'writing',
         'study_help',
         'image_analysis',
+        'vegan',
+        'plant_based',
+        'movement_breaks',
+        'google_calendar',
       ]),
     );
+    expect(userProfileProvider.email, 'taylor@umd.edu');
     expect(find.text('How can I help?'), findsOneWidget);
     expect(find.text('Support pulse'), findsOneWidget);
     expect(find.text('Reflect and regroup'), findsOneWidget);
     expect(find.text('Welcome to Orbit'), findsNothing);
   });
+}
+
+Future<void> _tapOnboardingOption(
+  WidgetTester tester,
+  String questionId,
+  String optionId,
+) async {
+  final finder = find.byKey(ValueKey('option-$questionId-$optionId'));
+  await tester.ensureVisible(finder);
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
 }

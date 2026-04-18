@@ -15,19 +15,26 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final Map<String, String> _answers = <String, String>{};
   bool _isSaving = false;
 
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
   bool get _canContinue =>
       _nameController.text.trim().isNotEmpty &&
+      _isValidEmail(_emailController.text) &&
       onboardingQuestions
           .every((question) => _answers.containsKey(question.id));
+
+  int get _answeredCount => onboardingQuestions
+      .where((question) => _answers.containsKey(question.id))
+      .length;
 
   List<SupportLabel> get _rankedLabels {
     if (!_canContinue) {
@@ -35,12 +42,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
 
     return rankSupportLabels(
-      OnboardingAnswers(
-        primaryGoalId: _answers['primary_goal']!,
-        responseStyleId: _answers['response_style']!,
-        blockerId: _answers['blocker']!,
-      ),
+      OnboardingAnswers.fromSelectedOptions(_answers),
     );
+  }
+
+  List<String> get _profileLabels {
+    if (!_canContinue) {
+      return const <String>[];
+    }
+
+    return onboardingProfileLabels(
+      OnboardingAnswers.fromSelectedOptions(_answers),
+    );
+  }
+
+  List<String> get _storedLabels {
+    final supportLabels = _rankedLabels.map((label) => label.storageKey);
+    return {
+      ...supportLabels,
+      ..._profileLabels,
+    }.toList(growable: false);
   }
 
   Future<void> _save() async {
@@ -55,10 +76,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     try {
       await context.read<UserProfileProvider>().saveProfile(
             name: _nameController.text,
+            email: _emailController.text.trim(),
             imagePath: '',
-            preferredLabelKeys: _rankedLabels
-                .map((label) => label.storageKey)
-                .toList(growable: false),
+            preferredLabelKeys: _storedLabels,
           );
     } catch (_) {
       if (!mounted) {
@@ -83,6 +103,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final progress = onboardingQuestions.isEmpty
+        ? 0.0
+        : _answeredCount / onboardingQuestions.length;
 
     return AppScreenScaffold(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -99,8 +122,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Answer three quick questions so Orbit can prioritize the kinds of help you want first.',
+              'Create your local student profile. Orbit uses these answers to route agents, personalize searches, and set safe notification defaults.',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '$_answeredCount of ${onboardingQuestions.length} questions answered',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
             ),
@@ -108,17 +144,72 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: TextField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'What should we call you?',
-                    hintText: 'Taylor',
-                  ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'What should we call you?',
+                        hintText: 'Taylor',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [AutofillHints.email],
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'School email',
+                        hintText: 'name@umd.edu',
+                        errorText: _emailController.text.trim().isEmpty ||
+                                _isValidEmail(_emailController.text)
+                            ? null
+                            : 'Enter a valid email',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'This is stored locally for the demo account. Backend auth can be added later.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+            if (_profileLabels.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Personalization signals',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _profileLabels
+                            .take(8)
+                            .map((label) => Chip(label: Text(label)))
+                            .toList(growable: false),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             ...onboardingQuestions.map(
               (question) => Padding(
@@ -176,6 +267,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
+
+  bool _isValidEmail(String value) {
+    final trimmed = value.trim();
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(trimmed);
+  }
 }
 
 class _QuestionCard extends StatelessWidget {
@@ -215,6 +311,7 @@ class _QuestionCard extends StatelessWidget {
               (option) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: InkWell(
+                  key: ValueKey('option-${question.id}-${option.id}'),
                   borderRadius: BorderRadius.circular(20),
                   onTap: () => onSelected(option.id),
                   child: Ink(

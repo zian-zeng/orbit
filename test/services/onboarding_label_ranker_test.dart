@@ -3,6 +3,10 @@ import 'package:chatbotapp/services/onboarding_label_ranker.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('signup intake includes the business-demo question count', () {
+    expect(onboardingQuestions, hasLength(20));
+  });
+
   test('ranks all six labels exactly once', () {
     final labels = rankSupportLabels(
       const OnboardingAnswers(
@@ -38,5 +42,33 @@ void main() {
     );
 
     expect(labels.first, SupportLabel.wellbeingCheckIn);
+  });
+
+  test('full intake extracts durable student profile labels', () {
+    final answers = OnboardingAnswers.fromSelectedOptions(const {
+      'primary_goal': 'stay_organized',
+      'response_style': 'clear_steps',
+      'blocker': 'too_many_tasks',
+      'dining_preference': 'vegan_food',
+      'commute': 'commuter',
+      'notification_style': 'break_nudges',
+      'schedule_source': 'google_calendar',
+    });
+
+    final labels = onboardingProfileLabels(answers);
+
+    expect(
+      labels,
+      containsAll([
+        'college_student',
+        'local_first',
+        'vegan',
+        'plant_based',
+        'commuter',
+        'campus_navigation',
+        'movement_breaks',
+        'google_calendar',
+      ]),
+    );
   });
 }

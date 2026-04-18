@@ -53,11 +53,13 @@ class StudentContextAggregator {
   Future<StudentSignalSnapshot> loadSnapshot({
     Duration? timeout,
     bool forceRefresh = false,
+    bool allowExternalData = true,
     String taskText = '',
     Iterable<String> preferenceTags = const [],
   }) async {
     final effectiveTimeout = timeout ?? config.requestTimeout;
     final cacheKey = _cacheKey(
+      allowExternalData: allowExternalData,
       taskText: taskText,
       preferenceTags: preferenceTags,
     );
@@ -76,6 +78,7 @@ class StudentContextAggregator {
 
     final request = _loadSnapshotUncached(
       timeout: effectiveTimeout,
+      allowExternalData: allowExternalData,
       taskText: taskText,
       preferenceTags: preferenceTags,
     );
@@ -96,9 +99,18 @@ class StudentContextAggregator {
 
   Future<StudentSignalSnapshot> _loadSnapshotUncached({
     required Duration timeout,
+    required bool allowExternalData,
     required String taskText,
     required Iterable<String> preferenceTags,
   }) async {
+    if (!allowExternalData) {
+      return StudentSignalSnapshot.empty(
+        sourceNotes: const [
+          'Live student data is off. Enable Canvas/Google live data in Settings after getting consent.',
+        ],
+      );
+    }
+
     if (!config.hasAnyRealData) {
       return StudentSignalSnapshot.empty(
         sourceNotes: [
@@ -170,12 +182,14 @@ class StudentContextAggregator {
   Future<ExternalLabelImport> loadLabelImport({
     Duration? timeout,
     bool forceRefresh = false,
+    bool allowExternalData = true,
     String taskText = '',
     Iterable<String> preferenceTags = const [],
   }) async {
     final snapshot = await loadSnapshot(
       timeout: timeout,
       forceRefresh: forceRefresh,
+      allowExternalData: allowExternalData,
       taskText: taskText,
       preferenceTags: preferenceTags,
     );
@@ -241,6 +255,7 @@ class StudentContextAggregator {
   }
 
   String _cacheKey({
+    required bool allowExternalData,
     required String taskText,
     required Iterable<String> preferenceTags,
   }) {
@@ -251,7 +266,7 @@ class StudentContextAggregator {
         .toSet()
         .toList(growable: false)
       ..sort();
-    return '$normalizedTask::${normalizedTags.join(',')}';
+    return '$allowExternalData::$normalizedTask::${normalizedTags.join(',')}';
   }
 }
 

@@ -29,13 +29,15 @@ class SettingsAdapter extends TypeAdapter<Settings> {
       sendWithEnter: fields[8] as bool? ?? true,
       autoFocusComposer: fields[9] as bool? ?? false,
       showStarterPrompts: fields[10] as bool? ?? true,
+      focusBreakMinutes: fields[11] as int? ?? 45,
+      allowExternalStudentData: fields[12] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, Settings obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.isDarkTheme)
       ..writeByte(1)
@@ -57,7 +59,11 @@ class SettingsAdapter extends TypeAdapter<Settings> {
       ..writeByte(9)
       ..write(obj.autoFocusComposer)
       ..writeByte(10)
-      ..write(obj.showStarterPrompts);
+      ..write(obj.showStarterPrompts)
+      ..writeByte(11)
+      ..write(obj.focusBreakMinutes)
+      ..writeByte(12)
+      ..write(obj.allowExternalStudentData);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:chatbotapp/constants/constants.dart';
 import 'package:chatbotapp/data_sources/student_context_aggregator.dart';
+import 'package:chatbotapp/data_sources/student_data_models.dart';
 import 'package:chatbotapp/hive/boxes.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/user_model.dart';
@@ -23,6 +24,7 @@ class UserProfileProvider extends ChangeNotifier {
 
   String _uid = '';
   String _name = 'You';
+  String _email = '';
   String _imagePath = '';
   List<String> _preferredLabelKeys = [];
   List<String> _importedLabelKeys = [];
@@ -30,11 +32,14 @@ class UserProfileProvider extends ChangeNotifier {
   List<String> _importedSourceNames = [];
   List<String> _routingLabelKeys = [];
   List<String> _labelSignalSources = [];
+  StudentSignalSnapshot? _latestStudentSnapshot;
+  bool _isRefreshingExternalSignals = false;
   bool _isReady = false;
   bool _shouldShowOnboarding = false;
 
   String get uid => _uid;
   String get name => _name.trim().isEmpty ? 'You' : _name.trim();
+  String get email => _email.trim();
   String get firstName => name.split(' ').first;
   String get imagePath => _imagePath;
   bool get isReady => _isReady;
@@ -49,6 +54,8 @@ class UserProfileProvider extends ChangeNotifier {
       : List<String>.unmodifiable(_preferredLabelKeys);
   List<String> get labelSignalSources =>
       List<String>.unmodifiable(_labelSignalSources);
+  StudentSignalSnapshot? get latestStudentSnapshot => _latestStudentSnapshot;
+  bool get isRefreshingExternalSignals => _isRefreshingExternalSignals;
   bool get hasImage => _imagePath.trim().isNotEmpty;
   String get initials {
     final parts = name.split(' ').where((part) => part.isNotEmpty).toList();
@@ -64,6 +71,7 @@ class UserProfileProvider extends ChangeNotifier {
   void _resetProfile({required bool shouldShowOnboarding}) {
     _uid = '';
     _name = 'You';
+    _email = '';
     _imagePath = '';
     _preferredLabelKeys = [];
     _importedLabelKeys = [];
@@ -71,6 +79,8 @@ class UserProfileProvider extends ChangeNotifier {
     _importedSourceNames = [];
     _routingLabelKeys = [];
     _labelSignalSources = [];
+    _latestStudentSnapshot = null;
+    _isRefreshingExternalSignals = false;
     _shouldShowOnboarding = shouldShowOnboarding;
   }
 
@@ -147,6 +157,7 @@ class UserProfileProvider extends ChangeNotifier {
 
       _uid = user.uid;
       _name = user.name;
+      _email = user.email;
       _imagePath = user.image;
       _preferredLabelKeys = List<String>.from(user.preferredLabels);
       _importedSourceRankings = _deserializeImportedSourceRankings(
@@ -176,6 +187,7 @@ class UserProfileProvider extends ChangeNotifier {
   Future<void> saveProfile({
     required String name,
     required String imagePath,
+    String? email,
     List<String>? preferredLabelKeys,
     List<String>? importedLabelKeys,
     List<String>? importedSources,
@@ -187,6 +199,7 @@ class UserProfileProvider extends ChangeNotifier {
       uid: _uid.isEmpty ? const Uuid().v4() : _uid,
       name: trimmedName,
       image: imagePath,
+      email: email ?? _email,
       preferredLabels: preferredLabelKeys ?? _preferredLabelKeys,
       importedLabels: importedLabelKeys ?? _importedLabelKeys,
       importedSources: importedSources ?? _importedSourceNames,
@@ -202,6 +215,7 @@ class UserProfileProvider extends ChangeNotifier {
 
     _uid = user.uid;
     _name = user.name;
+    _email = user.email;
     _imagePath = user.image;
     _preferredLabelKeys = List<String>.from(user.preferredLabels);
     _importedSourceRankings = _deserializeImportedSourceRankings(
@@ -285,22 +299,52 @@ class UserProfileProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> refreshExternalStudentSignals() async {
+  Future<StudentSignalSnapshot?> refreshExternalStudentSignals({
+    bool forceRefresh = false,
+    String taskText = '',
+    Iterable<String>? preferenceTags,
+  }) async {
+    if (_isRefreshingExternalSignals) {
+      return _latestStudentSnapshot;
+    }
+    _isRefreshingExternalSignals = true;
+    notifyListeners();
     try {
-      final import = await _contextAggregator.loadLabelImport();
-      if (import.labelKeys.isEmpty) {
-        return;
-      }
-      await mergeImportedLabelSignals(
-        labelKeys: import.labelKeys,
-        sourceName: import.sourceName,
+      final import = await _contextAggregator.loadLabelImport(
+        forceRefresh: forceRefresh,
+        allowExternalData: _allowExternalStudentData(),
+        taskText: taskText,
+        preferenceTags: preferenceTags ?? routingLabelKeys,
       );
+      _latestStudentSnapshot = import.snapshot;
+      if (import.labelKeys.isNotEmpty) {
+        await mergeImportedLabelSignals(
+          labelKeys: import.labelKeys,
+          sourceName: import.sourceName,
+        );
+      }
+      return import.snapshot;
     } catch (error, stackTrace) {
       log(
         'Failed to refresh external student signals',
         error: error,
         stackTrace: stackTrace,
       );
+      return _latestStudentSnapshot;
+    } finally {
+      _isRefreshingExternalSignals = false;
+      notifyListeners();
     }
+  }
+
+  bool _allowExternalStudentData() {
+    if (!Hive.isBoxOpen(Constants.settingsBox)) {
+      return false;
+    }
+    final settingsBox = Boxes.getSettings();
+    if (settingsBox.isEmpty) {
+      return false;
+    }
+    return settingsBox.getAt(0)?.allowExternalStudentData ?? false;
   }
 }

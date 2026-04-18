@@ -37,6 +37,54 @@ void main() {
     expect(first.inferredLabelKeys, contains('study_help'));
   });
 
+  test('user consent gates live connector fetches', () async {
+    final canvas = _FakeCanvasDataSource();
+    final aggregator = StudentContextAggregator(
+      config: _config(externalDataEnabled: true),
+      canvasDataSource: canvas,
+      calendarDataSource: _FakeCalendarDataSource(),
+      routesDataSource: _FakeRoutesDataSource(),
+    );
+
+    final snapshot = await aggregator.loadSnapshot(allowExternalData: false);
+
+    expect(snapshot.assignments, isEmpty);
+    expect(canvas.callCount, 0);
+    expect(snapshot.sourceNotes.single, contains('Live student data is off'));
+  });
+
+  test('consent state is part of the snapshot cache key', () async {
+    final canvas = _FakeCanvasDataSource();
+    final aggregator = StudentContextAggregator(
+      config: _config(externalDataEnabled: true),
+      canvasDataSource: canvas,
+      calendarDataSource: _FakeCalendarDataSource(),
+      routesDataSource: _FakeRoutesDataSource(),
+    );
+
+    await aggregator.loadSnapshot(allowExternalData: false);
+    final live = await aggregator.loadSnapshot(allowExternalData: true);
+
+    expect(live.assignments, isNotEmpty);
+    expect(canvas.callCount, 1);
+  });
+
+  test('label import respects user consent', () async {
+    final canvas = _FakeCanvasDataSource();
+    final aggregator = StudentContextAggregator(
+      config: _config(externalDataEnabled: true),
+      canvasDataSource: canvas,
+      calendarDataSource: _FakeCalendarDataSource(),
+      routesDataSource: _FakeRoutesDataSource(),
+    );
+
+    final import = await aggregator.loadLabelImport(allowExternalData: false);
+
+    expect(import.labelKeys, isEmpty);
+    expect(import.sourceName, 'Real Data');
+    expect(canvas.callCount, 0);
+  });
+
   test('force refresh bypasses the cache', () async {
     final canvas = _FakeCanvasDataSource();
     final aggregator = StudentContextAggregator(

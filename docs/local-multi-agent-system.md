@@ -66,6 +66,23 @@ It currently uses:
   `college_student`, `academic_planning`, `stress_sensitive`,
   `career_builder`, `life_logistics`, `local_first`
 
+## Signup And Initial Labels
+
+The first-run signup flow now creates a local demo account with name and school
+email, then asks 20 intake questions. The answers produce two kinds of labels:
+
+- ranked support labels for the existing recommendation router:
+  `planning`, `writing`, `study_help`, `summarization`, `image_analysis`, and
+  `wellbeing_checkin`
+- durable profile labels for personalization and tool routing, such as
+  `vegan`, `plant_based`, `commuter`, `campus_navigation`,
+  `movement_breaks`, `google_calendar`, `canvas`, `career_builder`, and
+  `campus_resources`
+
+The email is stored locally with the Hive profile for the current demo account.
+This is not backend authentication yet; production auth should add a server or
+identity provider while keeping the same label contract.
+
 ## UMD-First Data Connectors
 
 `StudentContextAggregator` can fetch a real-data snapshot from:
@@ -113,14 +130,27 @@ backend-backed OAuth flow. Snapshot fetches are cached for the configured TTL an
 deduplicated while a request is in flight, so chat messages do not repeatedly
 hammer Canvas or Google APIs.
 
+The app also has a student-facing consent gate in Settings > Real Data Consent.
+Automatic Canvas, Calendar, Maps, and Places context requires both:
+
+- build/runtime connector configuration through `.env` or `--dart-define`
+- the in-app `Canvas/Google live data` switch turned on by the student
+
+If either condition is missing, ORBIT stays local-first and adds a source note
+explaining why live data was not fetched. Manual one-time imports remain
+available for controlled demos, but automatic assistant context is gated.
+
 The Resource Navigator also has an offline UMD catalog so the demo stays
-grounded without network credentials. It includes Accessibility and Disability
-Service, Counseling Center, Teaching and Learning Transformation Center,
-University Career Center, University Health Center, UMD Dining Services, Campus
-Pantry, Resident Life, Department of Transportation Services, International
-Student and Scholar Services, and the Writing Center. These entries are used as
-local routing anchors and fallback recommendations; live details should come
-from a future UMD resource retrieval backend.
+grounded without network credentials. It now covers the high-frequency UMD
+student needs found in official campus pages and student forum patterns:
+accommodations, Counseling Center crisis support, Help Center peer support,
+TLTC/GSS/math/Keystone tutoring, OMSE, Career Center, Health Center, Dining
+allergy/special-diet support, Campus Pantry, Resident Life, DOTS/Shuttle-UM,
+NITE Ride, Paratransit, Terp Ride, UMD Guardian, Student Legal Aid, Student
+Crisis Fund, Financial Aid, Dean of Students, Registrar, CARE to Stop Violence,
+OCRSM/Title IX, ISSS, and the Writing Center. These entries are used as local
+routing anchors and fallback recommendations; live details should come from a
+future UMD resource retrieval backend.
 
 ## Demo Readiness
 
@@ -132,10 +162,36 @@ For a business demo, prepare two paths:
    suggestions in the local UMD catalog.
 2. Real-data path: run a desktop build with `.env` credentials for Canvas,
    Google Calendar, and Google Maps/Places, and set
-   `EXTERNAL_DATA_ENABLED=true`. ORBIT imports those signals, refreshes routing
-   labels, updates the support pulse, runs personalized live searches when the
-   task needs them, and injects the structured snapshot into the local model
-   prompt.
+   `EXTERNAL_DATA_ENABLED=true`. In Settings > Real Data Consent, turn on
+   `Canvas/Google live data` for the demo student. ORBIT imports those signals,
+   refreshes routing labels, updates the support pulse, runs personalized live
+   searches when the task needs them, and injects the structured snapshot into
+   the local model prompt.
+
+The chat header now includes a demo-status entry for a polished desktop/web
+pitch path. It loads a UMD vegan-student scenario with Canvas deadlines,
+calendar pressure, vegan Google Places results, a campus route, stress alerts,
+tool-routing chips, and a one-click prompt that can be sent through the ORBIT
+chat flow. The scenario is deterministic so judges see the same story every
+time, while the evaluation story is grounded in
+`test/fixtures/support_intelligence_eval_dataset.json`, a reproducible 40-user
+fixture with 25 high-stress, 13 elevated, and 2 steady synthetic UMD profiles.
+
+The same screen now also acts as a live monitor. On open, it requests the latest
+`StudentSignalSnapshot` from the configured connectors and converts any live
+Canvas, Calendar, Places, or Routes data into the stress meter, workload bars,
+alerts, prompt, and agent-tool path. If no connected signals are available, it
+falls back to the deterministic UMD demo fixture instead of showing a blank
+dashboard.
+
+The monitor also includes an in-app notification policy. It can raise stress,
+deadline, and focus-duration nudges, including a demo control that simulates a
+focused laptop block and recommends a walking/reset break when the student's
+configured threshold is reached. The default is 45 minutes, and users can tune
+the threshold from 15 to 180 minutes in Settings > Monitor or directly from the
+demo monitor panel. This is intentionally implemented as a pure policy layer
+first so it can later drive Android/iOS or desktop local notifications without
+changing the alert logic.
 
 Recommended local model choices:
 

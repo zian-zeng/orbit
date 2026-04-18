@@ -18,6 +18,8 @@ class SettingsProvider extends ChangeNotifier {
   bool _sendWithEnter = true;
   bool _autoFocusComposer = false;
   bool _showStarterPrompts = true;
+  int _focusBreakMinutes = 45;
+  bool _allowExternalStudentData = false;
 
   AppThemeMode get appThemeMode => _appThemeMode;
 
@@ -45,6 +47,10 @@ class SettingsProvider extends ChangeNotifier {
 
   bool get showStarterPrompts => _showStarterPrompts;
 
+  int get focusBreakMinutes => _focusBreakMinutes;
+
+  bool get allowExternalStudentData => _allowExternalStudentData;
+
   AppThemeMode _themeModeFromSettings(Settings settings) {
     final storedIndex = settings.themeModeIndex;
     if (storedIndex >= 0 && storedIndex < AppThemeMode.values.length) {
@@ -70,6 +76,8 @@ class SettingsProvider extends ChangeNotifier {
       _sendWithEnter = settings.sendWithEnter;
       _autoFocusComposer = settings.autoFocusComposer;
       _showStarterPrompts = settings.showStarterPrompts;
+      _focusBreakMinutes = settings.focusBreakMinutes.clamp(15, 180);
+      _allowExternalStudentData = settings.allowExternalStudentData;
     }
   }
 
@@ -87,6 +95,8 @@ class SettingsProvider extends ChangeNotifier {
           sendWithEnter: sendWithEnter,
           autoFocusComposer: autoFocusComposer,
           showStarterPrompts: showStarterPrompts,
+          focusBreakMinutes: focusBreakMinutes,
+          allowExternalStudentData: allowExternalStudentData,
         );
   }
 
@@ -205,6 +215,31 @@ class SettingsProvider extends ChangeNotifier {
     _saveSettings(current);
 
     _showStarterPrompts = value;
+    notifyListeners();
+  }
+
+  void setFocusBreakMinutes({
+    required int value,
+    Settings? settings,
+  }) {
+    final normalized = value.clamp(15, 180);
+    final current = _currentSettings(settings);
+    current.focusBreakMinutes = normalized;
+    _saveSettings(current);
+
+    _focusBreakMinutes = normalized;
+    notifyListeners();
+  }
+
+  void toggleExternalStudentData({
+    required bool value,
+    Settings? settings,
+  }) {
+    final current = _currentSettings(settings);
+    current.allowExternalStudentData = value;
+    _saveSettings(current);
+
+    _allowExternalStudentData = value;
     notifyListeners();
   }
 }

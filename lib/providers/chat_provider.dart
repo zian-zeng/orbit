@@ -329,6 +329,7 @@ class ChatProvider extends ChangeNotifier {
   }) async {
     final profileLabels = _profileLabelKeys();
     final externalSnapshot = await _contextAggregator.loadSnapshot(
+      allowExternalData: _allowExternalStudentData(),
       taskText: message,
       preferenceTags: profileLabels,
     );
@@ -362,6 +363,17 @@ class ChatProvider extends ChangeNotifier {
       assistantMessage: assistantMessage,
       text: response.text.trim(),
     );
+  }
+
+  bool _allowExternalStudentData() {
+    if (!Hive.isBoxOpen(Constants.settingsBox)) {
+      return false;
+    }
+    final settingsBox = Boxes.getSettings();
+    if (settingsBox.isEmpty) {
+      return false;
+    }
+    return settingsBox.getAt(0)?.allowExternalStudentData ?? false;
   }
 
   Future<String> _conversationSummaryForAgent({required String chatId}) async {

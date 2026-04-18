@@ -10,6 +10,7 @@ class ChatHeader extends StatelessWidget {
     required this.canStartNewChat,
     required this.onOpenHistory,
     required this.onOpenSettings,
+    required this.onOpenDemo,
     required this.onNewChat,
   });
 
@@ -18,6 +19,7 @@ class ChatHeader extends StatelessWidget {
   final bool canStartNewChat;
   final VoidCallback onOpenHistory;
   final VoidCallback onOpenSettings;
+  final VoidCallback onOpenDemo;
   final VoidCallback onNewChat;
 
   @override
@@ -78,6 +80,12 @@ class ChatHeader extends StatelessWidget {
               icon: CupertinoIcons.clock,
               tooltip: 'History',
               onTap: onOpenHistory,
+            ),
+            const SizedBox(width: 8),
+            AppIconButton(
+              icon: CupertinoIcons.chart_bar_alt_fill,
+              tooltip: 'Demo status',
+              onTap: onOpenDemo,
             ),
             const SizedBox(width: 8),
             AppIconButton(
