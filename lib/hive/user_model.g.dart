@@ -25,13 +25,18 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       importedSources: (fields[5] as List?)?.cast<String>() ?? const [],
       importedSourceRankings: (fields[6] as List?)?.cast<String>() ?? const [],
       email: fields[7] as String? ?? '',
+      isAuthorized: fields[8] as bool? ?? false,
+      hasCompletedOnboarding: fields[9] as bool? ?? false,
+      hasCompletedGuide: fields[10] as bool? ?? false,
+      authorizationMethod: fields[11] as String? ?? '',
+      authorizedAtIso: fields[12] as String? ?? '',
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.uid)
       ..writeByte(1)
@@ -47,7 +52,17 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(6)
       ..write(obj.importedSourceRankings)
       ..writeByte(7)
-      ..write(obj.email);
+      ..write(obj.email)
+      ..writeByte(8)
+      ..write(obj.isAuthorized)
+      ..writeByte(9)
+      ..write(obj.hasCompletedOnboarding)
+      ..writeByte(10)
+      ..write(obj.hasCompletedGuide)
+      ..writeByte(11)
+      ..write(obj.authorizationMethod)
+      ..writeByte(12)
+      ..write(obj.authorizedAtIso);
   }
 
   @override

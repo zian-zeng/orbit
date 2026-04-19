@@ -28,6 +28,21 @@ class UserModel extends HiveObject {
   @HiveField(7)
   final String email;
 
+  @HiveField(8)
+  final bool isAuthorized;
+
+  @HiveField(9)
+  final bool hasCompletedOnboarding;
+
+  @HiveField(10)
+  final bool hasCompletedGuide;
+
+  @HiveField(11)
+  final String authorizationMethod;
+
+  @HiveField(12)
+  final String authorizedAtIso;
+
   // constructor
   UserModel({
     required this.uid,
@@ -38,5 +53,10 @@ class UserModel extends HiveObject {
     this.importedSources = const [],
     this.importedSourceRankings = const [],
     this.email = '',
+    this.isAuthorized = false,
+    this.hasCompletedOnboarding = false,
+    this.hasCompletedGuide = false,
+    this.authorizationMethod = '',
+    this.authorizedAtIso = '',
   });
 }

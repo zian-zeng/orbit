@@ -6,6 +6,7 @@ import 'package:chatbotapp/providers/voice_input_provider.dart';
 import 'package:chatbotapp/screens/chat_screen.dart';
 import 'package:chatbotapp/screens/connected_apps_screen.dart';
 import 'package:chatbotapp/screens/home_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,17 +30,23 @@ Future<void> pumpChatScreen(WidgetTester tester) async {
 class TestUserProfileProvider extends UserProfileProvider {
   TestUserProfileProvider({
     required bool isReady,
+    bool isAuthorized = false,
+    bool hasCompletedGuide = false,
     required bool hasCompletedOnboarding,
     String name = 'You',
     String email = '',
     List<String> preferredLabelKeys = const [],
   })  : _isReady = isReady,
+        _isAuthorized = isAuthorized,
+        _hasCompletedGuide = hasCompletedGuide,
         _hasCompletedOnboarding = hasCompletedOnboarding,
         _name = name,
         _email = email,
         _preferredLabelKeys = preferredLabelKeys;
 
   bool _isReady;
+  bool _isAuthorized;
+  bool _hasCompletedGuide;
   bool _hasCompletedOnboarding;
   String _name;
   String _email;
@@ -49,10 +56,20 @@ class TestUserProfileProvider extends UserProfileProvider {
   bool get isReady => _isReady;
 
   @override
+  bool get isAuthorized => _isAuthorized;
+
+  @override
+  bool get hasCompletedGuide => _hasCompletedGuide;
+
+  @override
   bool get hasCompletedOnboarding => _hasCompletedOnboarding;
 
   @override
-  bool get shouldShowOnboarding => !_hasCompletedOnboarding;
+  bool get shouldShowOnboarding =>
+      _isAuthorized && _hasCompletedGuide && !_hasCompletedOnboarding;
+
+  @override
+  bool get shouldShowGuide => _isAuthorized && !_hasCompletedGuide;
 
   @override
   String get uid => _hasCompletedOnboarding ? 'test-user' : '';
@@ -84,10 +101,36 @@ class TestUserProfileProvider extends UserProfileProvider {
   }
 
   @override
+  Future<void> authorizeSession({
+    required String email,
+    required String authorizationMethod,
+  }) async {
+    _email = email;
+    _isAuthorized = true;
+    _hasCompletedGuide = false;
+    _hasCompletedOnboarding = false;
+    _isReady = true;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> completeGuide() async {
+    _isAuthorized = true;
+    _hasCompletedGuide = true;
+    _isReady = true;
+    notifyListeners();
+  }
+
+  @override
   Future<void> saveProfile({
     required String name,
     required String imagePath,
     String? email,
+    bool? isAuthorized,
+    bool? hasCompletedOnboarding,
+    bool? hasCompletedGuide,
+    String? authorizationMethod,
+    String? authorizedAtIso,
     List<String>? preferredLabelKeys,
     List<String>? importedLabelKeys,
     List<String>? importedSources,
@@ -95,8 +138,10 @@ class TestUserProfileProvider extends UserProfileProvider {
   }) async {
     _name = name.trim().isEmpty ? 'You' : name.trim();
     _email = email ?? _email;
+    _isAuthorized = isAuthorized ?? _isAuthorized;
+    _hasCompletedGuide = hasCompletedGuide ?? _hasCompletedGuide;
     _preferredLabelKeys = preferredLabelKeys ?? _preferredLabelKeys;
-    _hasCompletedOnboarding = true;
+    _hasCompletedOnboarding = hasCompletedOnboarding ?? true;
     _isReady = true;
     notifyListeners();
   }
@@ -143,12 +188,13 @@ void main() {
   testWidgets('Chat screen renders empty state', (WidgetTester tester) async {
     await pumpChatScreen(tester);
 
-    expect(find.text('Chat'), findsOneWidget);
+    expect(find.text('Orbit'), findsOneWidget);
     expect(find.text('You'), findsOneWidget);
     expect(find.text('How can I help?'), findsOneWidget);
     expect(find.text('Message'), findsOneWidget);
     expect(find.text('Map out a plan'), findsOneWidget);
     expect(find.text('Draft a polished reply'), findsOneWidget);
+    expect(find.text('Tap to prefill'), findsNothing);
   });
 
   testWidgets('Selecting a recommendation prefills the composer', (
@@ -156,6 +202,7 @@ void main() {
   ) async {
     await pumpChatScreen(tester);
 
+    await tester.ensureVisible(find.text('Draft a polished reply'));
     await tester.tap(find.text('Draft a polished reply'));
     await tester.pumpAndSettle();
 
@@ -164,6 +211,7 @@ void main() {
       textField.controller?.text,
       'Help me draft a clear, polished message about: ',
     );
+    expect(find.text('Draft a polished reply'), findsNothing);
   });
 
   testWidgets('Label override reshapes recommendations', (
@@ -171,6 +219,7 @@ void main() {
   ) async {
     await pumpChatScreen(tester);
 
+    await tester.ensureVisible(find.text('Image analysis'));
     await tester.tap(find.text('Image analysis'));
     await tester.pumpAndSettle();
 
@@ -259,25 +308,29 @@ void main() {
     expect(find.textContaining('requires approval'), findsWidgets);
   });
 
-  testWidgets('Home screen shows onboarding before chat for first-run users', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Home screen shows authorization before onboarding for new users',
+      (WidgetTester tester) async {
     await pumpHomeScreen(
       tester,
       userProfileProvider: TestUserProfileProvider(
         isReady: true,
+        isAuthorized: false,
         hasCompletedOnboarding: false,
       ),
     );
 
-    expect(find.text('Welcome to Orbit'), findsOneWidget);
-    expect(find.text('How can I help?'), findsNothing);
+    expect(find.text('Authorize Orbit'), findsOneWidget);
+    expect(
+      find.text('Welcome to Orbit'),
+      findsNothing,
+    );
   });
 
-  testWidgets('Completing onboarding unlocks chat',
+  testWidgets('Authorization continues into the startup guide',
       (WidgetTester tester) async {
     final userProfileProvider = TestUserProfileProvider(
       isReady: true,
+      isAuthorized: false,
       hasCompletedOnboarding: false,
     );
 
@@ -286,8 +339,99 @@ void main() {
       userProfileProvider: userProfileProvider,
     );
 
+    await tester.enterText(
+      find.byType(TextField).first,
+      'taylor@umd.edu',
+    );
+    final continueToGuideButton = find.widgetWithText(
+      FilledButton,
+      'Continue to guide',
+    );
+    await tester.ensureVisible(continueToGuideButton);
+    await tester.tap(continueToGuideButton);
+    await tester.pumpAndSettle();
+
+    expect(userProfileProvider.isAuthorized, isTrue);
+    expect(userProfileProvider.hasCompletedGuide, isFalse);
+    expect(find.text('How Orbit works'), findsOneWidget);
+    expect(find.text('Continue to setup'), findsOneWidget);
+  });
+
+  testWidgets('Home screen shows onboarding after guide completion',
+      (WidgetTester tester) async {
+    await pumpHomeScreen(
+      tester,
+      userProfileProvider: TestUserProfileProvider(
+        isReady: true,
+        isAuthorized: true,
+        hasCompletedGuide: true,
+        hasCompletedOnboarding: false,
+        email: 'taylor@umd.edu',
+      ),
+    );
+
+    expect(find.text('Finish your support profile'), findsOneWidget);
+    expect(find.text('Authorize Orbit'), findsNothing);
+    expect(find.text('How Orbit works'), findsNothing);
+  });
+
+  testWidgets('Onboarding options render as full-width selection boxes',
+      (WidgetTester tester) async {
+    await pumpHomeScreen(
+      tester,
+      userProfileProvider: TestUserProfileProvider(
+        isReady: true,
+        isAuthorized: true,
+        hasCompletedGuide: true,
+        hasCompletedOnboarding: false,
+        email: 'taylor@umd.edu',
+      ),
+    );
+
+    final optionFinder =
+        find.byKey(const ValueKey('option-primary_goal-stay_organized'));
+    expect(optionFinder, findsOneWidget);
+    expect(tester.getSize(optionFinder).width, greaterThan(500));
+    expect(
+      find.descendant(
+        of: optionFinder,
+        matching: find.byIcon(CupertinoIcons.chevron_right),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('Completing onboarding unlocks chat',
+      (WidgetTester tester) async {
+    final userProfileProvider = TestUserProfileProvider(
+      isReady: true,
+      isAuthorized: false,
+      hasCompletedOnboarding: false,
+    );
+
+    await pumpHomeScreen(
+      tester,
+      userProfileProvider: userProfileProvider,
+    );
+
+    await tester.enterText(find.byType(TextField).first, 'taylor@umd.edu');
+    final continueToGuideButton = find.widgetWithText(
+      FilledButton,
+      'Continue to guide',
+    );
+    await tester.ensureVisible(continueToGuideButton);
+    await tester.tap(continueToGuideButton);
+    await tester.pumpAndSettle();
+
+    final continueToSetupButton = find.widgetWithText(
+      FilledButton,
+      'Continue to setup',
+    );
+    await tester.ensureVisible(continueToSetupButton);
+    await tester.tap(continueToSetupButton);
+    await tester.pumpAndSettle();
+
     await tester.enterText(find.byType(TextField).first, 'Taylor');
-    await tester.enterText(find.byType(TextField).at(1), 'taylor@umd.edu');
     await _tapOnboardingOption(tester, 'primary_goal', 'feel_less_overwhelmed');
     await _tapOnboardingOption(tester, 'response_style', 'steady_support');
     await _tapOnboardingOption(tester, 'blocker', 'stress_spiral');
@@ -332,8 +476,32 @@ void main() {
     expect(userProfileProvider.email, 'taylor@umd.edu');
     expect(find.text('How can I help?'), findsOneWidget);
     expect(find.text('Support pulse'), findsOneWidget);
+    expect(find.text('Use a question or action to draft the next prompt.'), findsOneWidget);
     expect(find.text('Reflect and regroup'), findsOneWidget);
-    expect(find.text('Welcome to Orbit'), findsNothing);
+    expect(find.text('Finish your support profile'), findsNothing);
+  });
+
+  testWidgets('Guide can be reopened from the chat workspace',
+      (WidgetTester tester) async {
+    await pumpHomeScreen(
+      tester,
+      userProfileProvider: TestUserProfileProvider(
+        isReady: true,
+        isAuthorized: true,
+        hasCompletedGuide: true,
+        hasCompletedOnboarding: true,
+        email: 'taylor@umd.edu',
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Guide'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Guide'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('How Orbit works'), findsOneWidget);
+    expect(find.text('Continue to chat'), findsOneWidget);
   });
 }
 

@@ -77,4 +77,18 @@ void main() {
     expect(saved.recommendedSkillId, 'workflow.plan_next_steps');
     expect(saved.templateId, 'template.plan_next_steps');
   });
+
+  test('web storage setup skips the native documents directory', () {
+    expect(ChatProvider.resolveHiveDocumentsPath(isWeb: true), isNull);
+  });
+
+  test('native storage setup keeps the documents directory path', () {
+    expect(
+      ChatProvider.resolveHiveDocumentsPath(
+        isWeb: false,
+        documentsPath: '/tmp/orbit',
+      ),
+      '/tmp/orbit',
+    );
+  });
 }

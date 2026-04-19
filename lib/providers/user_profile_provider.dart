@@ -27,6 +27,11 @@ class UserProfileProvider extends ChangeNotifier {
   String _name = 'You';
   String _email = '';
   String _imagePath = '';
+  bool _isAuthorized = false;
+  bool _hasCompletedOnboarding = false;
+  bool _hasCompletedGuide = false;
+  String _authorizationMethod = '';
+  String _authorizedAtIso = '';
   List<String> _preferredLabelKeys = [];
   List<String> _importedLabelKeys = [];
   Map<String, List<String>> _importedSourceRankings = {};
@@ -36,16 +41,21 @@ class UserProfileProvider extends ChangeNotifier {
   StudentSignalSnapshot? _latestStudentSnapshot;
   bool _isRefreshingExternalSignals = false;
   bool _isReady = false;
-  bool _shouldShowOnboarding = false;
 
   String get uid => _uid;
   String get name => _name.trim().isEmpty ? 'You' : _name.trim();
   String get email => _email.trim();
   String get firstName => name.split(' ').first;
   String get imagePath => _imagePath;
+  bool get isAuthorized => _isAuthorized;
   bool get isReady => _isReady;
-  bool get hasCompletedOnboarding => _uid.trim().isNotEmpty;
-  bool get shouldShowOnboarding => _shouldShowOnboarding;
+  bool get hasCompletedOnboarding => _hasCompletedOnboarding;
+  bool get hasCompletedGuide => _hasCompletedGuide;
+  bool get shouldShowOnboarding =>
+      _isAuthorized && _hasCompletedGuide && !_hasCompletedOnboarding;
+  bool get shouldShowGuide => _isAuthorized && !_hasCompletedGuide;
+  String get authorizationMethod => _authorizationMethod;
+  String get authorizedAtIso => _authorizedAtIso;
   List<String> get preferredLabelKeys =>
       List<String>.unmodifiable(_preferredLabelKeys);
   List<String> get importedLabelKeys =>
@@ -69,11 +79,20 @@ class UserProfileProvider extends ChangeNotifier {
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
   }
 
-  void _resetProfile({required bool shouldShowOnboarding}) {
+  void _resetProfile({
+    required bool isAuthorized,
+    required bool hasCompletedOnboarding,
+    required bool hasCompletedGuide,
+  }) {
     _uid = '';
     _name = 'You';
     _email = '';
     _imagePath = '';
+    _isAuthorized = isAuthorized;
+    _hasCompletedOnboarding = hasCompletedOnboarding;
+    _hasCompletedGuide = hasCompletedGuide;
+    _authorizationMethod = '';
+    _authorizedAtIso = '';
     _preferredLabelKeys = [];
     _importedLabelKeys = [];
     _importedSourceRankings = {};
@@ -82,7 +101,6 @@ class UserProfileProvider extends ChangeNotifier {
     _labelSignalSources = [];
     _latestStudentSnapshot = null;
     _isRefreshingExternalSignals = false;
-    _shouldShowOnboarding = shouldShowOnboarding;
   }
 
   bool _hasLegacyActivity() {
@@ -143,23 +161,44 @@ class UserProfileProvider extends ChangeNotifier {
   Future<void> loadUser() async {
     try {
       final userBox = Boxes.getUser();
+      final hasLegacyActivity = _hasLegacyActivity();
       if (userBox.isEmpty) {
-        _resetProfile(shouldShowOnboarding: !_hasLegacyActivity());
+        _resetProfile(
+          isAuthorized: hasLegacyActivity,
+          hasCompletedOnboarding: hasLegacyActivity,
+          hasCompletedGuide: hasLegacyActivity,
+        );
         _refreshRoutingLabels();
         return;
       }
 
       final user = userBox.getAt(0);
       if (user == null) {
-        _resetProfile(shouldShowOnboarding: !_hasLegacyActivity());
+        _resetProfile(
+          isAuthorized: hasLegacyActivity,
+          hasCompletedOnboarding: hasLegacyActivity,
+          hasCompletedGuide: hasLegacyActivity,
+        );
         _refreshRoutingLabels();
         return;
       }
 
+      final legacyAuthorized =
+          user.uid.trim().isNotEmpty || user.email.trim().isNotEmpty;
+      final looksLikeLegacyCompletedProfile = user.uid.trim().isNotEmpty &&
+          !user.isAuthorized &&
+          user.authorizationMethod.trim().isEmpty &&
+          user.authorizedAtIso.trim().isEmpty;
       _uid = user.uid;
       _name = user.name;
       _email = user.email;
       _imagePath = user.image;
+      _isAuthorized = user.isAuthorized || legacyAuthorized;
+      _hasCompletedOnboarding =
+          user.hasCompletedOnboarding || looksLikeLegacyCompletedProfile;
+      _hasCompletedGuide = user.hasCompletedGuide || _hasCompletedOnboarding;
+      _authorizationMethod = user.authorizationMethod;
+      _authorizedAtIso = user.authorizedAtIso;
       _preferredLabelKeys = List<String>.from(user.preferredLabels);
       _importedSourceRankings = _deserializeImportedSourceRankings(
         user.importedSourceRankings,
@@ -170,9 +209,12 @@ class UserProfileProvider extends ChangeNotifier {
         };
       }
       _refreshRoutingLabels();
-      _shouldShowOnboarding = false;
     } catch (error, stackTrace) {
-      _resetProfile(shouldShowOnboarding: false);
+      _resetProfile(
+        isAuthorized: false,
+        hasCompletedOnboarding: false,
+        hasCompletedGuide: false,
+      );
       _refreshRoutingLabels();
       log(
         'Failed to load user profile',
@@ -189,18 +231,32 @@ class UserProfileProvider extends ChangeNotifier {
     required String name,
     required String imagePath,
     String? email,
+    bool? isAuthorized,
+    bool? hasCompletedOnboarding,
+    bool? hasCompletedGuide,
+    String? authorizationMethod,
+    String? authorizedAtIso,
     List<String>? preferredLabelKeys,
     List<String>? importedLabelKeys,
     List<String>? importedSources,
     List<String>? importedSourceRankings,
   }) async {
     final trimmedName = name.trim().isEmpty ? 'You' : name.trim();
+    final resolvedHasCompletedOnboarding =
+        hasCompletedOnboarding ?? _hasCompletedOnboarding;
     final userBox = Boxes.getUser();
     final user = UserModel(
-      uid: _uid.isEmpty ? const Uuid().v4() : _uid,
+      uid: resolvedHasCompletedOnboarding
+          ? (_uid.isEmpty ? const Uuid().v4() : _uid)
+          : _uid,
       name: trimmedName,
       image: imagePath,
       email: email ?? _email,
+      isAuthorized: isAuthorized ?? _isAuthorized,
+      hasCompletedOnboarding: resolvedHasCompletedOnboarding,
+      hasCompletedGuide: hasCompletedGuide ?? _hasCompletedGuide,
+      authorizationMethod: authorizationMethod ?? _authorizationMethod,
+      authorizedAtIso: authorizedAtIso ?? _authorizedAtIso,
       preferredLabels: preferredLabelKeys ?? _preferredLabelKeys,
       importedLabels: importedLabelKeys ?? _importedLabelKeys,
       importedSources: importedSources ?? _importedSourceNames,
@@ -218,6 +274,11 @@ class UserProfileProvider extends ChangeNotifier {
     _name = user.name;
     _email = user.email;
     _imagePath = user.image;
+    _isAuthorized = user.isAuthorized;
+    _hasCompletedOnboarding = user.hasCompletedOnboarding;
+    _hasCompletedGuide = user.hasCompletedGuide;
+    _authorizationMethod = user.authorizationMethod;
+    _authorizedAtIso = user.authorizedAtIso;
     _preferredLabelKeys = List<String>.from(user.preferredLabels);
     _importedSourceRankings = _deserializeImportedSourceRankings(
       user.importedSourceRankings,
@@ -225,12 +286,36 @@ class UserProfileProvider extends ChangeNotifier {
     if (_importedSourceRankings.isEmpty && user.importedSources.isNotEmpty) {
       _importedSourceRankings = {
         user.importedSources.first: List<String>.from(user.importedLabels),
-      };
+        };
     }
     _refreshRoutingLabels();
     _isReady = true;
-    _shouldShowOnboarding = false;
     notifyListeners();
+  }
+
+  Future<void> authorizeSession({
+    required String email,
+    required String authorizationMethod,
+  }) async {
+    await saveProfile(
+      name: _name,
+      imagePath: _imagePath,
+      email: email.trim(),
+      isAuthorized: true,
+      hasCompletedGuide: false,
+      hasCompletedOnboarding: false,
+      authorizationMethod: authorizationMethod,
+      authorizedAtIso: DateTime.now().toUtc().toIso8601String(),
+    );
+  }
+
+  Future<void> completeGuide() async {
+    await saveProfile(
+      name: _name,
+      imagePath: _imagePath,
+      isAuthorized: true,
+      hasCompletedGuide: true,
+    );
   }
 
   Future<void> rememberPreferredLabel(String labelKey) async {

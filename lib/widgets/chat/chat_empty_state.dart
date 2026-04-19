@@ -34,26 +34,40 @@ class ChatEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return SingleChildScrollView(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 44),
+          const SizedBox(height: 28),
+          Text(
+            'Workspace',
+            style: textTheme.labelLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 10),
           Text(
             'How can I help?',
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.8,
+            ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Choose a focus or try a recommendation below',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-            textAlign: TextAlign.center,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 540),
+            child: Text(
+              'Start with one routed prompt, or choose a focus lane to shape the first response.',
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
           if (supportBundle != null) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             _SupportPulseCard(
               bundle: supportBundle!,
               onPromptTap: onInsightPromptTap,
@@ -62,28 +76,61 @@ class ChatEmptyState extends StatelessWidget {
             ),
           ],
           if (showStarterPrompts) ...[
-            const SizedBox(height: 20),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                ChoiceChip(
-                  label: const Text('Auto'),
-                  selected: selectedLabel == null,
-                  onSelected: (_) => onLabelSelected(null),
-                ),
-                ...labels.map(
-                  (label) => ChoiceChip(
-                    label: Text(label.displayName),
-                    selected: selectedLabel == label,
-                    onSelected: (_) => onLabelSelected(label),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 24),
+            Text(
+              'Focus lane',
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 6),
+            Text(
+              'Use a lane to narrow the first reply before you send anything.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: const Text('Auto'),
+                    selected: selectedLabel == null,
+                    onSelected: (_) => onLabelSelected(null),
+                  ),
+                  const SizedBox(width: 8),
+                  ...labels.expand(
+                    (label) => [
+                      ChoiceChip(
+                        label: Text(label.displayName),
+                        selected: selectedLabel == label,
+                        onSelected: (_) => onLabelSelected(label),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Suggested starts',
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Choose one to start with a routed draft.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: recommendations
                   .map(
                     (recommendation) => Padding(
@@ -94,7 +141,7 @@ class ChatEmptyState extends StatelessWidget {
                       ),
                     ),
                   )
-                  .toList(),
+                  .toList(growable: false),
             ),
           ],
           if (!apiConfigured) ...[
@@ -146,6 +193,7 @@ class _SupportPulseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       width: double.infinity,
@@ -195,7 +243,14 @@ class _SupportPulseCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             bundle.stressReport.summary,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Use a question or action to draft the next prompt.',
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           if (bundle.stressReport.sourceBadges.isNotEmpty) ...[
             const SizedBox(height: 10),
@@ -209,17 +264,27 @@ class _SupportPulseCard extends StatelessWidget {
           ],
           const SizedBox(height: 14),
           Text(
-            'Questions to ask next',
-            style: Theme.of(context).textTheme.titleSmall,
+            'Quick check-ins',
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
+          Text(
+            'Choose one to start a grounded follow-up.',
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: bundle.questions
                 .map(
-                  (question) => ActionChip(
-                    label: Text(question.title),
+                  (question) => _PromptPillButton(
+                    icon: CupertinoIcons.chat_bubble_text,
+                    label: question.title,
                     onPressed: () => onPromptTap(question.prompt),
                   ),
                 )
@@ -227,32 +292,26 @@ class _SupportPulseCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'Suggestions',
-            style: Theme.of(context).textTheme.titleSmall,
+            'Next actions',
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
+          Text(
+            'These turn the pulse into something concrete right now.',
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
           ...bundle.suggestions.map(
             (suggestion) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: OutlinedButton(
+              child: _SupportActionTile(
                 onPressed: () => onPromptTap(suggestion.prompt),
-                style: OutlinedButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.all(14),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(suggestion.title),
-                    const SizedBox(height: 4),
-                    Text(
-                      suggestion.detail,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ],
-                ),
+                title: suggestion.title,
+                detail: suggestion.detail,
               ),
             ),
           ),
@@ -272,7 +331,9 @@ class _SupportPulseCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         bundle.skill.title,
-                        style: Theme.of(context).textTheme.titleSmall,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     Wrap(
@@ -292,9 +353,16 @@ class _SupportPulseCard extends StatelessWidget {
                 ),
                 Text(
                   bundle.skill.summary,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Copy or save this workflow if you want to reuse it later.',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -317,7 +385,7 @@ class _SupportPulseCard extends StatelessWidget {
   }
 }
 
-class _RecommendationCard extends StatelessWidget {
+class _RecommendationCard extends StatefulWidget {
   const _RecommendationCard({
     required this.recommendation,
     required this.onTap,
@@ -327,69 +395,240 @@ class _RecommendationCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_RecommendationCard> createState() => _RecommendationCardState();
+}
+
+class _RecommendationCardState extends State<_RecommendationCard> {
+  bool _isHovering = false;
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
-      child: Ink(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 160),
+        scale: _isHovering ? 1.01 : 1,
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(32),
+          child: Ink(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  _isHovering
+                      ? colorScheme.primaryContainer.withValues(alpha: 0.42)
+                      : colorScheme.surfaceContainerLow,
+                  _isHovering
+                      ? colorScheme.secondaryContainer.withValues(alpha: 0.32)
+                      : colorScheme.surface,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: _isHovering
+                    ? colorScheme.primary.withValues(alpha: 0.5)
+                    : colorScheme.outlineVariant.withValues(alpha: 0.6),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withValues(
+                    alpha: _isHovering ? 0.08 : 0.04,
+                  ),
+                  blurRadius: _isHovering ? 22 : 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    CupertinoIcons.sparkles,
-                    size: 16,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      recommendation.title,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                  ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(999),
+                      color: colorScheme.primaryContainer.withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                    child: Text(
-                      recommendation.label.displayName,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
+                    child: Icon(
+                      CupertinoIcons.sparkles,
+                      size: 18,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.recommendation.title,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                widget.recommendation.label.displayName,
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.recommendation.description,
+                          style: textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.recommendation.reason,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
                           ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                recommendation.description,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                recommendation.reason,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PromptPillButton extends StatelessWidget {
+  const _PromptPillButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: colorScheme.onSurface,
+        backgroundColor: colorScheme.surface,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+          side: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          ),
+        ),
+      ),
+      icon: Icon(icon, size: 16, color: colorScheme.primary),
+      label: Text(label),
+    );
+  }
+}
+
+class _SupportActionTile extends StatelessWidget {
+  const _SupportActionTile({
+    required this.onPressed,
+    required this.title,
+    required this.detail,
+  });
+
+  final VoidCallback onPressed;
+  final String title;
+  final String detail;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(20),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.primary,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      detail,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Use',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),

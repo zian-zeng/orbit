@@ -8,6 +8,7 @@ class ChatHeader extends StatelessWidget {
     required this.userName,
     required this.modelLabel,
     required this.canStartNewChat,
+    required this.onOpenGuide,
     required this.onOpenHistory,
     required this.onOpenSettings,
     required this.onOpenDemo,
@@ -19,6 +20,7 @@ class ChatHeader extends StatelessWidget {
   final String userName;
   final String modelLabel;
   final bool canStartNewChat;
+  final VoidCallback onOpenGuide;
   final VoidCallback onOpenHistory;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenDemo;
@@ -31,47 +33,44 @@ class ChatHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Chat',
-                style: theme.textTheme.titleLarge,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Text(
-                      userName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 820;
+
+        final titleBlock = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Orbit',
+              style: theme.textTheme.titleLarge,
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Text(
+                  userName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: _CompactMetric(
-                        icon: CupertinoIcons.sparkles,
-                        label: modelLabel,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+                ),
+                _CompactMetric(
+                  icon: CupertinoIcons.sparkles,
+                  label: modelLabel,
+                ),
+              ],
+            ),
+          ],
+        );
+
+        final actions = Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.end,
           children: [
             AppIconButton(
               icon: CupertinoIcons.square_pencil,
@@ -79,39 +78,68 @@ class ChatHeader extends StatelessWidget {
               isEnabled: canStartNewChat,
               onTap: onNewChat,
             ),
-            const SizedBox(width: 8),
+            AppIconButton(
+              icon: CupertinoIcons.book,
+              tooltip: 'Guide',
+              onTap: onOpenGuide,
+            ),
             AppIconButton(
               icon: CupertinoIcons.clock,
               tooltip: 'History',
               onTap: onOpenHistory,
             ),
-            const SizedBox(width: 8),
             AppIconButton(
               icon: CupertinoIcons.chart_bar_alt_fill,
               tooltip: 'Demo status',
               onTap: onOpenDemo,
             ),
-            const SizedBox(width: 8),
             AppIconButton(
               icon: CupertinoIcons.calendar_badge_plus,
               tooltip: 'Course planner',
               onTap: onOpenCoursePlanner,
             ),
-            const SizedBox(width: 8),
             AppIconButton(
               icon: CupertinoIcons.square_stack_3d_up_fill,
               tooltip: 'Intelligence dashboard',
               onTap: onOpenIntelligence,
             ),
-            const SizedBox(width: 8),
             AppIconButton(
               icon: CupertinoIcons.settings,
               tooltip: 'Settings',
               onTap: onOpenSettings,
             ),
           ],
-        ),
-      ],
+        );
+
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: titleBlock,
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: actions,
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: titleBlock),
+            const SizedBox(width: 16),
+            Align(
+              alignment: Alignment.topRight,
+              child: actions,
+            ),
+          ],
+        );
+      },
     );
   }
 }
