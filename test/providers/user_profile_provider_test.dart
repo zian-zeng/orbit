@@ -72,6 +72,24 @@ void main() {
     );
   });
 
+  test('authorizeSession reopens at the guide until setup is complete',
+      () async {
+    await provider.authorizeSession(
+      email: 'taylor@umd.edu',
+      authorizationMethod: 'school-email',
+    );
+
+    final reloadedProvider = UserProfileProvider();
+    await reloadedProvider.loadUser();
+
+    expect(reloadedProvider.isAuthorized, isTrue);
+    expect(reloadedProvider.uid, isEmpty);
+    expect(reloadedProvider.hasCompletedGuide, isFalse);
+    expect(reloadedProvider.hasCompletedOnboarding, isFalse);
+    expect(reloadedProvider.shouldShowGuide, isTrue);
+    expect(reloadedProvider.shouldShowOnboarding, isFalse);
+  });
+
   test('loadUser recovers to a ready default state when storage access fails',
       () async {
     await Hive.close();
@@ -103,6 +121,28 @@ void main() {
     expect(provider.isReady, isTrue);
     expect(provider.shouldShowOnboarding, isFalse);
     expect(provider.name, 'You');
+  });
+
+  test('loadUser preserves legacy saved profiles through the new startup gates',
+      () async {
+    await Hive.box<UserModel>(Constants.userBox).add(
+      UserModel(
+        uid: 'legacy-user',
+        name: 'Taylor',
+        email: 'taylor@umd.edu',
+        image: '',
+        preferredLabels: const ['planning', 'writing'],
+      ),
+    );
+
+    await provider.loadUser();
+
+    expect(provider.isAuthorized, isTrue);
+    expect(provider.hasCompletedOnboarding, isTrue);
+    expect(provider.hasCompletedGuide, isTrue);
+    expect(provider.shouldShowGuide, isFalse);
+    expect(provider.shouldShowOnboarding, isFalse);
+    expect(provider.email, 'taylor@umd.edu');
   });
 
   test('imported signals and history enrich routing labels', () async {

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+// ignore: depend_on_referenced_packages
+import 'package:http/http.dart' as http;
 
 class LocalLlmConfig {
   const LocalLlmConfig({
@@ -101,12 +102,12 @@ class LocalLlmException implements Exception {
 class OllamaLocalLlmClient implements LocalLlmClient {
   OllamaLocalLlmClient({
     LocalLlmConfig? config,
-    HttpClient? httpClient,
+    http.Client? httpClient,
   })  : config = config ?? LocalLlmConfig.fromEnvironment(),
-        _httpClient = httpClient ?? HttpClient();
+        _httpClient = httpClient ?? http.Client();
 
   final LocalLlmConfig config;
-  final HttpClient _httpClient;
+  final http.Client _httpClient;
 
   @override
   Future<LocalLlmResult> generate(LocalLlmRequest request) async {
@@ -114,27 +115,26 @@ class OllamaLocalLlmClient implements LocalLlmClient {
     final uri =
         endpoint.replace(path: _joinPath(endpoint.path, 'api/generate'));
 
-    final httpRequest =
-        await _httpClient.postUrl(uri).timeout(const Duration(seconds: 8));
-    httpRequest.headers.contentType = ContentType.json;
-    httpRequest.add(
-      utf8.encode(
-        jsonEncode({
-          'model': config.model,
-          'system': request.systemPrompt,
-          'prompt': request.prompt,
-          'stream': false,
-          'options': {
-            'temperature': request.temperature,
-            'num_predict': request.maxTokens,
-            'num_ctx': 4096,
+    final response = await _httpClient
+        .post(
+          uri,
+          headers: const {
+            'Content-Type': 'application/json',
           },
-        }),
-      ),
-    );
-
-    final response = await httpRequest.close().timeout(config.timeout);
-    final body = await response.transform(utf8.decoder).join();
+          body: jsonEncode({
+            'model': config.model,
+            'system': request.systemPrompt,
+            'prompt': request.prompt,
+            'stream': false,
+            'options': {
+              'temperature': request.temperature,
+              'num_predict': request.maxTokens,
+              'num_ctx': 4096,
+            },
+          }),
+        )
+        .timeout(config.timeout);
+    final body = response.body;
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw LocalLlmException(

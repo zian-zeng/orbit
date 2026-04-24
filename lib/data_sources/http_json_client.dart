@@ -1,21 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+// ignore: depend_on_referenced_packages
+import 'package:http/http.dart' as http;
 
 class HttpJsonClient {
-  HttpJsonClient({HttpClient? httpClient})
-      : _httpClient = httpClient ?? HttpClient();
+  HttpJsonClient({http.Client? httpClient})
+      : _httpClient = httpClient ?? http.Client();
 
-  final HttpClient _httpClient;
+  final http.Client _httpClient;
 
   Future<dynamic> getJson(
     Uri uri, {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 12),
   }) async {
-    final request = await _httpClient.getUrl(uri).timeout(timeout);
-    headers.forEach(request.headers.set);
-    final response = await request.close().timeout(timeout);
+    final response = await _httpClient.get(
+      uri,
+      headers: headers,
+    ).timeout(timeout);
     return _decodeResponse(response);
   }
 
@@ -25,16 +27,21 @@ class HttpJsonClient {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 12),
   }) async {
-    final request = await _httpClient.postUrl(uri).timeout(timeout);
-    request.headers.contentType = ContentType.json;
-    headers.forEach(request.headers.set);
-    request.add(utf8.encode(jsonEncode(body)));
-    final response = await request.close().timeout(timeout);
+    final response = await _httpClient
+        .post(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+          },
+          body: jsonEncode(body),
+        )
+        .timeout(timeout);
     return _decodeResponse(response);
   }
 
-  Future<dynamic> _decodeResponse(HttpClientResponse response) async {
-    final body = await response.transform(utf8.decoder).join();
+  Future<dynamic> _decodeResponse(http.Response response) async {
+    final body = response.body;
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw HttpJsonException(
         'HTTP ${response.statusCode}: ${_shorten(body)}',

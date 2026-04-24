@@ -1,7 +1,8 @@
 class Constants {
-  static const String appName = 'AI Chatbot';
-  static const String appTitle = 'AI Chatbot';
-  static const String appDescription = 'Local ORBIT agent chat';
+  static const String appName = 'Orbit';
+  static const String appTitle = 'Orbit';
+  static const String appDescription =
+      'Local-first student support workspace';
   static const String chatHistoryBox = 'chat_history';
   static const String userBox = 'user_box';
   static const String settingsBox = 'settings';

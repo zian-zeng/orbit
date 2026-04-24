@@ -13,6 +13,7 @@ import 'package:chatbotapp/screens/course_planner_screen.dart';
 import 'package:chatbotapp/screens/demo_status_screen.dart';
 import 'package:chatbotapp/screens/intelligence_dashboard_screen.dart';
 import 'package:chatbotapp/screens/settings_screen.dart';
+import 'package:chatbotapp/screens/startup_guide_screen.dart';
 import 'package:chatbotapp/services/prompt_router.dart';
 import 'package:chatbotapp/services/skill_registry_service.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
@@ -367,6 +368,12 @@ class _ChatScreenState extends State<ChatScreen> {
         final recommendations = _promptRouter.recommend(
           context: routingContext,
         );
+        final visibleRecommendations = recommendations
+            .where(
+              (recommendation) =>
+                  recommendation.promptTemplate.trim() != _draftText.trim(),
+            )
+            .toList(growable: false);
         final supportBundle = userProfile.buildSupportIntelligence(
           recentLabelKeys: chatProvider.recentLabelKeys(),
         );
@@ -395,6 +402,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 userName: userName,
                 modelLabel: _modelLabel(chatProvider.modelType),
                 canStartNewChat: chatProvider.hasMessages,
+                onOpenGuide: () =>
+                    _openPage<void>(const StartupGuideScreen(isRevisit: true)),
                 onOpenHistory: () => _openPage<void>(const ChatHistoryScreen()),
                 onOpenSettings: () => _openPage<void>(const SettingsScreen()),
                 onOpenDemo: _openDemoPath,
@@ -429,7 +438,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       settingsProvider.showStarterPrompts,
                                   supportBundle: supportBundle,
                                   labels: _promptRouter.labels,
-                                  recommendations: recommendations,
+                                  recommendations: visibleRecommendations,
                                   selectedLabel: _selectedLabel,
                                   onSuggestionTap: _applyRecommendation,
                                   onInsightPromptTap: (prompt) =>

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:chatbotapp/agents/orbit_agent_orchestrator.dart';
 import 'package:chatbotapp/agents/orbit_models.dart';
 import 'package:chatbotapp/apis/api_service.dart';
@@ -589,6 +588,10 @@ class ChatProvider extends ChangeNotifier {
       return const <XFile>[];
     }
 
+    if (kIsWeb) {
+      return List<XFile>.from(images);
+    }
+
     final appDir = await path.getApplicationDocumentsDirectory();
     final mediaDir = Directory(
       '${appDir.path}/${Constants.geminiDB}/chat_media/$chatId',
@@ -670,9 +673,26 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  static String? resolveHiveDocumentsPath({
+    required bool isWeb,
+    String? documentsPath,
+  }) {
+    if (isWeb) {
+      return null;
+    }
+    return documentsPath;
+  }
+
   static initHive() async {
-    final dir = await path.getApplicationDocumentsDirectory();
-    Hive.init(dir.path);
+    final dirPath = resolveHiveDocumentsPath(
+      isWeb: kIsWeb,
+      documentsPath: kIsWeb
+          ? null
+          : (await path.getApplicationDocumentsDirectory()).path,
+    );
+    if (dirPath != null && dirPath.isNotEmpty) {
+      Hive.init(dirPath);
+    }
     await Hive.initFlutter(Constants.geminiDB);
 
     if (!Hive.isAdapterRegistered(0)) {
