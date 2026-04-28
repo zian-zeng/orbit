@@ -1,5 +1,7 @@
 # ORBIT
 
+![ORBIT product poster](<images/Orbit Poster.png>)
+
 ## Personalized Multi-Agent AI for Student Life, Academic Planning, and Wellbeing
 
 ORBIT is a student-centered AI workspace that helps college students plan their
@@ -20,20 +22,20 @@ every day.
 
 ## Product Narrative
 
-ORBIT can be understood as a student success operating layer. It starts with the
-student's situation, turns that context into labels, activates the right agent
-roles, checks the right tools or data sources, and returns a plan the student can
-actually use.
+ORBIT can be understood as a **student success operating layer**. It starts with
+the student's situation, turns that context into **labels**, activates the right
+**agent roles**, checks the right **tools or data sources**, and returns a plan
+the student can actually use.
 
 | Moment | Product focus | What it demonstrates |
 | --- | --- | --- |
-| Student problem | Disconnected tools and cognitive overload | Students are overloaded by coordination work, not just by missing information. |
-| Product vision | Personalized student AI workspace | ORBIT is built for student life, not generic conversation. |
-| Setup | Adaptive questions and labels | A student profile becomes routing logic for future help. |
-| Chat | Multi-role agent collaboration | One message can activate academic, stress, campus, career, and logistics agents. |
-| Report | Student-facing wellbeing and workload intelligence | ORBIT turns history into warm, actionable guidance. |
-| Campus intelligence | UMD-specific data and resources | Course planning, food, maps, housing, rent, tutoring, disability support, and career resources can be routed from one place. |
-| Architecture | Explainable agent system | Every answer can expose agents, tools, model path, and fallback reason. |
+| Student problem | **Disconnected tools** and **cognitive overload** | Students are overloaded by coordination work, not just by missing information. |
+| Product vision | **Personalized student AI workspace** | ORBIT is built for student life, not generic conversation. |
+| Setup | **Adaptive questions** and **labels** | A student profile becomes routing logic for future help. |
+| Chat | **Multi-role agent collaboration** | One message can activate academic, stress, campus, career, and logistics agents. |
+| Report | **Student-facing wellbeing and workload intelligence** | ORBIT turns history into warm, actionable guidance. |
+| Campus intelligence | **UMD-specific data and resources** | Course planning, food, maps, housing, rent, tutoring, disability support, and career resources can be routed from one place. |
+| Architecture | **Explainable agent system** | Every answer can expose agents, tools, model path, and fallback reason. |
 
 ---
 
@@ -59,13 +61,13 @@ context, workload signals, and current request.
 
 ## The Problem
 
-College students live inside a fragmented digital ecosystem:
+College students live inside a **fragmented digital ecosystem**:
 
-- Canvas or ELMS has assignments and deadlines.
-- Google Calendar has classes, work, events, and study blocks.
+- **Canvas / ELMS** has assignments and deadlines.
+- **Google Calendar** has classes, work, events, and study blocks.
 - Google Maps and campus routes determine what is realistic between locations.
-- Course/professor information lives in PlanetTerp, Testudo, umd.io, and review
-  sites.
+- Course/professor information lives in **PlanetTerp**, **Testudo**,
+  **umd.io**, and review/forum sources.
 - Accessibility, counseling, tutoring, financial aid, food security, housing,
   transport, and career support all live in separate offices and websites.
 - Students may also be first-generation, international, disabled, working,
@@ -73,10 +75,10 @@ College students live inside a fragmented digital ecosystem:
   understand that they may need accommodations.
 
 The real problem is not that information does not exist. The problem is that
-students must integrate all of it while already under stress.
+students must **integrate all of it while already under stress**.
 
-ORBIT's thesis: student support AI should act like a coordinated advisor system,
-not a single prompt-response bot.
+ORBIT's thesis: student support AI should act like a **coordinated advisor
+system**, not a single prompt-response bot.
 
 ---
 
@@ -110,13 +112,13 @@ ORBIT begins from a student model.
 
 | General chatbot | ORBIT |
 | --- | --- |
-| Responds mainly to the current text. | Uses current text plus labels, history, monitor state, and campus context. |
-| May give broad advice. | Builds a concrete next action based on deadlines, stress, route, food, schedule, and student constraints. |
-| Does not know what tools are safe to use. | Uses tool permissions and connected action cards. |
+| Responds mainly to the **current text**. | Uses current text plus **labels, history, monitor state, and campus context**. |
+| May give **broad advice**. | Builds a **concrete next action** based on deadlines, stress, route, food, schedule, and student constraints. |
+| Does not know what tools are safe to use. | Uses **tool permissions** and **connected action cards**. |
 | Does not automatically remember student-specific needs unless told repeatedly. | Stores durable local labels such as `vegan`, `working_student`, `first_generation_student`, `stress_sensitive`, `course_selection`, and `campus_navigation`. |
-| One model role answers everything. | Multiple specialized roles collaborate: academic planning, stress monitoring, campus resources, career strategy, life logistics, and response synthesis. |
-| Usually does not show why it answered a certain way. | Shows an agent trace so the user can see which agents and model path were used. |
-| Usually ignores campus-specific data unless pasted manually. | Can fetch or mimic Canvas, Calendar, Maps, Places, PlanetTerp, Testudo/umd.io, UMD resources, housing, rent, dining, and life logistics signals. |
+| One model role answers everything. | Multiple specialized roles collaborate: **academic planning**, **stress monitoring**, **campus resources**, **career strategy**, **life logistics**, and **response synthesis**. |
+| Usually does not show why it answered a certain way. | Shows an **agent trace** so the user can see which agents and model path were used. |
+| Usually ignores campus-specific data unless pasted manually. | Can fetch or mimic **Canvas**, **Calendar**, **Maps**, **Places**, **PlanetTerp**, **Testudo/umd.io**, **UMD resources**, housing, rent, dining, and life logistics signals. |
 
 The result is a more customized student experience: less generic, more grounded,
 and more action-oriented.
@@ -142,12 +144,14 @@ message as an isolated prompt. The system builds a short-lived decision context:
    agent logic if both model paths are unavailable.
 9. It records an agent trace and feedback signal so the answer is inspectable.
 
-This is the product moat: ORBIT turns student context into action, not just
+This is the product moat: ORBIT turns **student context into action**, not just
 conversation.
 
 ---
 
 ## Why Labelization Is Central
+
+![Label-To-Agent workflow diagram](<images/Label-To-Agent Workflow Diagram.png>)
 
 Labels are ORBIT's bridge between raw student context and personalized
 assistance. They let the system stay lightweight while still behaving as if it
@@ -170,6 +174,11 @@ change report recommendations, and prioritize resource-aware language.
 `campus_navigation` can make ORBIT consider walking routes and Google Maps
 actions. `course_selection` can route the question toward professor and workload
 signals.
+
+The diagram above shows the core workflow: **adaptive setup questions** become
+**profile labels**, labels become **runtime skills**, skills activate the right
+**agent roles**, connected tools supply real context, and ORBIT returns a
+**personalized student answer**.
 
 ---
 
@@ -320,33 +329,36 @@ system keeps the reasoning path inspectable through the agent trace.
 
 ## Live Demo Video 1: Ask for Food Place
 
-Video: [Orbit - Ask for Food Place](https://drive.google.com/file/d/1-nO824NuEBsQ7M6nfL83iBUC-G21VEPC/view?usp=drive_link)
+Video: [Orbit - Ask for Food Place](https://youtu.be/daW_iRL8FWU)
+
+[![Orbit - Ask for Food Place video](https://img.youtube.com/vi/daW_iRL8FWU/hqdefault.jpg)](https://youtu.be/daW_iRL8FWU)
 
 In this demo, Maya asks:
 
 > I have CMSC216 near IRB, a work shift later, and I still need vegan food. What
 > should I do in the next 90 minutes without making my stress worse?
 
-ORBIT responds with a coordinated plan:
+ORBIT responds with a **coordinated plan**:
 
-- Recognizes Maya's stress and does not overload her.
-- Uses vegan/plant-based preference.
-- Considers her location near IRB.
+- Recognizes **Maya's stress** and does not overload her.
+- Uses **vegan/plant-based preference**.
+- Considers her **location near IRB**.
 - Suggests Maryland Hillel Cafe or NuVegan Cafe as campus-relevant food options.
-- Connects the food decision to academic triage.
+- Connects the food decision to **academic triage**.
 - Creates a simple task table for CMSC216 and STAT400.
-- Offers connected actions such as adding a calendar block or opening a walking
-  route.
-- Shows an agent trace with roles such as workflow controller, academic planning,
-  stress monitoring, campus resources, career strategy, and response synthesizer.
+- Offers **connected actions** such as adding a calendar block or opening a
+  walking route.
+- Shows an **agent trace** with roles such as workflow controller, academic
+  planning, stress monitoring, campus resources, career strategy, and response
+  synthesizer.
 
 ![Ask for Food Place](<images/Orbit - Ask for Food Place.png>)
 
 ![Ask for Food Place 2](<images/Orbit - Ask for Food Place 2.png>)
 
-The images above are preview frames from the video. The linked video shows the
-real-time chat flow, connected action card, Google Maps route launch, model
-badge, and agent trace.
+The video frame opens the YouTube demo. The app screenshots below capture the
+same flow: **real-time chat**, **connected action card**, **Google Maps route
+launch**, **model badge**, and **agent trace**.
 
 A generic chatbot might say "eat first, then study." ORBIT ties the food
 recommendation to Maya's diet, campus route, deadline pressure, stress level,
@@ -357,27 +369,29 @@ becomes operational.
 
 ## Live Demo Video 2: Sent Email and Calendar Invite
 
-Video: [Orbit - Sent Email](https://drive.google.com/file/d/1n_alAHTGi9dfI-NiM3TJYE2HruGHZ4f1/view?usp=drive_link)
+Video: [Orbit - Sent Email](https://youtu.be/w1HK6_Pdn8Y)
+
+[![Orbit - Sent Email video](https://img.youtube.com/vi/w1HK6_Pdn8Y/hqdefault.jpg)](https://youtu.be/w1HK6_Pdn8Y)
 
 In this demo, Maya asks ORBIT to write an email to Alex and send a calendar
 invite for a vegan meal at Maryland Hillel Cafe.
 
 ORBIT:
 
-- Drafts a natural email in Maya's voice.
+- Drafts a natural **email in Maya's voice**.
 - Includes the recipient, date, time, and place.
-- Notices a calendar conflict with a project study group.
+- Notices a **calendar conflict** with a project study group.
 - Asks Maya to confirm whether the time should change.
-- Provides connected actions to add a Google Calendar block and send an email
-  update.
+- Provides **connected actions** to add a Google Calendar block and send an
+  email update.
 - Uses demo notifications to mimic successful calendar/email actions without
   requiring a real email account.
 
 ![Sent email demo](<images/Orbit - Sent Email.png>)
 
-The image above is a preview frame from the video. The linked video shows
-real-time email drafting, calendar conflict checking, connected action buttons,
-and a demo notification confirming the email/calendar action.
+The video frame opens the YouTube demo. The screenshot below captures the same
+flow: **real-time email drafting**, **calendar conflict checking**, **connected
+action buttons**, and a demo notification confirming the email/calendar action.
 
 The key product behavior is coordination. ORBIT does not only draft words; it
 checks whether the plan conflicts with the student's calendar, prepares the
@@ -644,20 +658,23 @@ ORBIT is designed to work in two modes:
 
 Demo mode:
 
-- Deterministic Maya Chen UMD scenario.
-- Seeded labels, chat history, report data, resources, and actions.
+- **Deterministic Maya Chen UMD scenario.**
+- **Seeded labels, chat history, report data, resources, and actions.**
 - No real credentials required.
 
 Live mode:
 
-- Canvas/ELMS assignments and courses.
-- Google Calendar events.
-- Google Maps/Routes.
-- Google Places.
-- PlanetTerp course/professor signals.
-- Testudo/umd.io official course structure.
-- UMD resource catalog.
-- Housing, rent, food, transport, and life logistics search.
+- **Canvas/ELMS assignments and courses.**
+- **Google Calendar events.**
+- **Google Maps/Routes.**
+- **Google Places.**
+- **PlanetTerp course/professor signals.**
+- **Testudo/umd.io official course structure.**
+- **UMD resource catalog.**
+- **Housing, rent, food, transport, and life logistics search.**
+- **Forum and community retrieval when needed**, such as Reddit-style student
+  discussion signals for lived experience around courses, housing, commute, or
+  campus life. These signals should be treated as context, not official truth.
 
 ### 6. Model Fallback
 
@@ -674,6 +691,15 @@ The trace tells the truth about which path was used.
 ---
 
 ## System Architecture
+
+![ORBIT system architecture diagram](<images/ORBIT System Architecture Diagram.png>)
+
+ORBIT's architecture is built around a clear progression: **student context** is
+converted into **labels**, labels activate a **multi-role agent layer**, agent
+outputs pass through a **skill and tool router**, model synthesis uses fallback
+paths when needed, and the result becomes **student action surfaces** such as
+chat answers, reports, maps, calendar blocks, email drafts, and resource
+recommendations.
 
 ```mermaid
 flowchart TD
@@ -719,25 +745,38 @@ flowchart TD
 
 ## Data Sources and UMD-Specific Support
 
+![Real data integration pipeline](<images/Real Data Integration Pipeline.png>)
+
 ORBIT's UMD support strategy includes:
 
-- Canvas / ELMS: active courses, assignment names, due dates.
-- Google Calendar: upcoming events, schedule density, conflicts.
-- Google Maps / Routes: walking routes and commute constraints.
-- Google Places: food, study spots, housing/rent, shopping, campus life search.
-- PlanetTerp: course metadata, professor reviews, historical grade signals.
-- Testudo / umd.io: official course, prerequisite, section, and registration
+- **Canvas / ELMS**: active courses, assignment names, due dates.
+- **Google Calendar**: upcoming events, schedule density, conflicts.
+- **Google Maps / Routes**: walking routes and commute constraints.
+- **Google Places**: food, study spots, housing/rent, shopping, campus life
+  search.
+- **PlanetTerp**: course metadata, professor reviews, historical grade signals.
+- **Testudo / umd.io**: official course, prerequisite, section, and registration
   structure.
-- UMD resource catalog: Accessibility and Disability Service, Counseling
+- **Student forums and Reddit-style community signals**: optional real-time
+  context for lived student experience around professors, housing, commuting,
+  food, and campus life. ORBIT should clearly distinguish these from official
+  university sources.
+- **UMD resource catalog**: Accessibility and Disability Service, Counseling
   Center, TLTC, Career Center, Health Center, Dining, Campus Pantry, ResLife,
   DOTS, ISSS, Writing Center, tutoring, Guided Study Sessions, Math Success,
   Keystone, OMSE, Student Legal Aid, Crisis Fund, Financial Aid, Dean of
   Students, OCRSM, NITE Ride, Paratransit, Terp Ride, Guardian App, Help Center,
   and related support paths.
 
-This campus-specific layer is a major differentiator. ORBIT can answer "what
-should I do?" with the right office, route, course signal, calendar action, and
-next step.
+This **campus-specific layer** is a major differentiator. ORBIT can answer
+"what should I do?" with the right **office**, **route**, **course signal**,
+**calendar action**, and **next step**.
+
+The real data pipeline separates **official institutional sources** from
+**community/forum context**. Official sources such as Canvas, Testudo/umd.io,
+and UMD offices are treated as truth. Community signals, including Reddit-style
+discussion, are useful for lived experience but should remain contextual and
+clearly labeled.
 
 ---
 
@@ -777,6 +816,30 @@ success. Instead of students manually coordinating Canvas, Calendar, Maps,
 PlanetTerp, Testudo, tutoring, disability services, counseling, financial aid,
 housing, food, internships, and daily tasks, ORBIT can become the explainable
 workspace that coordinates those systems around the individual student.
+
+---
+
+## Final Takeaway
+
+ORBIT is not only a UI demo. It is a product direction for a real
+student-success platform: personalized, campus-aware, explainable, and
+action-oriented.
+
+| Takeaway | Why it matters |
+| --- | --- |
+| **Personalization depth** | ORBIT uses durable labels, history, report state, and imported context instead of treating every prompt as a new conversation. |
+| **Agentic architecture** | The answer is produced through **multi-role collaboration**, not a single undifferentiated model response. |
+| **Real data readiness** | The system is structured around **Canvas/ELMS**, **Google Calendar**, **Google Maps/Places**, **PlanetTerp**, **Testudo/umd.io**, UMD resources, and optional community/forum retrieval. |
+| **Student-facing empathy** | The report and recommendations are designed to feel like a caring advisor, especially during stress, accessibility, financial, or first-generation support scenarios. |
+| **Actionability** | ORBIT can move from advice to action through **calendar blocks**, **email drafts**, **map routes**, **course plans**, and **resource routing**. |
+| **Explainability** | Agent traces, audit logs, feedback signals, and model fallback reasons make the system inspectable. |
+| **Demo reliability** | The Maya Chen fixture gives a repeatable product walkthrough even when real credentials, OAuth, or network APIs are unavailable. |
+| **Production path** | The architecture already separates local demo data, live connectors, model synthesis, tool permissions, and privacy-sensitive student labels. |
+
+The strongest product signal is that ORBIT can answer a student question with a
+plan that is **personal**, **campus-aware**, **resource-aware**, and
+**immediately actionable**. That is the difference between a chatbot that
+responds and an advisor system that helps a student move forward.
 
 ---
 
