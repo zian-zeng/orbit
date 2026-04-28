@@ -36,7 +36,7 @@ class MonitorHistoryService {
 
   List<MonitorHistoryEntry> loadRecent({
     required String email,
-    int limit = 14,
+    int limit = 30,
   }) {
     if (!Hive.isBoxOpen(Constants.monitorHistoryBox)) {
       return const [];

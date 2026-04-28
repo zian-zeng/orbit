@@ -12,6 +12,7 @@ class ChatHeader extends StatelessWidget {
     required this.onOpenHistory,
     required this.onOpenSettings,
     required this.onOpenDemo,
+    required this.onOpenReport,
     required this.onOpenCoursePlanner,
     required this.onOpenIntelligence,
     required this.onNewChat,
@@ -24,6 +25,7 @@ class ChatHeader extends StatelessWidget {
   final VoidCallback onOpenHistory;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenDemo;
+  final VoidCallback onOpenReport;
   final VoidCallback onOpenCoursePlanner;
   final VoidCallback onOpenIntelligence;
   final VoidCallback onNewChat;
@@ -92,6 +94,11 @@ class ChatHeader extends StatelessWidget {
               icon: CupertinoIcons.chart_bar_alt_fill,
               tooltip: 'Demo status',
               onTap: onOpenDemo,
+            ),
+            AppIconButton(
+              icon: CupertinoIcons.waveform_path_ecg,
+              tooltip: 'Report',
+              onTap: onOpenReport,
             ),
             AppIconButton(
               icon: CupertinoIcons.calendar_badge_plus,

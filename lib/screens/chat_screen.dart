@@ -14,6 +14,7 @@ import 'package:chatbotapp/screens/demo_status_screen.dart';
 import 'package:chatbotapp/screens/intelligence_dashboard_screen.dart';
 import 'package:chatbotapp/screens/settings_screen.dart';
 import 'package:chatbotapp/screens/startup_guide_screen.dart';
+import 'package:chatbotapp/screens/student_report_screen.dart';
 import 'package:chatbotapp/services/prompt_router.dart';
 import 'package:chatbotapp/services/skill_registry_service.dart';
 import 'package:chatbotapp/utilities/animated_dialog.dart';
@@ -206,9 +207,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _modelLabel(String modelType) {
     if (modelType == Constants.localAgentModel) {
-      return 'Local';
+      return 'Gemma';
     }
-    return modelType.contains('flash') ? 'Flash' : 'Vision';
+    return modelType.contains('flash') ? 'Gemini' : 'Vision';
   }
 
   Future<void> _startNewChat(ChatProvider chatProvider) async {
@@ -407,6 +408,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 onOpenHistory: () => _openPage<void>(const ChatHistoryScreen()),
                 onOpenSettings: () => _openPage<void>(const SettingsScreen()),
                 onOpenDemo: _openDemoPath,
+                onOpenReport: () =>
+                    _openPage<void>(const StudentReportScreen()),
                 onOpenCoursePlanner: _openCoursePlanner,
                 onOpenIntelligence: () =>
                     _openPage<void>(const IntelligenceDashboardScreen()),

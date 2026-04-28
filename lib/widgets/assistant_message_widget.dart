@@ -5,6 +5,8 @@ import 'package:chatbotapp/hive/agent_audit_log_entry.dart';
 import 'package:chatbotapp/models/message.dart';
 import 'package:chatbotapp/services/agent_audit_log_service.dart';
 import 'package:chatbotapp/services/assistant_feedback_service.dart';
+import 'package:chatbotapp/services/chat_action_service.dart';
+import 'package:chatbotapp/services/external_action_launcher.dart';
 import 'package:chatbotapp/utilities/app_snackbar.dart';
 import 'package:chatbotapp/widgets/chat/assistant_response_content.dart';
 
@@ -24,6 +26,9 @@ class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
   static const AssistantFeedbackService _feedbackService =
       AssistantFeedbackService();
   static const AgentAuditLogService _auditLogService = AgentAuditLogService();
+  static const ChatActionService _chatActionService = ChatActionService();
+  static const ExternalActionLauncher _externalLauncher =
+      ExternalActionLauncher();
   String? _selectedFeedback;
   AgentAuditLogEntry? _auditLog;
 
@@ -54,6 +59,7 @@ class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
     final text = widget.message.message.toString();
     final traceText = _extractOrbitTrace(text);
     final visibleText = _withoutOrbitTrace(text);
+    final actions = _chatActionService.actionsForResponse(visibleText);
     final hasCodeBlocks = AssistantResponseContent.containsCodeBlocks(
       visibleText,
     );
@@ -125,6 +131,13 @@ class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
                 )
               else ...[
                 AssistantResponseContent(text: visibleText),
+                if (actions.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  _AssistantActionPanel(
+                    actions: actions,
+                    onAction: _handleAction,
+                  ),
+                ],
                 if (traceText != null) ...[
                   const SizedBox(height: 12),
                   _AgentTracePill(traceText: traceText),
@@ -191,6 +204,97 @@ class _AssistantMessageWidgetState extends State<AssistantMessageWidget> {
       _selectedFeedback = feedbackType;
     });
     showAppSnackBar(context, 'Feedback saved', bottomOffset: 132);
+  }
+
+  Future<void> _handleAction(ChatAction action) async {
+    switch (action.type) {
+      case ChatActionType.mapRoute:
+        final opened = await _externalLauncher.openUrl(
+          ChatActionService.demoMapUrl,
+        );
+        if (!mounted) {
+          return;
+        }
+        showAppSnackBar(
+          context,
+          opened
+              ? 'Opening Google Maps route'
+              : 'Could not open Google Maps on this device',
+          bottomOffset: 132,
+        );
+      case ChatActionType.calendarEvent:
+        showAppSnackBar(
+          context,
+          'Demo: Google Calendar event added for a 20-minute CMSC216 planning block.',
+          bottomOffset: 132,
+        );
+      case ChatActionType.emailUpdate:
+        showAppSnackBar(
+          context,
+          'Demo: email update sent with the plan and calendar invite.',
+          bottomOffset: 132,
+        );
+    }
+  }
+}
+
+class _AssistantActionPanel extends StatelessWidget {
+  const _AssistantActionPanel({
+    required this.actions,
+    required this.onAction,
+  });
+
+  final List<ChatAction> actions;
+  final ValueChanged<ChatAction> onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.66),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Connected actions',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: actions
+                .map(
+                  (action) => FilledButton.tonalIcon(
+                    onPressed: () => onAction(action),
+                    icon: Icon(action.icon, size: 16),
+                    label: Text(action.label),
+                  ),
+                )
+                .toList(growable: false),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            actions.map((action) => action.detail).join(' '),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -306,7 +410,7 @@ class _AgentAuditPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final modelStatus =
-        auditLog.usedLocalModel ? 'Local model' : 'Deterministic fallback';
+        auditLog.fallbackReason.isEmpty ? 'Model synthesis' : 'Fallback';
 
     return Container(
       width: double.infinity,

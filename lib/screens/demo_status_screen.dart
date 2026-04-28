@@ -42,6 +42,7 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
   String _lastRecordedMonitorSignature = '';
   bool _isRecordingMonitorHistory = false;
   bool _skipNextMonitorRecord = false;
+  bool _isResettingDemo = false;
 
   @override
   void initState() {
@@ -219,12 +220,14 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
                       _PrivacyPanel(
                         report: report,
                         preferDemoFixture: settings.preferDemoFixture,
+                        isResettingDemo: _isResettingDemo,
                         onPreferDemoFixtureChanged: (value) {
                           settings.togglePreferDemoFixture(value: value);
                           if (!value) {
                             _refreshLiveSignals(forceRefresh: true);
                           }
                         },
+                        onResetDemo: _resetMayaDemo,
                       ),
                     ],
                   );
@@ -329,6 +332,26 @@ class _DemoStatusScreenState extends State<DemoStatusScreen> {
       _history = const [];
       _lastRecordedMonitorSignature = '';
       _skipNextMonitorRecord = true;
+    });
+  }
+
+  Future<void> _resetMayaDemo() async {
+    if (_isResettingDemo) {
+      return;
+    }
+    setState(() {
+      _isResettingDemo = true;
+    });
+    await context.read<UserProfileProvider>().resetDemoUser();
+    if (!mounted) {
+      return;
+    }
+    context.read<SettingsProvider>().reloadSavedSettings();
+    _loadMonitorHistory(email: DemoStatusScreen.scenario.email);
+    setState(() {
+      _isResettingDemo = false;
+      _didRequestLiveSignals = false;
+      _lastRecordedMonitorSignature = '';
     });
   }
 }
@@ -667,7 +690,7 @@ class _HistoryPanel extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: entries
-                  .take(14)
+                  .take(30)
                   .map(
                     (entry) => Expanded(
                       child: Padding(
@@ -1160,12 +1183,16 @@ class _PrivacyPanel extends StatelessWidget {
   const _PrivacyPanel({
     required this.report,
     required this.preferDemoFixture,
+    required this.isResettingDemo,
     required this.onPreferDemoFixtureChanged,
+    required this.onResetDemo,
   });
 
   final StudentMonitorReport report;
   final bool preferDemoFixture;
+  final bool isResettingDemo;
   final ValueChanged<bool> onPreferDemoFixtureChanged;
+  final VoidCallback onResetDemo;
 
   @override
   Widget build(BuildContext context) {
@@ -1186,6 +1213,18 @@ class _PrivacyPanel extends StatelessWidget {
             ),
             value: preferDemoFixture,
             onChanged: onPreferDemoFixtureChanged,
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: _outlinedButtonStyle(),
+              onPressed: isResettingDemo ? null : onResetDemo,
+              icon: const Icon(CupertinoIcons.arrow_counterclockwise),
+              label: Text(
+                isResettingDemo ? 'Resetting Maya...' : 'Reset Maya demo',
+              ),
+            ),
           ),
           const SizedBox(height: 8),
           Text(

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chatbotapp/apis/api_service.dart';
+import 'package:chatbotapp/constants/constants.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 
@@ -13,7 +16,7 @@ class LocalLlmConfig {
   });
 
   static const String defaultEndpoint = 'http://127.0.0.1:11434';
-  static const String defaultModel = 'gemma2:2b';
+  static const String defaultModel = 'gemma3:4b';
 
   final String endpoint;
   final String model;
@@ -97,6 +100,64 @@ class LocalLlmException implements Exception {
 
   @override
   String toString() => message;
+}
+
+class GeminiThenOllamaLlmClient implements LocalLlmClient {
+  GeminiThenOllamaLlmClient({
+    LocalLlmClient? gemmaClient,
+    String geminiModel = Constants.geminiTextModel,
+  })  : _gemmaClient = gemmaClient ?? OllamaLocalLlmClient(),
+        _geminiModel = geminiModel;
+
+  final LocalLlmClient _gemmaClient;
+  final String _geminiModel;
+
+  @override
+  Future<LocalLlmResult> generate(LocalLlmRequest request) async {
+    Object? geminiError;
+    if (ApiService.isConfigured) {
+      try {
+        final model = GenerativeModel(
+          model: _geminiModel,
+          apiKey: ApiService.apiKey,
+          generationConfig: GenerationConfig(
+            temperature: request.temperature,
+            topP: 0.9,
+            topK: 32,
+            maxOutputTokens: request.maxTokens,
+          ),
+          systemInstruction: Content.system(request.systemPrompt),
+        );
+        final response = await model
+            .generateContent([Content.text(request.prompt)]).timeout(
+                const Duration(seconds: 45));
+        final text = response.text?.trim();
+        if (text != null && text.isNotEmpty) {
+          return LocalLlmResult(
+            text: text,
+            model: _geminiModel,
+            provider: 'gemini',
+          );
+        }
+        geminiError = const LocalLlmException(
+          'Gemini returned an empty response.',
+        );
+      } catch (error) {
+        geminiError = error;
+      }
+    } else {
+      geminiError =
+          const LocalLlmException('Gemini API key is not configured.');
+    }
+
+    try {
+      return await _gemmaClient.generate(request);
+    } catch (gemmaError) {
+      throw LocalLlmException(
+        'Gemini failed: $geminiError. Gemma failed: $gemmaError',
+      );
+    }
+  }
 }
 
 class OllamaLocalLlmClient implements LocalLlmClient {

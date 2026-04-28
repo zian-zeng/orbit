@@ -1,18 +1,29 @@
 import 'package:chatbotapp/hive/agent_audit_log_entry.dart';
 import 'package:chatbotapp/hive/assistant_feedback_entry.dart';
 import 'package:chatbotapp/hive/skill_registry_entry.dart';
+import 'package:chatbotapp/providers/settings_provider.dart';
+import 'package:chatbotapp/providers/user_profile_provider.dart';
 import 'package:chatbotapp/services/agent_audit_log_service.dart';
 import 'package:chatbotapp/services/assistant_feedback_service.dart';
+import 'package:chatbotapp/services/demo_readiness_service.dart';
 import 'package:chatbotapp/services/evaluation_readiness_service.dart';
 import 'package:chatbotapp/services/skill_registry_service.dart';
 import 'package:chatbotapp/widgets/app_icon_button.dart';
 import 'package:chatbotapp/widgets/app_screen_scaffold.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class IntelligenceDashboardScreen extends StatelessWidget {
+class IntelligenceDashboardScreen extends StatefulWidget {
   const IntelligenceDashboardScreen({super.key});
 
+  @override
+  State<IntelligenceDashboardScreen> createState() =>
+      _IntelligenceDashboardScreenState();
+}
+
+class _IntelligenceDashboardScreenState
+    extends State<IntelligenceDashboardScreen> {
   static const SkillRegistryService _skillRegistryService =
       SkillRegistryService();
   static const AssistantFeedbackService _feedbackService =
@@ -20,6 +31,30 @@ class IntelligenceDashboardScreen extends StatelessWidget {
   static const AgentAuditLogService _auditLogService = AgentAuditLogService();
   static const EvaluationReadinessService _evaluationService =
       EvaluationReadinessService();
+  static const DemoReadinessService _readinessService = DemoReadinessService();
+
+  late Future<DemoReadinessReport> _readinessFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _readinessFuture = _readinessService.buildReport();
+  }
+
+  void _refreshReadiness() {
+    setState(() {
+      _readinessFuture = _readinessService.buildReport();
+    });
+  }
+
+  Future<void> _resetMayaDemo() async {
+    await context.read<UserProfileProvider>().resetDemoUser();
+    if (!mounted) {
+      return;
+    }
+    context.read<SettingsProvider>().reloadSavedSettings();
+    _refreshReadiness();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +126,12 @@ class IntelligenceDashboardScreen extends StatelessWidget {
                     children: [
                       overview,
                       const SizedBox(height: 12),
+                      _DemoReadinessPanel(
+                        readinessFuture: _readinessFuture,
+                        onRefresh: _refreshReadiness,
+                        onResetDemo: _resetMayaDemo,
+                      ),
+                      const SizedBox(height: 12),
                       _EvaluationPanel(report: evaluationReport),
                       const SizedBox(height: 12),
                       _SkillRegistryPanel(skills: skills),
@@ -98,6 +139,14 @@ class IntelligenceDashboardScreen extends StatelessWidget {
                   );
                   final right = Column(
                     children: [
+                      _InvestorTourPanel(
+                        hasSkills: skills.isNotEmpty,
+                        hasAudits: audits.isNotEmpty,
+                        hasFeedback: feedback.isNotEmpty,
+                      ),
+                      const SizedBox(height: 12),
+                      _CollaborationPanel(audits: audits),
+                      const SizedBox(height: 12),
                       _FeedbackPanel(
                         feedback: feedback,
                         counts: feedbackCounts,
@@ -165,6 +214,337 @@ class _OverviewPanel extends StatelessWidget {
           _MetricTile(label: 'Audit logs', value: '$audits'),
           _MetricTile(label: 'Helpful', value: '$helpful'),
           _MetricTile(label: 'Issues', value: '$issues'),
+        ],
+      ),
+    );
+  }
+}
+
+class _DemoReadinessPanel extends StatelessWidget {
+  const _DemoReadinessPanel({
+    required this.readinessFuture,
+    required this.onRefresh,
+    required this.onResetDemo,
+  });
+
+  final Future<DemoReadinessReport> readinessFuture;
+  final VoidCallback onRefresh;
+  final VoidCallback onResetDemo;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DemoReadinessReport>(
+      future: readinessFuture,
+      builder: (context, snapshot) {
+        final report = snapshot.data;
+        final loading = snapshot.connectionState != ConnectionState.done;
+        return _DashboardPanel(
+          title: 'Demo Readiness',
+          subtitle: report?.summaryLabel ?? 'Checking local demo state',
+          icon: CupertinoIcons.checkmark_shield_fill,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (loading)
+                const LinearProgressIndicator(minHeight: 6)
+              else if (report == null)
+                const _EmptyText(text: 'Could not read demo readiness.')
+              else ...[
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _MetricTile(
+                      label: 'Ready',
+                      value: '${report.readyCount}/${report.items.length}',
+                    ),
+                    _MetricTile(
+                      label: 'Checked',
+                      value:
+                          '${report.checkedAt.hour.toString().padLeft(2, '0')}:${report.checkedAt.minute.toString().padLeft(2, '0')}',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ...report.items.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _ReadinessRow(item: item),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: onRefresh,
+                    icon: const Icon(CupertinoIcons.arrow_clockwise),
+                    label: const Text('Refresh readiness'),
+                  ),
+                  FilledButton.icon(
+                    onPressed: onResetDemo,
+                    icon: const Icon(CupertinoIcons.person_crop_circle),
+                    label: const Text('Reset Maya demo'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ReadinessRow extends StatelessWidget {
+  const _ReadinessRow({required this.item});
+
+  final DemoReadinessItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final (icon, color) = switch (item.state) {
+      DemoReadinessState.ready => (
+          CupertinoIcons.checkmark_circle_fill,
+          colorScheme.primary,
+        ),
+      DemoReadinessState.warning => (
+          CupertinoIcons.exclamationmark_triangle_fill,
+          colorScheme.tertiary,
+        ),
+      DemoReadinessState.missing => (
+          CupertinoIcons.xmark_circle_fill,
+          colorScheme.error,
+        ),
+    };
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 17, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(item.label, style: Theme.of(context).textTheme.labelLarge),
+              const SizedBox(height: 2),
+              Text(
+                item.detail,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InvestorTourPanel extends StatelessWidget {
+  const _InvestorTourPanel({
+    required this.hasSkills,
+    required this.hasAudits,
+    required this.hasFeedback,
+  });
+
+  final bool hasSkills;
+  final bool hasAudits;
+  final bool hasFeedback;
+
+  @override
+  Widget build(BuildContext context) {
+    return _DashboardPanel(
+      title: 'Investor Tour',
+      subtitle: 'Five-minute proof path',
+      icon: CupertinoIcons.play_rectangle_fill,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _TourStep(
+            title: 'Log in as Maya',
+            detail: 'Open the finished student profile with local history.',
+            complete: true,
+          ),
+          const _TourStep(
+            title: 'Show UMD Demo Path',
+            detail:
+                'Canvas, Calendar, Places, Routes, stress, and action plan.',
+            complete: true,
+          ),
+          _TourStep(
+            title: 'Send the demo prompt',
+            detail: 'Show Gemma/Gemini synthesis plus deterministic fallback.',
+            complete: hasAudits,
+          ),
+          _TourStep(
+            title: 'Open Agent Collaboration',
+            detail:
+                'Explain labels + history + current query -> runtime skill.',
+            complete: hasAudits,
+          ),
+          _TourStep(
+            title: 'Show learning loop',
+            detail:
+                'Saved skills and feedback prove personalization can improve.',
+            complete: hasSkills && hasFeedback,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TourStep extends StatelessWidget {
+  const _TourStep({
+    required this.title,
+    required this.detail,
+    required this.complete,
+  });
+
+  final String title;
+  final String detail;
+  final bool complete;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            complete
+                ? CupertinoIcons.checkmark_circle_fill
+                : CupertinoIcons.circle,
+            size: 17,
+            color: complete ? colorScheme.primary : colorScheme.outline,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.labelLarge),
+                const SizedBox(height: 2),
+                Text(
+                  detail,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CollaborationPanel extends StatelessWidget {
+  const _CollaborationPanel({required this.audits});
+
+  final List<AgentAuditLogEntry> audits;
+
+  @override
+  Widget build(BuildContext context) {
+    final audit = audits.isEmpty ? null : audits.first;
+    final labels =
+        audit?.labelKeys.take(8).toList(growable: false) ?? const <String>[];
+    final roles = audit?.activatedRoles.take(6).toList(growable: false) ??
+        const <String>[];
+    final tools =
+        audit?.toolNames.take(6).toList(growable: false) ?? const <String>[];
+
+    return _DashboardPanel(
+      title: 'Agent Collaboration',
+      subtitle: 'Labels + history + query -> runtime skill',
+      icon: CupertinoIcons.flowchart_fill,
+      child: audit == null
+          ? const _EmptyText(
+              text:
+                  'No collaboration trace yet. Log in as Maya or send a message to create one.',
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _TraceStep(
+                  label: '1. Personal context',
+                  value:
+                      labels.isEmpty ? 'No labels captured' : labels.join(', '),
+                ),
+                const SizedBox(height: 8),
+                _TraceStep(
+                  label: '2. Current query',
+                  value: audit.userMessagePreview,
+                ),
+                const SizedBox(height: 8),
+                _TraceStep(
+                  label: '3. Runtime skill',
+                  value: audit.skillIds.isEmpty
+                      ? 'No generated skill recorded'
+                      : audit.skillIds.first,
+                ),
+                const SizedBox(height: 8),
+                _TraceStep(
+                  label: '4. Agent roles',
+                  value:
+                      roles.isEmpty ? 'No roles recorded' : roles.join(' -> '),
+                ),
+                const SizedBox(height: 8),
+                _TraceStep(
+                  label: '5. Tool path',
+                  value:
+                      tools.isEmpty ? 'No tools recorded' : tools.join(' -> '),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+class _TraceStep extends StatelessWidget {
+  const _TraceStep({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
         ],
       ),
     );

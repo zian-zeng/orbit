@@ -6,7 +6,7 @@ class OrbitAgentOrchestrator {
   OrbitAgentOrchestrator({
     LocalLlmClient? llmClient,
     List<OrbitAgent>? agents,
-  })  : _llmClient = llmClient ?? OllamaLocalLlmClient(),
+  })  : _llmClient = llmClient ?? GeminiThenOllamaLlmClient(),
         _agents = agents ??
             const [
               AcademicPlanningAgent(),
@@ -62,13 +62,13 @@ class OrbitAgentOrchestrator {
           text: localResult.text,
           skillResults: skillResults,
           modelName: localResult.model,
-          usedLocalModel: true,
+          modelProvider: localResult.provider,
         ),
         trace: OrbitAgentTrace(
           activatedRoles: _rolesFor(skillResults),
           skillResults: skillResults,
-          usedLocalModel: true,
-          modelName: localResult.model,
+          usedLocalModel: localResult.provider == 'ollama',
+          modelName: '${localResult.provider}: ${localResult.model}',
           fallbackReason: null,
         ),
       );
@@ -252,12 +252,15 @@ If data from Canvas, Google Calendar, campus resources, or datasets is missing, 
     required String text,
     required List<SkillResult> skillResults,
     required String modelName,
-    required bool usedLocalModel,
+    required String modelProvider,
   }) {
     final roles =
         _rolesFor(skillResults).map((role) => role.label).join(' -> ');
-    final modelStatus =
-        usedLocalModel ? 'local model: $modelName' : 'local fallback';
+    final modelStatus = switch (modelProvider) {
+      'gemini' => 'Gemini: $modelName',
+      'ollama' => 'Gemma/Ollama: $modelName',
+      _ => '$modelProvider: $modelName',
+    };
     return [
       text.trim(),
       '',

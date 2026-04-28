@@ -1,10 +1,15 @@
 import 'dart:io';
 
 import 'package:chatbotapp/constants/constants.dart';
+import 'package:chatbotapp/hive/agent_audit_log_entry.dart';
+import 'package:chatbotapp/hive/assistant_feedback_entry.dart';
 import 'package:chatbotapp/hive/chat_history.dart';
+import 'package:chatbotapp/hive/monitor_history_entry.dart';
 import 'package:chatbotapp/hive/settings.dart';
+import 'package:chatbotapp/hive/skill_registry_entry.dart';
 import 'package:chatbotapp/hive/user_model.dart';
 import 'package:chatbotapp/providers/user_profile_provider.dart';
+import 'package:chatbotapp/services/demo_bootstrap_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -25,10 +30,26 @@ void main() {
     if (!Hive.isAdapterRegistered(2)) {
       Hive.registerAdapter(SettingsAdapter());
     }
+    if (!Hive.isAdapterRegistered(3)) {
+      Hive.registerAdapter(MonitorHistoryEntryAdapter());
+    }
+    if (!Hive.isAdapterRegistered(4)) {
+      Hive.registerAdapter(AssistantFeedbackEntryAdapter());
+    }
+    if (!Hive.isAdapterRegistered(5)) {
+      Hive.registerAdapter(AgentAuditLogEntryAdapter());
+    }
+    if (!Hive.isAdapterRegistered(6)) {
+      Hive.registerAdapter(SkillRegistryEntryAdapter());
+    }
 
     await Hive.openBox<ChatHistory>(Constants.chatHistoryBox);
     await Hive.openBox<UserModel>(Constants.userBox);
     await Hive.openBox<Settings>(Constants.settingsBox);
+    await Hive.openBox<MonitorHistoryEntry>(Constants.monitorHistoryBox);
+    await Hive.openBox<AssistantFeedbackEntry>(Constants.assistantFeedbackBox);
+    await Hive.openBox<AgentAuditLogEntry>(Constants.agentAuditLogBox);
+    await Hive.openBox<SkillRegistryEntry>(Constants.skillRegistryBox);
     provider = UserProfileProvider();
   });
 
@@ -262,5 +283,37 @@ void main() {
     expect(provider.latestStudentSnapshot, same(snapshot));
     expect(provider.labelSignalSources, contains('UMD Demo Fixture'));
     expect(provider.importedLabelKeys, contains('planning'));
+  });
+
+  test('demo login seeds Maya profile and month-long demo state', () async {
+    final rejected = await provider.loginAsDemoUser(password: 'wrong');
+    expect(rejected, isFalse);
+
+    final accepted = await provider.loginAsDemoUser(
+      password: DemoBootstrapService.demoPassword,
+    );
+
+    expect(accepted, isTrue);
+    expect(provider.name, DemoBootstrapService.demoName);
+    expect(provider.email, DemoBootstrapService.demoEmail);
+    expect(provider.isAuthorized, isTrue);
+    expect(provider.hasCompletedGuide, isTrue);
+    expect(provider.hasCompletedOnboarding, isTrue);
+    expect(provider.shouldShowGuide, isFalse);
+    expect(provider.shouldShowOnboarding, isFalse);
+    expect(provider.preferredLabelKeys, contains('vegan'));
+    expect(provider.labelSignalSources, contains('UMD Demo Fixture'));
+    expect(Hive.box<MonitorHistoryEntry>(Constants.monitorHistoryBox).length,
+        greaterThanOrEqualTo(30));
+    expect(Hive.box<ChatHistory>(Constants.chatHistoryBox).length,
+        greaterThanOrEqualTo(5));
+    expect(
+      Hive.box<SkillRegistryEntry>(Constants.skillRegistryBox).values,
+      isNotEmpty,
+    );
+    expect(
+      Hive.box<AgentAuditLogEntry>(Constants.agentAuditLogBox).values,
+      isNotEmpty,
+    );
   });
 }

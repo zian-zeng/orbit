@@ -10,6 +10,7 @@ import 'package:chatbotapp/hive/chat_history.dart';
 import 'package:chatbotapp/hive/user_model.dart';
 import 'package:chatbotapp/models/prompt_recommendation.dart';
 import 'package:chatbotapp/models/support_intelligence.dart';
+import 'package:chatbotapp/services/demo_bootstrap_service.dart';
 import 'package:chatbotapp/services/label_enrichment_service.dart';
 import 'package:chatbotapp/services/support_intelligence_service.dart';
 import 'package:hive/hive.dart';
@@ -20,6 +21,8 @@ class UserProfileProvider extends ChangeNotifier {
       LabelEnrichmentService();
   static const SupportIntelligenceService _supportIntelligenceService =
       SupportIntelligenceService();
+  static const DemoBootstrapService _demoBootstrapService =
+      DemoBootstrapService();
   final StudentContextAggregator _contextAggregator =
       StudentContextAggregator();
 
@@ -68,6 +71,8 @@ class UserProfileProvider extends ChangeNotifier {
   StudentSignalSnapshot? get latestStudentSnapshot => _latestStudentSnapshot;
   bool get isRefreshingExternalSignals => _isRefreshingExternalSignals;
   bool get hasImage => _imagePath.trim().isNotEmpty;
+  static const String demoEmail = DemoBootstrapService.demoEmail;
+  static const String demoPassword = DemoBootstrapService.demoPassword;
   String get initials {
     final parts = name.split(' ').where((part) => part.isNotEmpty).toList();
     if (parts.isEmpty) {
@@ -286,7 +291,7 @@ class UserProfileProvider extends ChangeNotifier {
     if (_importedSourceRankings.isEmpty && user.importedSources.isNotEmpty) {
       _importedSourceRankings = {
         user.importedSources.first: List<String>.from(user.importedLabels),
-        };
+      };
     }
     _refreshRoutingLabels();
     _isReady = true;
@@ -307,6 +312,20 @@ class UserProfileProvider extends ChangeNotifier {
       authorizationMethod: authorizationMethod,
       authorizedAtIso: DateTime.now().toUtc().toIso8601String(),
     );
+  }
+
+  Future<bool> loginAsDemoUser({required String password}) async {
+    if (password.trim() != DemoBootstrapService.demoPassword) {
+      return false;
+    }
+
+    await resetDemoUser();
+    return true;
+  }
+
+  Future<void> resetDemoUser() async {
+    await _demoBootstrapService.bootstrapMayaChen();
+    await loadUser();
   }
 
   Future<void> completeGuide() async {

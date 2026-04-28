@@ -114,6 +114,11 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
+  void reloadSavedSettings() {
+    getSavedSettings();
+    notifyListeners();
+  }
+
   Settings _currentSettings(Settings? settings) {
     return settings ??
         Settings(

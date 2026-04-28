@@ -111,7 +111,7 @@ Recommended no-token demo `.env`:
 
 ```env
 LOCAL_LLM_ENDPOINT=http://127.0.0.1:11434
-LOCAL_LLM_MODEL=gemma2:2b
+LOCAL_LLM_MODEL=gemma3:4b
 EXTERNAL_DATA_ENABLED=false
 STUDENT_DATA_PROXY_URL=
 STUDENT_DATA_PROXY_USER_ID=demo
@@ -201,30 +201,46 @@ On Windows, iOS cannot be built locally. Use Android, Windows desktop, or web.
 Use this path for testing the implemented product surfaces:
 
 1. Start the desktop or web app.
-2. Complete signup with a UMD-style email.
-3. Complete the 20-question onboarding intake.
-4. On the chat screen, confirm recommendation chips and support pulse appear.
-5. Open **UMD Demo Path** from the chat header.
-6. Review the student profile labels and signal summary.
-7. Review **Next Best Action Plan**.
-8. Review **Stress Monitor**, **Monitor History**, and **Notification Center**.
-9. Click `Simulate 45m laptop block` and confirm the laptop-break nudge.
-10. Change the focus-break threshold and confirm the recommendation updates.
-11. Review **Personalized Food Search** for vegan/location-aware routing.
-12. Review **Next Semester Plan** for course/professor planning.
-13. Review **UMD Resource Cards** and **Agent Execution Path**.
-14. Click `Use this prompt in chat`.
-15. Open **Course Planner** from the chat header and export a plan to chat.
-16. Open **Connected Apps** and review data sources and permissions.
-17. Open **Intelligence Dashboard** and review skill registry, feedback, audit
+2. Choose **Log in**.
+3. Use the seeded demo account:
+   - Email: `maya.chen@umd.edu`
+   - Password: `12345`
+   - Or click `Use Maya demo profile`.
+4. Confirm the app opens directly to chat as Maya Chen, skipping signup, the
+   guide, and the 20-question onboarding intake.
+5. On the chat screen, confirm recommendation chips and support pulse appear.
+6. Open **UMD Demo Path** from the chat header.
+7. Review the student profile labels and signal summary.
+8. Review **Next Best Action Plan**.
+9. Review **Stress Monitor**, **Monitor History**, and **Notification Center**.
+10. Click `Simulate 45m laptop block` and confirm the laptop-break nudge.
+11. Change the focus-break threshold and confirm the recommendation updates.
+12. Open **Report** from the chat header and switch between Now, 3 days, Week,
+    Month, 6 months, Full year, YTD, and All time.
+13. Review status metrics, trend bars, and recommendations for the selected
+    range.
+14. Review **Personalized Food Search** for vegan/location-aware routing.
+15. Review **Next Semester Plan** for course/professor planning.
+16. Review **UMD Resource Cards** and **Agent Execution Path**.
+17. Click `Use this prompt in chat`.
+18. Send the prompt and review the ORBIT trace beneath the assistant response.
+19. Open **Course Planner** from the chat header and export a plan to chat.
+20. Open **Connected Apps** and review data sources and permissions.
+21. Open **Intelligence Dashboard** and review agent collaboration, skill
+    registry, feedback, audit
     trail, and Evaluation Readiness.
+
+The dashboard also includes **Demo Readiness** and **Investor Tour** panels.
+Use `Reset Maya demo` before a pitch to re-seed Maya's profile, labels, prior
+chats, monitor history, saved skill, feedback, and audit trace. The UMD Demo
+Path includes the same reset action from its Data & Privacy panel.
 
 ## Optional Local LLM Synthesis
 
 Install Ollama, then in a separate terminal:
 
 ```powershell
-ollama pull gemma2:2b
+ollama pull gemma3:4b
 ollama serve
 ```
 
@@ -232,11 +248,12 @@ Keep `.env` pointed at:
 
 ```env
 LOCAL_LLM_ENDPOINT=http://127.0.0.1:11434
-LOCAL_LLM_MODEL=gemma2:2b
+LOCAL_LLM_MODEL=gemma3:4b
 ```
 
-If Ollama is unavailable, ORBIT still works through deterministic agent
-fallbacks.
+ORBIT tries Gemini first when `API_KEY` is configured, falls back to local
+Gemma/Ollama, then falls back to deterministic agent logic if both model paths
+are unavailable.
 
 ## Optional Live Data Demo
 
@@ -299,7 +316,7 @@ Do not commit real tokens.
 | Variable | Default | Description |
 | --- | --- | --- |
 | `LOCAL_LLM_ENDPOINT` | `http://127.0.0.1:11434` | Ollama-compatible endpoint. |
-| `LOCAL_LLM_MODEL` | `gemma2:2b` | Local model name. |
+| `LOCAL_LLM_MODEL` | `gemma3:4b` | Local model name. |
 | `EXTERNAL_DATA_ENABLED` | `false` | Enables live connector fetching. |
 | `EXTERNAL_DATA_CACHE_SECONDS` | `300` | Snapshot cache duration. |
 | `EXTERNAL_DATA_TIMEOUT_SECONDS` | `8` | Connector timeout. |

@@ -44,7 +44,7 @@ class ChatProvider extends ChangeNotifier {
   GenerativeModel? _model;
   GenerativeModel? _textModel;
   GenerativeModel? _visionModel;
-  String _modelType = Constants.geminiTextModel;
+  String _modelType = Constants.localAgentModel;
   bool _isLoading = false;
 
   List<Message> get inChatMessages => _inChatMessages;
@@ -91,6 +91,36 @@ class ChatProvider extends ChangeNotifier {
       return Message.fromMap(Map<String, dynamic>.from(message));
     }).toList();
     return newData;
+  }
+
+  Future<List<Message>> _messagesForHistoryFallback({
+    required String chatId,
+  }) async {
+    if (!Hive.isBoxOpen(Constants.chatHistoryBox)) {
+      return const [];
+    }
+    final history = Boxes.getChatHistory().get(chatId);
+    if (history == null) {
+      return const [];
+    }
+    return [
+      Message(
+        messageId: '0',
+        chatId: chatId,
+        role: Role.user,
+        message: StringBuffer(history.prompt),
+        imagesUrls: history.imagesUrls,
+        timeSent: history.timestamp,
+      ),
+      Message(
+        messageId: '1',
+        chatId: chatId,
+        role: Role.assistant,
+        message: StringBuffer(history.response),
+        imagesUrls: const [],
+        timeSent: history.timestamp.add(const Duration(seconds: 1)),
+      ),
+    ];
   }
 
   void setImagesFileList({required List<XFile> listValue}) {
@@ -203,7 +233,10 @@ class ChatProvider extends ChangeNotifier {
     required String chatID,
   }) async {
     if (!isNewChat) {
-      final chatHistory = await loadMessagesFromDB(chatId: chatID);
+      var chatHistory = await loadMessagesFromDB(chatId: chatID);
+      if (chatHistory.isEmpty) {
+        chatHistory = await _messagesForHistoryFallback(chatId: chatID);
+      }
       _inChatMessages.clear();
       for (var message in chatHistory) {
         _inChatMessages.add(message);
@@ -230,7 +263,11 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
-    setCurrentModel(newModel: Constants.localAgentModel);
+    setCurrentModel(
+      newModel: ApiService.isConfigured
+          ? Constants.geminiTextModel
+          : Constants.localAgentModel,
+    );
     setLoading(value: true);
     String chatId = getChatId();
     final imageFiles = isTextOnly
@@ -372,6 +409,11 @@ class ChatProvider extends ChangeNotifier {
     _applyAssistantText(
       assistantMessage: assistantMessage,
       text: response.text.trim(),
+    );
+    setCurrentModel(
+      newModel: response.trace.modelName.startsWith('gemini:')
+          ? Constants.geminiTextModel
+          : Constants.localAgentModel,
     );
     await _auditLogService.record(
       assistantMessage: assistantMessage,
@@ -686,9 +728,8 @@ class ChatProvider extends ChangeNotifier {
   static initHive() async {
     final dirPath = resolveHiveDocumentsPath(
       isWeb: kIsWeb,
-      documentsPath: kIsWeb
-          ? null
-          : (await path.getApplicationDocumentsDirectory()).path,
+      documentsPath:
+          kIsWeb ? null : (await path.getApplicationDocumentsDirectory()).path,
     );
     if (dirPath != null && dirPath.isNotEmpty) {
       Hive.init(dirPath);
