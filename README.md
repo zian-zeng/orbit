@@ -860,13 +860,13 @@ The sections below are for developers running or modifying the app.
 Open PowerShell in the project root:
 
 ```powershell
-cd C:\Users\zianz\OneDrive\Documents\GitHub\orbit
+cd C:\Users\<your-username>\Documents\GitHub\orbit
 ```
 
 Install dependencies:
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' pub get
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' pub get
 ```
 
 If `.env` does not exist:
@@ -902,13 +902,13 @@ Do not commit `.env`.
 ### Web
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' run -d chrome
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' run -d chrome
 ```
 
 Build web:
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' build web
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' build web
 ```
 
 ### Android
@@ -916,14 +916,14 @@ Build web:
 Start an emulator or connect an Android device, then:
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' devices
-& 'C:\Users\zianz\flutter\bin\flutter.bat' run -d android
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' devices
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' run -d android
 ```
 
 Build APK:
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' build apk
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' build apk
 ```
 
 APK output:
@@ -935,8 +935,8 @@ build\app\outputs\flutter-apk\app-release.apk
 ### Windows Desktop
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' config --enable-windows-desktop
-& 'C:\Users\zianz\flutter\bin\flutter.bat' run -d windows
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' config --enable-windows-desktop
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' run -d windows
 ```
 
 ## Demo Login
@@ -982,7 +982,7 @@ Gemma/Ollama, then falls back to deterministic agent logic.
 Start the proxy:
 
 ```powershell
-cd C:\Users\zianz\OneDrive\Documents\GitHub\orbit\backend\student-data-proxy
+cd C:\Users\<your-username>\Documents\GitHub\orbit\backend\student-data-proxy
 node server.mjs
 ```
 
@@ -1025,19 +1025,19 @@ Invoke-RestMethod `
 Analyze:
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\cache\dart-sdk\bin\dart.exe' analyze lib test
+& 'C:\Users\<your-username>\flutter\bin\cache\dart-sdk\bin\dart.exe' analyze lib test
 ```
 
 Focused Flutter tests:
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' test test\agents\orbit_agent_orchestrator_test.dart
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' test test\agents\orbit_agent_orchestrator_test.dart
 ```
 
 Full test suite:
 
 ```powershell
-& 'C:\Users\zianz\flutter\bin\flutter.bat' test
+& 'C:\Users\<your-username>\flutter\bin\flutter.bat' test
 ```
 
 Note: if `flutter test` hangs on this Windows machine, prefer `dart analyze lib
