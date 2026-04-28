@@ -94,6 +94,37 @@ void main() {
     );
   });
 
+  test('keeps Gemini fallback reason when Gemma completes synthesis', () async {
+    final orchestrator = OrbitAgentOrchestrator(
+      llmClient: const _FakeLocalLlmClient(
+        'Use the next 20 minutes for the smallest course checkpoint.',
+        provider: 'ollama',
+        fallbackReason:
+            'Gemini returned an incomplete response: ended mid-thought',
+      ),
+    );
+
+    final response = await orchestrator.respond(
+      const OrbitAgentRequest(
+        message: 'I have class, work, and food constraints. What next?',
+        historySummary: '',
+        selectedLabelKey: 'planning',
+        recommendedSkillId: null,
+        templateId: null,
+        profileLabelKeys: ['academic_planning', 'stress_sensitive'],
+        recentLabelKeys: [],
+        imageCount: 0,
+      ),
+    );
+
+    expect(response.trace.usedLocalModel, isTrue);
+    expect(
+      response.trace.fallbackReason,
+      contains('Gemini returned an incomplete response'),
+    );
+    expect(response.text, contains('Gemma/Ollama'));
+  });
+
   test('blocks irreversible tool actions in the permission policy', () {
     final context = StudentContext(
       profileLabelKeys: const ['academic_planning'],
@@ -166,16 +197,23 @@ void main() {
 }
 
 class _FakeLocalLlmClient implements LocalLlmClient {
-  const _FakeLocalLlmClient(this.text);
+  const _FakeLocalLlmClient(
+    this.text, {
+    this.provider = 'test',
+    this.fallbackReason,
+  });
 
   final String text;
+  final String provider;
+  final String? fallbackReason;
 
   @override
   Future<LocalLlmResult> generate(LocalLlmRequest request) async {
     return LocalLlmResult(
       text: text,
       model: LocalLlmConfig.defaultModel,
-      provider: 'test',
+      provider: provider,
+      fallbackReason: fallbackReason,
     );
   }
 }

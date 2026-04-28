@@ -53,7 +53,7 @@ class OrbitAgentOrchestrator {
             skillResults: skillResults,
           ),
           temperature: 0.28,
-          maxTokens: 850,
+          maxTokens: 1200,
         ),
       );
 
@@ -69,7 +69,7 @@ class OrbitAgentOrchestrator {
           skillResults: skillResults,
           usedLocalModel: localResult.provider == 'ollama',
           modelName: '${localResult.provider}: ${localResult.model}',
-          fallbackReason: null,
+          fallbackReason: localResult.fallbackReason,
         ),
       );
     } catch (error) {

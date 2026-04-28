@@ -82,11 +82,13 @@ class LocalLlmResult {
     required this.text,
     required this.model,
     required this.provider,
+    this.fallbackReason,
   });
 
   final String text;
   final String model;
   final String provider;
+  final String? fallbackReason;
 }
 
 abstract class LocalLlmClient {
@@ -133,15 +135,23 @@ class GeminiThenOllamaLlmClient implements LocalLlmClient {
                 const Duration(seconds: 45));
         final text = response.text?.trim();
         if (text != null && text.isNotEmpty) {
-          return LocalLlmResult(
-            text: text,
-            model: _geminiModel,
-            provider: 'gemini',
+          final incompleteReason = _incompleteResponseReason(text);
+          if (incompleteReason != null) {
+            geminiError = LocalLlmException(
+              'Gemini returned an incomplete response: $incompleteReason',
+            );
+          } else {
+            return LocalLlmResult(
+              text: text,
+              model: _geminiModel,
+              provider: 'gemini',
+            );
+          }
+        } else {
+          geminiError = const LocalLlmException(
+            'Gemini returned an empty response.',
           );
         }
-        geminiError = const LocalLlmException(
-          'Gemini returned an empty response.',
-        );
       } catch (error) {
         geminiError = error;
       }
@@ -151,13 +161,63 @@ class GeminiThenOllamaLlmClient implements LocalLlmClient {
     }
 
     try {
-      return await _gemmaClient.generate(request);
+      final gemmaResult = await _gemmaClient.generate(request);
+      return LocalLlmResult(
+        text: gemmaResult.text,
+        model: gemmaResult.model,
+        provider: gemmaResult.provider,
+        fallbackReason: geminiError.toString(),
+      );
     } catch (gemmaError) {
       throw LocalLlmException(
         'Gemini failed: $geminiError. Gemma failed: $gemmaError',
       );
     }
   }
+
+  String? _incompleteResponseReason(String text) {
+    final normalized = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (normalized.length < 80) {
+      return 'too short to be a complete student plan';
+    }
+
+    final lower = normalized.toLowerCase();
+    const danglingEndings = [
+      'here',
+      'here is',
+      'here are',
+      'here\'s',
+      'first',
+      'second',
+      'because',
+      'and',
+      'or',
+      'but',
+      'so',
+      'with',
+      'without',
+      'to',
+      'for',
+      'the',
+      'a',
+      'an',
+      ':',
+      '-',
+    ];
+    if (danglingEndings.any((ending) => lower.endsWith(ending))) {
+      return 'ended mid-thought';
+    }
+
+    final hasTerminalPunctuation =
+        RegExp(r"""[.!?)]["']?$""").hasMatch(normalized);
+    if (!hasTerminalPunctuation && normalized.length < requestSizedFloor) {
+      return 'missing a clear ending';
+    }
+
+    return null;
+  }
+
+  static const int requestSizedFloor = 220;
 }
 
 class OllamaLocalLlmClient implements LocalLlmClient {
