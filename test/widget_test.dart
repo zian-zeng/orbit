@@ -432,6 +432,21 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField).first, 'Taylor');
+    await _tapOnboardingOption(tester, 'student_stage', 'undergrad_upper');
+    await _tapOnboardingOption(tester, 'major_area', 'cs_engineering');
+    await _tapOnboardingOption(tester, 'age_context', 'traditional_age');
+    await _tapOnboardingOption(tester, 'enrollment_work', 'student_working');
+    await _tapOnboardingOption(
+        tester, 'international_status', 'multilingual_student');
+    await _tapOnboardingOption(
+        tester, 'first_language', 'first_language_other');
+    await _tapOnboardingOption(
+        tester, 'background_support', 'accessibility_or_health');
+    await _tapOnboardingOption(tester, 'subject_pressure', 'coding_lab_stress');
+    await _tapOnboardingOption(
+        tester, 'academic_strength', 'strength_visual_hands_on');
+    await _tapOnboardingOption(
+        tester, 'course_life_need', 'job_internship_work');
     await _tapOnboardingOption(tester, 'primary_goal', 'feel_less_overwhelmed');
     await _tapOnboardingOption(tester, 'response_style', 'steady_support');
     await _tapOnboardingOption(tester, 'blocker', 'stress_spiral');
@@ -449,7 +464,7 @@ void main() {
     await _tapOnboardingOption(tester, 'commute', 'commuter');
     await _tapOnboardingOption(tester, 'dining_preference', 'vegan_food');
     await _tapOnboardingOption(
-        tester, 'accessibility_need', 'accessibility_no');
+        tester, 'accessibility_need', 'adhd_or_focus_support');
     await _tapOnboardingOption(tester, 'career_focus', 'career_active');
     await _tapOnboardingOption(
         tester, 'campus_confidence', 'somewhat_confident');
@@ -471,12 +486,17 @@ void main() {
         'plant_based',
         'movement_breaks',
         'google_calendar',
+        'working_student',
+        'language_support',
+        'mental_health_support',
+        'career_builder',
       ]),
     );
     expect(userProfileProvider.email, 'taylor@umd.edu');
     expect(find.text('How can I help?'), findsOneWidget);
     expect(find.text('Support pulse'), findsOneWidget);
-    expect(find.text('Use a question or action to draft the next prompt.'), findsOneWidget);
+    expect(find.text('Use a question or action to draft the next prompt.'),
+        findsOneWidget);
     expect(find.text('Reflect and regroup'), findsOneWidget);
     expect(find.text('Finish your support profile'), findsNothing);
   });

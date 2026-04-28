@@ -19,6 +19,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final Map<String, String> _answers = <String, String>{};
   bool _isSaving = false;
 
+  List<OnboardingQuestion> get _visibleQuestions =>
+      visibleOnboardingQuestions(_answers);
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -27,10 +30,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   bool get _canContinue =>
       _nameController.text.trim().isNotEmpty &&
-      onboardingQuestions
-          .every((question) => _answers.containsKey(question.id));
+      _visibleQuestions.every((question) => _answers.containsKey(question.id));
 
-  int get _answeredCount => onboardingQuestions
+  int get _answeredCount => _visibleQuestions
       .where((question) => _answers.containsKey(question.id))
       .length;
 
@@ -38,7 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       (_nameController.text.trim().isNotEmpty ? 1 : 0) + _answeredCount;
 
   double get _progress =>
-      (_completedSteps / (onboardingQuestions.length + 1)).clamp(0, 1);
+      (_completedSteps / (_visibleQuestions.length + 1)).clamp(0, 1);
 
   List<SupportLabel> get _rankedLabels {
     if (!_canContinue) {
@@ -113,11 +115,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       stageLabel: 'Setup',
       stageTitle: 'Finish your support profile',
       stageDescription:
-          'Tell Orbit how this semester feels so the workspace can prioritize the right planning, writing, and wellbeing lanes from the first chat.',
+          'Tell Orbit a little about your school, life, and support context so the workspace can start with useful labels instead of generic advice.',
       leadingPanel: _OnboardingAside(
         progress: _progress,
         completedSteps: _completedSteps,
-        totalSteps: onboardingQuestions.length + 1,
+        totalSteps: _visibleQuestions.length + 1,
         email: userProfile.email.isEmpty ? 'Local session' : userProfile.email,
         rankedLabels: _rankedLabels,
         profileLabels: _profileLabels,
@@ -176,7 +178,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          ...onboardingQuestions.asMap().entries.map(
+          ..._visibleQuestions.asMap().entries.map(
                 (entry) => Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: _SectionFrame(
@@ -189,6 +191,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onSelected: (optionId) {
                         setState(() {
                           _answers[entry.value.id] = optionId;
+                          _pruneHiddenAnswers();
                         });
                       },
                     ),
@@ -249,6 +252,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
+
+  void _pruneHiddenAnswers() {
+    var changed = true;
+    while (changed) {
+      changed = false;
+      final visibleIds =
+          visibleOnboardingQuestions(_answers).map((item) => item.id).toSet();
+      final hiddenAnsweredIds = _answers.keys
+          .where((questionId) => !visibleIds.contains(questionId))
+          .toList(growable: false);
+      if (hiddenAnsweredIds.isNotEmpty) {
+        changed = true;
+        for (final questionId in hiddenAnsweredIds) {
+          _answers.remove(questionId);
+        }
+      }
+    }
+  }
 }
 
 class _OnboardingAside extends StatelessWidget {
@@ -292,7 +313,7 @@ class _OnboardingAside extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'The questionnaire stays local and powers the planning, writing, and support suggestions you see first.',
+          'The adaptive questionnaire stays local and only shows follow-ups when your earlier answers make them useful.',
           style: textTheme.bodyLarge?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -488,10 +509,12 @@ class _QuestionOptions extends StatelessWidget {
                         children: [
                           Text(
                             option.title,
-                            style:
-                                Theme.of(context).textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                           const SizedBox(height: 4),
                           Text(

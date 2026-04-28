@@ -35,12 +35,22 @@ class OnboardingQuestion {
     required this.title,
     required this.description,
     required this.options,
+    this.visibleWhenOptionIds = const [],
   });
 
   final String id;
   final String title;
   final String description;
   final List<OnboardingOption> options;
+  final List<String> visibleWhenOptionIds;
+
+  bool isVisible(Map<String, String> selections) {
+    if (visibleWhenOptionIds.isEmpty) {
+      return true;
+    }
+    final selectedIds = selections.values.toSet();
+    return visibleWhenOptionIds.any(selectedIds.contains);
+  }
 }
 
 class OnboardingOption {
@@ -60,6 +70,565 @@ class OnboardingOption {
 }
 
 const onboardingQuestions = <OnboardingQuestion>[
+  OnboardingQuestion(
+    id: 'student_stage',
+    title: 'Where are you in school right now?',
+    description:
+        'This helps Orbit tune advice for incoming, undergraduate, graduate, and returning students.',
+    options: [
+      OnboardingOption(
+        id: 'incoming_student',
+        title: 'Incoming or first-year student',
+        description: 'I am still learning campus, expectations, and routines.',
+        labelWeights: {
+          SupportLabel.planning: 4,
+          SupportLabel.wellbeingCheckIn: 2,
+        },
+        profileLabels: [
+          'incoming_student',
+          'undergraduate',
+          'campus_navigation'
+        ],
+      ),
+      OnboardingOption(
+        id: 'undergrad_early',
+        title: 'Undergraduate, early years',
+        description: 'I am building study habits and choosing a direction.',
+        labelWeights: {
+          SupportLabel.studyHelp: 3,
+          SupportLabel.planning: 3,
+        },
+        profileLabels: ['undergraduate', 'early_college'],
+      ),
+      OnboardingOption(
+        id: 'undergrad_upper',
+        title: 'Undergraduate, upper years',
+        description:
+            'Major classes, internships, and graduation planning matter.',
+        labelWeights: {
+          SupportLabel.planning: 3,
+          SupportLabel.studyHelp: 2,
+          SupportLabel.writing: 1,
+        },
+        profileLabels: ['undergraduate', 'upper_division', 'career_builder'],
+      ),
+      OnboardingOption(
+        id: 'masters_student',
+        title: 'Master\'s student',
+        description:
+            'I need support balancing advanced classes, projects, or work.',
+        labelWeights: {
+          SupportLabel.planning: 3,
+          SupportLabel.studyHelp: 2,
+          SupportLabel.writing: 1,
+        },
+        profileLabels: ['graduate_student', 'masters_student'],
+      ),
+      OnboardingOption(
+        id: 'phd_student',
+        title: 'PhD student',
+        description:
+            'Research, teaching, advising, and long-term planning matter.',
+        labelWeights: {
+          SupportLabel.planning: 3,
+          SupportLabel.writing: 2,
+          SupportLabel.wellbeingCheckIn: 1,
+        },
+        profileLabels: ['graduate_student', 'phd_student', 'research_student'],
+      ),
+      OnboardingOption(
+        id: 'returning_or_nontraditional',
+        title: 'Returning or nontraditional student',
+        description: 'School has to fit around more life responsibilities.',
+        labelWeights: {
+          SupportLabel.planning: 4,
+          SupportLabel.wellbeingCheckIn: 2,
+        },
+        profileLabels: ['nontraditional_student', 'life_logistics'],
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'major_area',
+    title: 'What area best matches your major or path?',
+    description: 'A broad signal is enough; Orbit can refine this later.',
+    options: [
+      OnboardingOption(
+        id: 'cs_engineering',
+        title: 'Computer science or engineering',
+        description:
+            'Coding, systems, labs, projects, or technical interviews.',
+        labelWeights: {
+          SupportLabel.studyHelp: 4,
+          SupportLabel.planning: 2,
+        },
+        profileLabels: ['stem', 'cs_engineering', 'career_builder'],
+      ),
+      OnboardingOption(
+        id: 'math_physics',
+        title: 'Math, physics, or quantitative STEM',
+        description: 'Problem sets, proofs, formulas, or technical exams.',
+        labelWeights: {
+          SupportLabel.studyHelp: 5,
+          SupportLabel.planning: 1,
+        },
+        profileLabels: ['stem', 'math_physics', 'quantitative_courses'],
+      ),
+      OnboardingOption(
+        id: 'bio_health_science',
+        title: 'Biology, health, or lab science',
+        description: 'Memorization, labs, exams, and dense course material.',
+        labelWeights: {
+          SupportLabel.studyHelp: 4,
+          SupportLabel.summarization: 2,
+        },
+        profileLabels: ['science_courses', 'lab_courses'],
+      ),
+      OnboardingOption(
+        id: 'business_policy_social',
+        title: 'Business, policy, or social science',
+        description: 'Reading, cases, presentations, research, or analysis.',
+        labelWeights: {
+          SupportLabel.writing: 2,
+          SupportLabel.summarization: 3,
+          SupportLabel.planning: 1,
+        },
+        profileLabels: ['reading_heavy_courses', 'presentation_support'],
+      ),
+      OnboardingOption(
+        id: 'arts_humanities',
+        title: 'Arts, humanities, or communication',
+        description: 'Writing, critique, projects, and creative work.',
+        labelWeights: {
+          SupportLabel.writing: 4,
+          SupportLabel.summarization: 2,
+        },
+        profileLabels: ['writing_heavy_courses', 'creative_courses'],
+      ),
+      OnboardingOption(
+        id: 'undecided_major',
+        title: 'Undecided or exploring',
+        description: 'I want help comparing classes, majors, or directions.',
+        labelWeights: {
+          SupportLabel.planning: 4,
+          SupportLabel.wellbeingCheckIn: 1,
+        },
+        profileLabels: ['major_exploration', 'course_selection'],
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'age_context',
+    title: 'What life-stage context should Orbit assume?',
+    description:
+        'A broad range is enough; this helps avoid advice that assumes one kind of student life.',
+    options: [
+      OnboardingOption(
+        id: 'traditional_age',
+        title: 'Traditional undergraduate age',
+        description: 'Most campus routines and peer activities may fit.',
+        labelWeights: {
+          SupportLabel.planning: 1,
+        },
+        profileLabels: ['traditional_age_student'],
+      ),
+      OnboardingOption(
+        id: 'adult_learner',
+        title: 'Adult learner',
+        description:
+            'Work, family, commuting, or returning to school may matter.',
+        labelWeights: {
+          SupportLabel.planning: 3,
+          SupportLabel.wellbeingCheckIn: 1,
+        },
+        profileLabels: ['adult_learner', 'nontraditional_student'],
+      ),
+      OnboardingOption(
+        id: 'prefer_not_age',
+        title: 'Prefer not to say',
+        description: 'Do not use age context for personalization.',
+        labelWeights: {
+          SupportLabel.planning: 1,
+        },
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'enrollment_work',
+    title: 'What does your weekly load look like outside class?',
+    description:
+        'Orbit should know if school has to fit around work or caregiving.',
+    options: [
+      OnboardingOption(
+        id: 'full_time_student',
+        title: 'Full-time student',
+        description: 'School is the main weekly commitment.',
+        labelWeights: {
+          SupportLabel.planning: 2,
+        },
+        profileLabels: ['full_time_student'],
+      ),
+      OnboardingOption(
+        id: 'student_working',
+        title: 'Student and working',
+        description: 'I need school plans that respect job shifts.',
+        labelWeights: {
+          SupportLabel.planning: 5,
+          SupportLabel.wellbeingCheckIn: 2,
+        },
+        profileLabels: ['working_student', 'work_shift_constraints'],
+      ),
+      OnboardingOption(
+        id: 'part_time_student',
+        title: 'Part-time student',
+        description: 'My schedule is not a standard full-time student week.',
+        labelWeights: {
+          SupportLabel.planning: 4,
+        },
+        profileLabels: ['part_time_student', 'life_logistics'],
+      ),
+      OnboardingOption(
+        id: 'caregiver_or_family',
+        title: 'Family or caregiving duties',
+        description: 'Home responsibilities affect when I can study.',
+        labelWeights: {
+          SupportLabel.planning: 4,
+          SupportLabel.wellbeingCheckIn: 2,
+        },
+        profileLabels: ['caregiver_student', 'life_logistics'],
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'international_status',
+    title: 'Should language or international-student context matter?',
+    description: 'Choose what you want Orbit to remember locally.',
+    options: [
+      OnboardingOption(
+        id: 'international_student',
+        title: 'International student',
+        description: 'Visa, language, culture, and campus systems may matter.',
+        labelWeights: {
+          SupportLabel.writing: 2,
+          SupportLabel.summarization: 2,
+          SupportLabel.planning: 2,
+        },
+        profileLabels: ['international_student', 'campus_resources'],
+      ),
+      OnboardingOption(
+        id: 'multilingual_student',
+        title: 'Multilingual or English is not always easiest',
+        description: 'Clear wording and language support may help.',
+        labelWeights: {
+          SupportLabel.writing: 3,
+          SupportLabel.summarization: 2,
+        },
+        profileLabels: ['multilingual_student', 'language_support'],
+      ),
+      OnboardingOption(
+        id: 'domestic_student',
+        title: 'No special language context',
+        description: 'Use standard campus and academic guidance.',
+        labelWeights: {
+          SupportLabel.planning: 1,
+        },
+      ),
+      OnboardingOption(
+        id: 'prefer_not_language',
+        title: 'Prefer not to say',
+        description: 'Do not use this signal unless I bring it up later.',
+        labelWeights: {
+          SupportLabel.planning: 1,
+        },
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'first_language',
+    title: 'What language should Orbit consider first?',
+    description: 'This only appears when language context may be useful.',
+    visibleWhenOptionIds: [
+      'international_student',
+      'multilingual_student',
+    ],
+    options: [
+      OnboardingOption(
+        id: 'first_language_english',
+        title: 'English',
+        description: 'English is comfortable for school support.',
+        labelWeights: {
+          SupportLabel.writing: 1,
+        },
+        profileLabels: ['english_first_language'],
+      ),
+      OnboardingOption(
+        id: 'first_language_chinese',
+        title: 'Chinese',
+        description: 'Plain English rewrites and term explanations may help.',
+        labelWeights: {
+          SupportLabel.writing: 2,
+          SupportLabel.summarization: 2,
+        },
+        profileLabels: ['language_chinese', 'language_support'],
+      ),
+      OnboardingOption(
+        id: 'first_language_spanish',
+        title: 'Spanish',
+        description: 'Plain English rewrites and term explanations may help.',
+        labelWeights: {
+          SupportLabel.writing: 2,
+          SupportLabel.summarization: 2,
+        },
+        profileLabels: ['language_spanish', 'language_support'],
+      ),
+      OnboardingOption(
+        id: 'first_language_other',
+        title: 'Another language',
+        description: 'Keep wording clear and explain campus terminology.',
+        labelWeights: {
+          SupportLabel.writing: 2,
+          SupportLabel.summarization: 2,
+        },
+        profileLabels: ['language_other', 'language_support'],
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'background_support',
+    title: 'Which background signal would help Orbit support you better?',
+    description:
+        'Pick the one that matters most now; you can change this later.',
+    options: [
+      OnboardingOption(
+        id: 'first_generation',
+        title: 'First-generation college student',
+        description: 'Campus processes and hidden expectations can be unclear.',
+        labelWeights: {
+          SupportLabel.planning: 3,
+          SupportLabel.wellbeingCheckIn: 2,
+        },
+        profileLabels: ['first_generation_student', 'campus_resources'],
+      ),
+      OnboardingOption(
+        id: 'financial_stress',
+        title: 'Financial stress',
+        description: 'Work, cost, food, books, or housing pressure matters.',
+        labelWeights: {
+          SupportLabel.planning: 3,
+          SupportLabel.wellbeingCheckIn: 3,
+        },
+        profileLabels: [
+          'financial_stress',
+          'campus_resources',
+          'life_logistics'
+        ],
+      ),
+      OnboardingOption(
+        id: 'accessibility_or_health',
+        title: 'Disability, ADHD, depression, anxiety, or health support',
+        description:
+            'I may need pacing, accommodations, or the right resource.',
+        labelWeights: {
+          SupportLabel.wellbeingCheckIn: 5,
+          SupportLabel.planning: 3,
+        },
+        profileLabels: [
+          'accessibility',
+          'mental_health_support',
+          'accommodation',
+          'stress_sensitive',
+        ],
+      ),
+      OnboardingOption(
+        id: 'housing_transport_pressure',
+        title: 'Housing, rent, transport, or shopping pressure',
+        description: 'Everyday logistics can affect school plans.',
+        labelWeights: {
+          SupportLabel.planning: 4,
+          SupportLabel.wellbeingCheckIn: 1,
+        },
+        profileLabels: ['housing_support', 'renting', 'life_logistics'],
+      ),
+      OnboardingOption(
+        id: 'no_background_signal',
+        title: 'None right now',
+        description: 'Start with academic and schedule support.',
+        labelWeights: {
+          SupportLabel.planning: 1,
+        },
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'subject_pressure',
+    title: 'Which academic area feels most stressful?',
+    description:
+        'This helps Orbit decide whether to lead with tutoring, practice, writing, or planning.',
+    options: [
+      OnboardingOption(
+        id: 'math_physics_stress',
+        title: 'Math, physics, or quantitative work',
+        description: 'Problem solving, formulas, or proofs feel stressful.',
+        labelWeights: {
+          SupportLabel.studyHelp: 5,
+          SupportLabel.planning: 2,
+        },
+        profileLabels: ['math_stress', 'physics_stress', 'exam_prep'],
+      ),
+      OnboardingOption(
+        id: 'coding_lab_stress',
+        title: 'Coding, labs, or technical projects',
+        description: 'Projects feel hard to start, debug, or finish.',
+        labelWeights: {
+          SupportLabel.studyHelp: 4,
+          SupportLabel.planning: 3,
+        },
+        profileLabels: ['coding_stress', 'lab_support', 'project_planning'],
+      ),
+      OnboardingOption(
+        id: 'reading_writing_stress',
+        title: 'Reading, writing, or presentations',
+        description: 'Dense material, essays, or speaking tasks take energy.',
+        labelWeights: {
+          SupportLabel.writing: 3,
+          SupportLabel.summarization: 4,
+        },
+        profileLabels: ['writing_stress', 'reading_heavy_courses'],
+      ),
+      OnboardingOption(
+        id: 'exam_stress_general',
+        title: 'Exams in general',
+        description: 'I need review plans and calmer test prep.',
+        labelWeights: {
+          SupportLabel.studyHelp: 4,
+          SupportLabel.planning: 3,
+          SupportLabel.wellbeingCheckIn: 2,
+        },
+        profileLabels: ['exam_prep', 'stress_sensitive'],
+      ),
+      OnboardingOption(
+        id: 'academics_feel_ok',
+        title: 'Academics feel okay',
+        description: 'I mainly need schedule, life, or career support.',
+        labelWeights: {
+          SupportLabel.planning: 2,
+        },
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'academic_strength',
+    title: 'What usually feels strongest for you?',
+    description: 'This helps Orbit encourage the strategies that already work.',
+    options: [
+      OnboardingOption(
+        id: 'strength_math_logic',
+        title: 'Math, logic, or problem solving',
+        description: 'Use structured examples and practice loops.',
+        labelWeights: {
+          SupportLabel.studyHelp: 2,
+          SupportLabel.planning: 1,
+        },
+        profileLabels: ['strength_quantitative'],
+      ),
+      OnboardingOption(
+        id: 'strength_writing_reading',
+        title: 'Writing, reading, or discussion',
+        description: 'Use explanations, outlines, and verbal reasoning.',
+        labelWeights: {
+          SupportLabel.writing: 2,
+          SupportLabel.summarization: 1,
+        },
+        profileLabels: ['strength_writing_reading'],
+      ),
+      OnboardingOption(
+        id: 'strength_visual_hands_on',
+        title: 'Visual or hands-on learning',
+        description: 'Use diagrams, examples, and applied practice.',
+        labelWeights: {
+          SupportLabel.imageAnalysis: 2,
+          SupportLabel.studyHelp: 2,
+        },
+        profileLabels: ['visual_learner', 'hands_on_learning'],
+      ),
+      OnboardingOption(
+        id: 'strength_still_learning',
+        title: 'I am still figuring that out',
+        description: 'Help me test different study approaches.',
+        labelWeights: {
+          SupportLabel.studyHelp: 2,
+          SupportLabel.wellbeingCheckIn: 1,
+        },
+        profileLabels: ['learning_strategy_support'],
+      ),
+    ],
+  ),
+  OnboardingQuestion(
+    id: 'course_life_need',
+    title: 'What should Orbit be ready to help with later?',
+    description:
+        'This creates starting labels for class choice, work, campus life, and daily logistics.',
+    options: [
+      OnboardingOption(
+        id: 'choose_classes_professors',
+        title: 'Choosing classes and professors',
+        description: 'Course difficulty, professor fit, and ratings matter.',
+        labelWeights: {
+          SupportLabel.planning: 5,
+          SupportLabel.summarization: 1,
+        },
+        profileLabels: [
+          'course_selection',
+          'professor_ratings',
+          'planet_terp',
+        ],
+      ),
+      OnboardingOption(
+        id: 'regular_course_review',
+        title: 'Regular study and course review',
+        description: 'Keep me reviewing material before exams.',
+        labelWeights: {
+          SupportLabel.studyHelp: 4,
+          SupportLabel.planning: 3,
+        },
+        profileLabels: ['regular_review', 'exam_prep'],
+      ),
+      OnboardingOption(
+        id: 'job_internship_work',
+        title: 'Jobs, internships, or work help',
+        description: 'Resume, applications, interviews, or job balancing.',
+        labelWeights: {
+          SupportLabel.writing: 3,
+          SupportLabel.planning: 3,
+        },
+        profileLabels: ['career_builder', 'job_search', 'internship_search'],
+      ),
+      OnboardingOption(
+        id: 'campus_events_groups',
+        title: 'Events, clubs, or email lists',
+        description: 'Help me find relevant campus events or groups.',
+        labelWeights: {
+          SupportLabel.planning: 2,
+          SupportLabel.summarization: 1,
+        },
+        profileLabels: [
+          'event_recommendations',
+          'campus_resources',
+          'cs_email_list'
+        ],
+      ),
+      OnboardingOption(
+        id: 'life_shopping_renting',
+        title: 'Life logistics',
+        description: 'Shopping, renting, food, transport, and errands.',
+        labelWeights: {
+          SupportLabel.planning: 4,
+          SupportLabel.wellbeingCheckIn: 1,
+        },
+        profileLabels: ['life_logistics', 'shopping_support', 'renting'],
+      ),
+    ],
+  ),
   OnboardingQuestion(
     id: 'primary_goal',
     title: 'What do you want Orbit to help with first?',
@@ -325,6 +894,14 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'class_support',
     title: 'Which class support would help most?',
     description: 'This tunes the academic agent.',
+    visibleWhenOptionIds: [
+      'learn_a_topic',
+      'hard_to_understand',
+      'math_physics_stress',
+      'coding_lab_stress',
+      'exam_stress_general',
+      'regular_course_review',
+    ],
     options: [
       OnboardingOption(
         id: 'concept_help',
@@ -359,6 +936,15 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'writing_need',
     title: 'What writing help do you need?',
     description: 'This includes emails, essays, and applications.',
+    visibleWhenOptionIds: [
+      'write_something_clear',
+      'polished_words',
+      'blank_page',
+      'reading_writing_stress',
+      'job_internship_work',
+      'international_student',
+      'multilingual_student',
+    ],
     options: [
       OnboardingOption(
         id: 'draft_from_scratch',
@@ -392,6 +978,14 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'reading_volume',
     title: 'How much dense reading do you handle?',
     description: 'Orbit can bias toward summaries when needed.',
+    visibleWhenOptionIds: [
+      'get_the_short_version',
+      'concise_takeaways',
+      'buried_in_notes',
+      'reading_writing_stress',
+      'business_policy_social',
+      'bio_health_science',
+    ],
     options: [
       OnboardingOption(
         id: 'many_readings',
@@ -424,6 +1018,11 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'image_need',
     title: 'Will you share screenshots or diagrams?',
     description: 'This affects routing for visual help.',
+    visibleWhenOptionIds: [
+      'understand_an_image',
+      'visual_breakdown',
+      'screenshot_confusion',
+    ],
     options: [
       OnboardingOption(
         id: 'frequent_images',
@@ -456,6 +1055,14 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'stress_pattern',
     title: 'When does stress usually spike?',
     description: 'This configures check-ins and pacing.',
+    visibleWhenOptionIds: [
+      'feel_less_overwhelmed',
+      'stress_spiral',
+      'financial_stress',
+      'accessibility_or_health',
+      'exam_stress_general',
+      'overplan',
+    ],
     options: [
       OnboardingOption(
         id: 'before_exams',
@@ -492,6 +1099,14 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'energy_pattern',
     title: 'What drains your energy most?',
     description: 'Orbit can keep actions smaller when needed.',
+    visibleWhenOptionIds: [
+      'before_exams',
+      'when_behind',
+      'financial_stress',
+      'accessibility_or_health',
+      'student_working',
+      'caregiver_or_family',
+    ],
     options: [
       OnboardingOption(
         id: 'long_laptop_blocks',
@@ -527,6 +1142,14 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'schedule_source',
     title: 'Where should schedule context come from?',
     description: 'This prepares the connector strategy.',
+    visibleWhenOptionIds: [
+      'stay_organized',
+      'too_many_tasks',
+      'choose_classes_professors',
+      'regular_course_review',
+      'student_working',
+      'caregiver_or_family',
+    ],
     options: [
       OnboardingOption(
         id: 'google_calendar',
@@ -562,6 +1185,13 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'calendar_density',
     title: 'How crowded is your calendar?',
     description: 'This helps estimate workload pressure.',
+    visibleWhenOptionIds: [
+      'google_calendar',
+      'canvas_calendar',
+      'manual_schedule',
+      'student_working',
+      'caregiver_or_family',
+    ],
     options: [
       OnboardingOption(
         id: 'very_crowded',
@@ -597,6 +1227,13 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'canvas_habit',
     title: 'How do you use Canvas?',
     description: 'This affects deadline retrieval and study routing.',
+    visibleWhenOptionIds: [
+      'canvas_calendar',
+      'heavy_course_load',
+      'last_minute',
+      'choose_classes_professors',
+      'regular_course_review',
+    ],
     options: [
       OnboardingOption(
         id: 'canvas_daily',
@@ -713,34 +1350,64 @@ const onboardingQuestions = <OnboardingQuestion>[
   ),
   OnboardingQuestion(
     id: 'accessibility_need',
-    title: 'Should accessibility needs affect planning?',
-    description: 'Only choose this if you want Orbit to remember it locally.',
+    title: 'What kind of access support should Orbit watch for?',
+    description:
+        'This stays local and helps route to accommodations or pacing support.',
+    visibleWhenOptionIds: [
+      'accessibility_or_health',
+    ],
     options: [
       OnboardingOption(
-        id: 'accessibility_yes',
-        title: 'Yes',
-        description: 'Account for accommodations, access, or pacing.',
+        id: 'accessibility_documented',
+        title: 'Documented disability or accommodation',
+        description: 'Help me plan around approved accommodations.',
         labelWeights: {
           SupportLabel.planning: 3,
           SupportLabel.wellbeingCheckIn: 3,
         },
-        profileLabels: ['accessibility', 'accommodation'],
+        profileLabels: [
+          'accessibility',
+          'accommodation',
+          'disability_resources'
+        ],
       ),
       OnboardingOption(
-        id: 'accessibility_maybe',
-        title: 'Maybe later',
-        description: 'Ask before using this signal.',
+        id: 'accessibility_realizing',
+        title: 'I may be realizing I need help',
+        description: 'Help me find the right office or next step.',
         labelWeights: {
-          SupportLabel.wellbeingCheckIn: 1,
+          SupportLabel.wellbeingCheckIn: 4,
+          SupportLabel.planning: 2,
         },
+        profileLabels: [
+          'accessibility',
+          'accommodation_exploration',
+          'campus_resources',
+        ],
       ),
       OnboardingOption(
-        id: 'accessibility_no',
-        title: 'No',
-        description: 'Not needed for now.',
+        id: 'adhd_or_focus_support',
+        title: 'ADHD, focus, anxiety, or depression support',
+        description: 'Keep plans smaller and resource-aware.',
         labelWeights: {
+          SupportLabel.wellbeingCheckIn: 5,
+          SupportLabel.planning: 3,
+        },
+        profileLabels: [
+          'mental_health_support',
+          'adhd_support',
+          'stress_sensitive'
+        ],
+      ),
+      OnboardingOption(
+        id: 'accessibility_prefer_not',
+        title: 'Prefer not to specify',
+        description: 'Use general stress-sensitive planning.',
+        labelWeights: {
+          SupportLabel.wellbeingCheckIn: 2,
           SupportLabel.planning: 1,
         },
+        profileLabels: ['stress_sensitive'],
       ),
     ],
   ),
@@ -748,6 +1415,13 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'career_focus',
     title: 'How much career support do you want?',
     description: 'This helps ORBIT route internships and resumes.',
+    visibleWhenOptionIds: [
+      'job_internship_work',
+      'career_active',
+      'career_exploring',
+      'undergrad_upper',
+      'cs_engineering',
+    ],
     options: [
       OnboardingOption(
         id: 'career_active',
@@ -783,6 +1457,14 @@ const onboardingQuestions = <OnboardingQuestion>[
     id: 'campus_confidence',
     title: 'How confident are you navigating UMD resources?',
     description: 'This tunes campus-resource suggestions.',
+    visibleWhenOptionIds: [
+      'incoming_student',
+      'first_generation',
+      'international_student',
+      'campus_events_groups',
+      'campus_walking',
+      'commuter',
+    ],
     options: [
       OnboardingOption(
         id: 'not_confident',
@@ -871,6 +1553,14 @@ List<SupportLabel> rankSupportLabels(OnboardingAnswers answers) {
     return left.index.compareTo(right.index);
   });
   return ranked;
+}
+
+List<OnboardingQuestion> visibleOnboardingQuestions(
+  Map<String, String> selections,
+) {
+  return onboardingQuestions
+      .where((question) => question.isVisible(selections))
+      .toList(growable: false);
 }
 
 List<String> onboardingProfileLabels(OnboardingAnswers answers) {
