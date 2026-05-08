@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ORBIT is a personalized multi-agent AI workspace for student life, academic planning, wellbeing, campus logistics, and UMD-specific support.">
+  <title>ORBIT | Personalized Multi-Agent AI for Student Life</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-language="en">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" data-header>
+    <nav class="nav-shell" aria-label="Primary navigation">
+      <a class="brand-mark" href="#hero" aria-label="ORBIT home">
+        <span class="brand-orb" aria-hidden="true"></span>
+        <span>ORBIT</span>
+      </a>
+      <div class="nav-actions">
+        <div class="nav-links" id="site-nav" data-nav-links>
+          <a href="#problem" data-i18n="nav.problem">Problem</a>
+          <a href="#overview" data-i18n="nav.overview">Overview</a>
+          <a href="story.html" data-i18n="nav.story" data-story-link>Our Story</a>
+          <a href="#how" data-i18n="nav.how">How It Works</a>
+          <a href="#walkthrough" data-i18n="nav.walkthrough">Walkthrough</a>
+          <a href="#architecture" data-i18n="nav.architecture">Architecture</a>
+          <a href="#run" data-i18n="nav.run">Run</a>
+        </div>
+        <button class="language-toggle" type="button" aria-pressed="false" data-language-toggle>
+          <span data-language-label>中文</span>
+        </button>
+      </div>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero section-dark" id="hero">
+      <div class="ambient-grid" aria-hidden="true"></div>
+      <div class="hero-content">
+        <div class="hero-copy reveal">
+          <p class="eyebrow" data-i18n="hero.eyebrow">Student success operating layer</p>
+          <h1>ORBIT</h1>
+          <p class="hero-tagline" data-i18n="hero.tagline">Personalized multi-agent AI for student life, academic planning, campus logistics, and wellbeing.</p>
+          <p class="hero-value" data-i18n="hero.value">
+            ORBIT helps college students coordinate schoolwork, stress, campus resources,
+            food, routes, courses, calendars, and action cards from one explainable AI workspace.
+            It is built around labels, specialist agents, tool routing, demo-safe data, and
+            inspectable traces rather than a generic prompt-response chat flow.
+          </p>
+          <div class="hero-actions" aria-label="Page shortcuts">
+            <a class="button primary" href="#walkthrough" data-i18n="hero.explore">Explore the Product</a>
+            <a class="button accent" href="story.html" data-i18n="hero.story" data-story-link>Read Our Story</a>
+            <a class="button secondary" href="#run" data-i18n="hero.run">Run the Project</a>
+          </div>
+          <dl class="signal-strip" aria-label="Project highlights">
+            <div>
+              <dt data-i18n="hero.mode">Mode</dt>
+              <dd data-i18n="hero.modeText">Local-first demo with opt-in live connectors</dd>
+            </div>
+            <div>
+              <dt data-i18n="hero.persona">Persona</dt>
+              <dd data-i18n="hero.personaText">Maya Chen, seeded UMD student profile</dd>
+            </div>
+            <div>
+              <dt data-i18n="hero.system">System</dt>
+              <dd data-i18n="hero.systemText">Labels -> agents -> tools -> action surfaces</dd>
+            </div>
+          </dl>
+          <div class="repo-link-row">
+            <a class="repo-pill" href="https://github.com/zian-zeng/orbit" target="_blank" rel="noopener" data-i18n="hero.repo">GitHub Repository</a>
+          </div>
+        </div>
+
+        <figure class="poster-frame reveal">
+          <div class="poster-glow" aria-hidden="true"></div>
+          <img
+            src="../images/Orbit%20Poster.png"
+            alt="ORBIT product poster showing the student AI workspace concept"
+            width="1024"
+            height="1536"
+            loading="eager"
+            decoding="async">
+        </figure>
+      </div>
+    </section>
+
+    <section class="section section-light story-preview" id="story" aria-labelledby="story-preview-title">
+      <article class="story-paper story-preview-paper reveal">
+        <p class="eyebrow lang-en">Project Build Story</p>
+        <p class="eyebrow lang-zh">项目构建故事</p>
+        <h2 id="story-preview-title" class="lang-en">Why We Built ORBIT, How We Built It, and What We Think It Proves</h2>
+        <h2 class="lang-zh">我们为什么构建 ORBIT、如何实现它，以及它证明了什么</h2>
+
+        <div class="essay-text story-preview-text lang-en">
+          <p>
+            When we started thinking about ORBIT, we were not only thinking about building another AI chatbot.
+            As CS and NLP students, we have used a lot of AI tools, and we think many of them are impressive
+            in a very technical sense. They can summarize, write, code, and answer questions quickly. However,
+            what made us pause was that most of these tools still begin from a blank prompt. They do not really
+            understand the messy environment around a student.
+          </p>
+          <p>
+            They do not know that one student might be worrying about a CMSC project, a statistics quiz, a work
+            shift, food cost, a walk across campus, and stress at the same time. That was the gap we wanted ORBIT
+            to explore. We wanted to build something that treats student life as a connected system, not as isolated
+            questions.
+          </p>
+          <p>
+            We think the core idea behind ORBIT is labelization. Instead of forcing a student to explain the same
+            context again and again, ORBIT turns important background information into durable labels. These labels
+            can be simple, like vegan, commuter, working student, or course selection, but they are not just
+            decorations on a profile page.
+          </p>
+        </div>
+
+        <div class="essay-text story-preview-text lang-zh">
+          <p>
+            当我们开始构思 ORBIT 的时候，我们并不是只想再做一个 AI 聊天机器人。作为 CS 和 NLP 学生，我们使用过很多 AI 工具，
+            也承认它们在技术层面非常强大：它们可以快速总结、写作、写代码、回答问题。可是让我们停下来思考的是，
+            大多数工具仍然从一个空白 prompt 开始。它们并不真正理解学生周围那个混乱、真实、不断变化的环境。
+          </p>
+          <p>
+            它们不知道一个学生可能同时在担心 CMSC 项目、统计学测验、打工班次、餐费、跨校园步行路线和压力状态。
+            这正是我们希望 ORBIT 探索的空白。我们想构建一个把学生生活看作连接系统的产品，而不是把每个问题都拆成孤立提问。
+          </p>
+          <p>
+            我们认为 ORBIT 的核心想法是标签化。与其要求学生一次又一次解释相同背景，ORBIT 会把重要上下文转化成可持续使用的标签。
+            这些标签可以很简单，比如 vegan、commuter、working student 或 course selection，但它们并不只是资料页上的装饰。
+          </p>
+        </div>
+
+        <div class="story-preview-fade" aria-hidden="true"></div>
+        <a class="story-expand-link" href="story.html" data-story-link>
+          <span class="lang-en">Continue Reading</span>
+          <span class="lang-zh">继续阅读</span>
+          <span class="story-expand-icon" aria-hidden="true"></span>
+        </a>
+      </article>
+    </section>
+
+    <section class="section section-light narrative" id="overview" aria-labelledby="overview-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Product Overview</p>
+        <h2 id="overview-title">A personalized multi-agent AI workspace for student life</h2>
+        <p>
+          ORBIT is built on a simple product belief: students do not need one more generic chatbot.
+          They need an assistant that knows the context they choose to share, understands campus-specific
+          systems, coordinates specialist roles, and returns plans they can actually use.
+        </p>
+      </div>
+
+      <div class="narrative-grid">
+        <article class="story-card reveal">
+          <span class="card-kicker">Student problem</span>
+          <h3>Disconnected tools create coordination overload.</h3>
+          <p>
+            Assignments live in Canvas/ELMS, classes and work shifts live in Google Calendar,
+            routes depend on Maps, course truth is split across PlanetTerp, Testudo, umd.io,
+            and campus support offices. The information exists, but students have to integrate
+            it while already under stress.
+          </p>
+        </article>
+        <article class="story-card reveal">
+          <span class="card-kicker">Product vision</span>
+          <h3>ORBIT starts from a student model, not a blank prompt.</h3>
+          <p>
+            The system uses durable labels, prior history, report state, campus context,
+            demo/live data, role agents, runtime skills, model fallback, connected actions,
+            and traces to transform student context into next steps.
+          </p>
+        </article>
+        <article class="story-card reveal">
+          <span class="card-kicker">Why it is different</span>
+          <h3>It is an advisor system, not only an answer generator.</h3>
+          <p>
+            ORBIT can move from advice to action with walking routes, calendar blocks,
+            email-like actions, report insights, course plans, UMD resource matches,
+            and an audit path that explains which agents and tools were used.
+          </p>
+        </article>
+      </div>
+
+      <div class="comparison reveal" aria-label="General chatbot versus ORBIT comparison">
+        <div>
+          <h3>General chatbots</h3>
+          <ul class="check-list muted">
+            <li>Begin mainly from the current prompt.</li>
+            <li>Often provide broad advice.</li>
+            <li>Usually use one model role for everything.</li>
+            <li>Do not know campus data unless the student pastes it in.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>ORBIT</h3>
+          <ul class="check-list">
+            <li>Begins from labels, history, monitor state, and campus context.</li>
+            <li>Creates concrete next actions based on deadlines, stress, route, food, and schedule.</li>
+            <li>Coordinates academic, stress, campus, career, logistics, and synthesis agents.</li>
+            <li>Can fetch or mimic Canvas, Calendar, Maps, Places, PlanetTerp, Testudo/umd.io, and UMD resources.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-dark problem" id="problem" aria-labelledby="problem-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Problem and Importance</p>
+        <h2 id="problem-title">Students are overloaded by coordination work, not just by missing information.</h2>
+        <p>
+          ORBIT targets the everyday friction that quietly undermines student success:
+          deadlines, hidden academic expectations, confusing campus systems, food and
+          transport decisions, work shifts, course planning, stress, accessibility needs,
+          and disconnected support offices.
+        </p>
+      </div>
+
+      <div class="impact-grid">
+        <article class="impact-card reveal">
+          <h3>Fragmented campus systems</h3>
+          <p>
+            Canvas/ELMS, Google Calendar, Google Maps, Google Places, PlanetTerp,
+            Testudo/umd.io, UMD offices, and optional community signals all answer
+            different fragments of the same student question.
+          </p>
+        </article>
+        <article class="impact-card reveal">
+          <h3>Cognitive load under stress</h3>
+          <p>
+            A student might need to decide where to eat, how to walk there, what academic task
+            to protect, whether the plan conflicts with work, and whether the plan should be smaller
+            because stress is already high.
+          </p>
+        </article>
+        <article class="impact-card reveal">
+          <h3>Underserved students need context-aware help</h3>
+          <p>
+            First-generation, international, financially stressed, accessibility-related,
+            commuting, working, ADHD, anxiety, burnout, and language-support contexts
+            can change what advice is respectful and realistic.
+          </p>
+        </article>
+      </div>
+
+      <div class="importance-band reveal">
+        <div>
+          <p class="eyebrow">Why it matters</p>
+          <h3>ORBIT reduces the student coordination burden.</h3>
+        </div>
+        <p>
+          A good student-success AI should not force students to become systems integrators.
+          It should preserve useful context, route to the right campus-aware agent, keep
+          recommendations safe and non-diagnostic, and translate complexity into a humane,
+          doable next move.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section-light persona" aria-labelledby="persona-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Demo Persona</p>
+        <h2 id="persona-title">Maya Chen makes the product concrete.</h2>
+        <p>
+          ORBIT includes a seeded UMD student profile so the full experience can be explored
+          without connecting a real student account. Maya's profile shows what the system
+          feels like after it has enough context to be useful.
+        </p>
+      </div>
+
+      <div class="persona-shell reveal">
+        <div class="persona-card">
+          <span class="status-dot"></span>
+          <h3>Maya Chen</h3>
+          <p class="persona-email">maya.chen@umd.edu</p>
+          <p>
+            UMD student, vegan/plant-based, near IRB and McKeldin, under CMSC216 project
+            pressure, preparing for STAT400, working later, and sensitive to stress overload.
+          </p>
+          <div class="tag-cloud" aria-label="Maya's seeded labels">
+            <span>vegan</span>
+            <span>campus_navigation</span>
+            <span>stress_sensitive</span>
+            <span>canvas</span>
+            <span>google_calendar</span>
+            <span>work_shift_constraints</span>
+            <span>course_selection</span>
+          </div>
+        </div>
+        <div class="persona-detail">
+          <h3>Why the seeded profile matters</h3>
+          <p>
+            The demo includes month-long monitor history, prior chats, generated skills,
+            audit traces, resource cards, course planning state, and connected action examples.
+            It lets the investor demo start inside a personalized workspace rather than a blank
+            app that requires real credentials.
+          </p>
+          <p>
+            Before a presentation, the app can reset Maya's demo state so labels, chat history,
+            report history, saved skill, feedback, and audit trace return to a reliable story path.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-dark how" id="how" aria-labelledby="how-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">How We Did It</p>
+        <h2 id="how-title">Labels become routing signals for agents, tools, recommendations, and safety-aware support.</h2>
+        <p>
+          We built ORBIT around adaptive setup, durable profile labels, specialist role agents,
+          runtime skills, connected action cards, demo-safe behavior, and an opt-in live data path.
+        </p>
+      </div>
+
+      <div class="image-showcase image-showcase-wide reveal">
+        <figure class="media-card diagram-card">
+          <img
+            src="../images/Label-To-Agent%20Workflow%20Diagram.png"
+            alt="Label-to-agent workflow diagram showing setup labels becoming runtime skills, agents, tools, and personalized answers"
+            width="1672"
+            height="941"
+            loading="lazy"
+            decoding="async">
+          <figcaption>Label-to-agent workflow diagram.</figcaption>
+        </figure>
+      </div>
+
+      <div class="process-grid">
+        <article class="process-card reveal">
+          <span>01</span>
+          <h3>Adaptive setup creates durable labels.</h3>
+          <p>
+            Setup asks focused background questions about food, life stage, academic path,
+            work, commuting, first-generation context, financial pressure, accessibility,
+            mental health support, language, career needs, events, and life logistics.
+          </p>
+        </article>
+        <article class="process-card reveal">
+          <span>02</span>
+          <h3>Labels activate role agents.</h3>
+          <p>
+            The workflow controller can activate academic planning, stress monitoring,
+            campus resources, career strategy, life logistics, and response synthesis agents
+            depending on the current request and student state.
+          </p>
+        </article>
+        <article class="process-card reveal">
+          <span>03</span>
+          <h3>Runtime skills and tools shape the answer.</h3>
+          <p>
+            Current query, selected labels, profile labels, recent history, imported data,
+            stress band, and tool permissions create an adaptive skill for the situation.
+          </p>
+        </article>
+        <article class="process-card reveal">
+          <span>04</span>
+          <h3>Action cards make advice operational.</h3>
+          <p>
+            ORBIT can surface Google Maps route actions, calendar blocks, email drafts,
+            report recommendations, course plans, and resource cards while keeping demo
+            actions safely mimicked unless real OAuth is added.
+          </p>
+        </article>
+      </div>
+
+      <div class="workflow-panel reveal">
+        <div>
+          <p class="eyebrow">How It Works</p>
+          <h3>One student request becomes an inspectable decision path.</h3>
+        </div>
+        <ol class="timeline">
+          <li>A student request enters the system.</li>
+          <li>ORBIT loads profile labels, chat history, report state, demo/live data, and relevant constraints.</li>
+          <li>The workflow controller decides which agents and tools should activate.</li>
+          <li>Role agents analyze the request from academic, wellbeing, campus, career, and logistics perspectives.</li>
+          <li>The runtime skill/tool router decides which action surfaces are appropriate.</li>
+          <li>Gemini is used when configured; Gemma/Ollama can be used as fallback; deterministic logic keeps the demo reliable.</li>
+          <li>The final output becomes an answer, action card, report insight, route, email draft, calendar block, course plan, or resource recommendation.</li>
+          <li>Agent traces and audit logs make the path inspectable.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section section-light walkthrough" id="walkthrough" aria-labelledby="walkthrough-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Product Walkthrough</p>
+        <h2 id="walkthrough-title">A complete student support flow, from account setup to explainable agent intelligence.</h2>
+        <p>
+          Every screenshot from the README is included below and grouped around the product
+          moments they demonstrate: account flow, adaptive setup, chat, demos, reports,
+          history, UMD scenario, course planning, and the intelligence dashboard.
+        </p>
+      </div>
+
+      <article class="walkthrough-block reveal" id="account-flow">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">01 / Signup and Login</p>
+          <h3>Start with a normal student account flow.</h3>
+          <p>
+            New users can sign up and answer setup questions, while returning users can log in.
+            Maya's seeded profile opens with labels, history, monitor data, and demo connectors
+            already prepared so the system does not reset to zero every session.
+          </p>
+        </div>
+        <div class="gallery two-col">
+          <figure class="media-card">
+            <img src="../images/sign%20up%20page%20-%20web.png" alt="ORBIT web sign up page" width="2340" height="1291" loading="lazy" decoding="async">
+            <figcaption>Sign up page.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/login%20page%20-%20web.png" alt="ORBIT web login page" width="2341" height="1288" loading="lazy" decoding="async">
+            <figcaption>Login page.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block reveal" id="setup-flow">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">02 / Adaptive Setup</p>
+          <h3>Setup questions create the first label profile.</h3>
+          <p>
+            ORBIT asks focused questions instead of asking every possible question at once.
+            Answers can create labels for food preferences, academic path, work, commuting,
+            first-generation context, financial stress, accessibility, ADHD support,
+            depression or anxiety support, international context, language support,
+            course support, internships, events, and life logistics.
+          </p>
+        </div>
+        <div class="gallery two-col">
+          <figure class="media-card">
+            <img src="../images/setup%20page%20-%20web.png" alt="ORBIT adaptive setup page with student context questions" width="2343" height="1357" loading="lazy" decoding="async">
+            <figcaption>Setup page.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/setup%20page%202%20-%20web.png" alt="ORBIT adaptive setup page with more background questions" width="2337" height="1357" loading="lazy" decoding="async">
+            <figcaption>Setup page 2.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block reveal" id="chat-workspace">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">03 / Chat Workspace</p>
+          <h3>The familiar interface hides a structured orchestration layer.</h3>
+          <p>
+            The chat screen shows the current student and active model path. Header controls
+            open guide, history, report, demo path, course planner, intelligence dashboard,
+            and settings. Underneath, each message can pass through labels, multi-agent routing,
+            context aggregation, connected action detection, and model fallback.
+          </p>
+        </div>
+        <div class="gallery two-col">
+          <figure class="media-card">
+            <img src="../images/new%20chat%20page%20-%20web.png" alt="ORBIT new chat workspace on web" width="2332" height="1293" loading="lazy" decoding="async">
+            <figcaption>New chat page.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/new%20chat%20page%202%20-%20web.png" alt="ORBIT chat workspace showing a second chat state" width="2329" height="1291" loading="lazy" decoding="async">
+            <figcaption>New chat page 2.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block video-section reveal" id="demos">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">04 / Live Demo Videos</p>
+          <h3>Two YouTube demos show ORBIT coordinating real student tasks.</h3>
+          <p>
+            The demos are embedded responsively when the page is hosted. When the site is
+            opened directly as a local file, the large video frame becomes a polished YouTube
+            launch panel so it avoids local embed configuration errors.
+          </p>
+        </div>
+
+        <div class="video-grid">
+          <article class="video-card">
+            <div class="video-frame" data-video-frame data-youtube-id="daW_iRL8FWU" data-video-title="Orbit - Ask for Food Place" data-video-url="https://youtu.be/daW_iRL8FWU">
+              <a class="video-launch" href="https://youtu.be/daW_iRL8FWU" target="_blank" rel="noopener" aria-label="Watch Orbit - Ask for Food Place on YouTube">
+                <img src="https://img.youtube.com/vi/daW_iRL8FWU/hqdefault.jpg" alt="Orbit - Ask for Food Place YouTube thumbnail" width="480" height="360" loading="lazy" decoding="async">
+                <span class="play-button" aria-hidden="true"></span>
+                <span class="video-launch-copy">Watch demo on YouTube</span>
+              </a>
+              <iframe
+                data-embed-src="https://www.youtube-nocookie.com/embed/daW_iRL8FWU?rel=0&modestbranding=1"
+                title="Orbit - Ask for Food Place"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+            <div class="video-copy">
+              <img class="video-thumb" src="https://img.youtube.com/vi/daW_iRL8FWU/hqdefault.jpg" alt="Orbit - Ask for Food Place YouTube thumbnail" width="480" height="360" loading="lazy" decoding="async">
+              <h4>Orbit - Ask for Food Place</h4>
+              <p>
+                Maya asks what to do in the next 90 minutes with CMSC216 near IRB,
+                a later work shift, and vegan food needs. ORBIT recognizes stress,
+                uses her plant-based preference, considers location, suggests campus-relevant
+                food, connects the decision to academic triage, and offers map or calendar actions.
+              </p>
+              <a class="text-link" href="https://youtu.be/daW_iRL8FWU" target="_blank" rel="noopener">Open fallback video link</a>
+            </div>
+          </article>
+
+          <article class="video-card">
+            <div class="video-frame" data-video-frame data-youtube-id="w1HK6_Pdn8Y" data-video-title="Orbit - Sent Email" data-video-url="https://youtu.be/w1HK6_Pdn8Y">
+              <a class="video-launch" href="https://youtu.be/w1HK6_Pdn8Y" target="_blank" rel="noopener" aria-label="Watch Orbit - Sent Email on YouTube">
+                <img src="https://img.youtube.com/vi/w1HK6_Pdn8Y/hqdefault.jpg" alt="Orbit - Sent Email YouTube thumbnail" width="480" height="360" loading="lazy" decoding="async">
+                <span class="play-button" aria-hidden="true"></span>
+                <span class="video-launch-copy">Watch demo on YouTube</span>
+              </a>
+              <iframe
+                data-embed-src="https://www.youtube-nocookie.com/embed/w1HK6_Pdn8Y?rel=0&modestbranding=1"
+                title="Orbit - Sent Email"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+            <div class="video-copy">
+              <img class="video-thumb" src="https://img.youtube.com/vi/w1HK6_Pdn8Y/hqdefault.jpg" alt="Orbit - Sent Email YouTube thumbnail" width="480" height="360" loading="lazy" decoding="async">
+              <h4>Orbit - Sent Email</h4>
+              <p>
+                Maya asks ORBIT to write an email to Alex and send a calendar invite
+                for a vegan meal at Maryland Hillel Cafe. ORBIT drafts the email,
+                notices a calendar conflict, asks for confirmation, and uses demo
+                notifications to mimic successful email/calendar actions safely.
+              </p>
+              <a class="text-link" href="https://youtu.be/w1HK6_Pdn8Y" target="_blank" rel="noopener">Open fallback video link</a>
+            </div>
+          </article>
+        </div>
+
+        <div class="gallery three-col demo-gallery">
+          <figure class="media-card">
+            <img src="../images/Orbit%20-%20Ask%20for%20Food%20Place.png" alt="ORBIT ask for food place demo showing chat response and connected action card" width="3552" height="1965" loading="lazy" decoding="async">
+            <figcaption>Ask for Food Place.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/Orbit%20-%20Ask%20for%20Food%20Place%202.png" alt="ORBIT ask for food place demo showing route and agent trace state" width="3556" height="1965" loading="lazy" decoding="async">
+            <figcaption>Ask for Food Place 2.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/Orbit%20-%20Sent%20Email.png" alt="ORBIT sent email demo showing email draft, calendar conflict, and action buttons" width="3552" height="1957" loading="lazy" decoding="async">
+            <figcaption>Sent email demo.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block reveal" id="student-report">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">05 / Student Report</p>
+          <h3>Analytics are translated into caring, actionable guidance.</h3>
+          <p>
+            The report summarizes now, 3 days, week, month, 6 months, full year,
+            year to date, and all-time windows. It includes happiness, stress ease,
+            focus room, recovery room, momentum, support fit, deadline pressure,
+            calendar density, advisor-style recommendations, next best moves,
+            trend charts, and month-long checkpoint history.
+          </p>
+        </div>
+        <div class="gallery three-col">
+          <figure class="media-card">
+            <img src="../images/student%20report%20page%20-%20web.png" alt="ORBIT student report page with wellbeing and workload metrics" width="2335" height="1285" loading="lazy" decoding="async">
+            <figcaption>Student report page.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/student%20report%20page%202%20-%20web.png" alt="ORBIT student report page showing additional advisor recommendations" width="2340" height="1283" loading="lazy" decoding="async">
+            <figcaption>Student report page 2.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/student%20report%20page%203%20-%20web.png" alt="ORBIT student report page showing trend charts and checkpoint history" width="2335" height="1291" loading="lazy" decoding="async">
+            <figcaption>Student report page 3.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block reveal" id="history">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">06 / Chat History</p>
+          <h3>Continuity means the student does not have to re-explain everything.</h3>
+          <p>
+            Maya's seeded history includes vegan preferences near IRB and McKeldin,
+            CMSC216 anxiety, first-step planning, work-shift constraints, TA email help,
+            career fair prep, food routes, Google Maps actions, and calendar/email demos.
+          </p>
+        </div>
+        <div class="gallery one-col">
+          <figure class="media-card">
+            <img src="../images/history%20page%20-%20web.png" alt="ORBIT chat history page showing prior student conversations and agent trace examples" width="2332" height="1286" loading="lazy" decoding="async">
+            <figcaption>History page.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block reveal" id="demo-path">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">07 / UMD Demo Path</p>
+          <h3>The strongest investor demo shows one concrete student scenario end to end.</h3>
+          <p>
+            The UMD Demo Path combines Maya's profile labels, Canvas-style deadline pressure,
+            Google Calendar-style schedule pressure, vegan and route constraints, stress alerts,
+            next best actions, notification policy, UMD resource cards, agent execution path,
+            and data/privacy controls.
+          </p>
+        </div>
+        <div class="gallery three-col">
+          <figure class="media-card">
+            <img src="../images/demo%20path%20page%20-%20web.png" alt="ORBIT UMD demo path page overview" width="2334" height="1288" loading="lazy" decoding="async">
+            <figcaption>Demo path page.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/demo%20path%20page%202%20-%20web.png" alt="ORBIT UMD demo path page with academic and schedule pressure" width="2334" height="1288" loading="lazy" decoding="async">
+            <figcaption>Demo path page 2.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/demo%20path%20page%203%20-%20web.png" alt="ORBIT UMD demo path page with resource and action recommendations" width="2335" height="1294" loading="lazy" decoding="async">
+            <figcaption>Demo path page 3.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/demo%20path%20page%204%20-%20web.png" alt="ORBIT UMD demo path page showing stress and notification policy" width="2335" height="1293" loading="lazy" decoding="async">
+            <figcaption>Demo path page 4.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/demo%20path%20page%205%20-%20web.png" alt="ORBIT UMD demo path page showing agent execution path" width="2328" height="1285" loading="lazy" decoding="async">
+            <figcaption>Demo path page 5.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/demo%20path%20page%206%20-%20web.png" alt="ORBIT UMD demo path page showing data and privacy controls" width="2329" height="1284" loading="lazy" decoding="async">
+            <figcaption>Demo path page 6.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block reveal" id="course-planner">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">08 / Course Planner</p>
+          <h3>UMD-specific course decisions become guided and realistic.</h3>
+          <p>
+            ORBIT can help students think about which classes fit their goals,
+            whether the semester is too heavy, which courses are easy, moderate,
+            or hard, which professors may fit better, and how stress, commuting,
+            career goals, and workload should affect course choice.
+          </p>
+        </div>
+        <div class="gallery three-col">
+          <figure class="media-card">
+            <img src="../images/course%20planner%20page%20-%20web.png" alt="ORBIT course planner page showing UMD course planning overview" width="2335" height="1289" loading="lazy" decoding="async">
+            <figcaption>Course planner page.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/course%20planner%20page%202%20-%20web.png" alt="ORBIT course planner page showing course workload and professor signals" width="2337" height="1288" loading="lazy" decoding="async">
+            <figcaption>Course planner page 2.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/course%20planner%20page%203%20-%20web.png" alt="ORBIT course planner page showing recommended semester guidance" width="2332" height="1282" loading="lazy" decoding="async">
+            <figcaption>Course planner page 3.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="walkthrough-block reveal" id="dashboard">
+        <div class="walkthrough-copy">
+          <p class="eyebrow">09 / Intelligence Dashboard</p>
+          <h3>The agent system is inspectable instead of opaque.</h3>
+          <p>
+            The dashboard shows demo readiness, investor tour checklist,
+            label-driven collaboration, skill registry, saved runtime skills,
+            feedback signal, agent audit trail, and evaluation readiness.
+            This matters because student-support advice should be useful and auditable.
+          </p>
+        </div>
+        <div class="gallery three-col">
+          <figure class="media-card">
+            <img src="../images/intelligence%20dashboard%20page%20-%20web.png" alt="ORBIT intelligence dashboard showing demo readiness and agent collaboration" width="2337" height="1293" loading="lazy" decoding="async">
+            <figcaption>Intelligence dashboard page.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/intelligence%20dashboard%20page%202%20-%20web.png" alt="ORBIT intelligence dashboard showing skill registry and feedback signal" width="2334" height="1288" loading="lazy" decoding="async">
+            <figcaption>Intelligence dashboard page 2.</figcaption>
+          </figure>
+          <figure class="media-card">
+            <img src="../images/intelligence%20dashboard%20page%203%20-%20web.png" alt="ORBIT intelligence dashboard showing agent audit trail and evaluation readiness" width="2331" height="1287" loading="lazy" decoding="async">
+            <figcaption>Intelligence dashboard page 3.</figcaption>
+          </figure>
+        </div>
+      </article>
+    </section>
+
+    <section class="section section-dark architecture" id="architecture" aria-labelledby="architecture-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Architecture</p>
+        <h2 id="architecture-title">Student context flows through labels, agents, skills, tools, model fallback, and action surfaces.</h2>
+        <p>
+          ORBIT's architecture is designed so each answer can expose agents, tools,
+          model path, fallback reason, sources, latency, and feedback signals.
+        </p>
+      </div>
+
+      <div class="image-showcase image-showcase-wide reveal">
+        <figure class="media-card diagram-card">
+          <img
+            src="../images/ORBIT%20System%20Architecture%20Diagram.png"
+            alt="ORBIT system architecture diagram showing student context, labels, agents, tools, synthesis, and action surfaces"
+            width="1672"
+            height="941"
+            loading="lazy"
+            decoding="async">
+          <figcaption>ORBIT system architecture diagram.</figcaption>
+        </figure>
+      </div>
+
+      <div class="architecture-grid">
+        <article class="layer-card reveal">
+          <h3>Onboarding label ranker</h3>
+          <p>Creates initial support labels from adaptive setup answers.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>Prompt router</h3>
+          <p>Uses selected and inferred labels to recommend prompt chips and skills.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>Support intelligence service</h3>
+          <p>Builds stress reports, follow-up questions, suggestions, and skill blueprints.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>ORBIT agent orchestrator</h3>
+          <p>Activates role agents and coordinates final response synthesis.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>Student context aggregator</h3>
+          <p>Loads live or demo Canvas, Calendar, Places, Routes, and course data.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>UMD resource catalog</h3>
+          <p>Routes students to tutoring, accessibility, counseling, financial aid, housing, transport, safety, and more.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>Course planning service</h3>
+          <p>Combines workload, professor/course signals, stress level, and profile labels.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>Agent audit log</h3>
+          <p>Records roles, skills, tools, sources, model path, latency, and fallback reason.</p>
+        </article>
+        <article class="layer-card reveal">
+          <h3>Student report</h3>
+          <p>Converts monitor history into student-facing charts, ratings, and recommendations.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section-light data" id="data" aria-labelledby="data-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Data Integrations</p>
+        <h2 id="data-title">Campus-aware support needs official sources, student tools, and clearly labeled optional context.</h2>
+        <p>
+          ORBIT separates local demo data from opt-in live integrations through the student data proxy.
+          Official sources are treated as truth. Optional community/forum signals can add lived context
+          but should remain contextual rather than official.
+        </p>
+      </div>
+
+      <div class="image-showcase image-showcase-wide reveal">
+        <figure class="media-card diagram-card">
+          <img
+            src="../images/Real%20Data%20Integration%20Pipeline.png"
+            alt="Real data integration pipeline diagram showing official sources, community context, proxy, labels, and ORBIT action surfaces"
+            width="1672"
+            height="941"
+            loading="lazy"
+            decoding="async">
+          <figcaption>Real data integration pipeline.</figcaption>
+        </figure>
+      </div>
+
+      <div class="data-grid">
+        <article class="data-card reveal">
+          <h3>Canvas / ELMS</h3>
+          <p>Active courses, assignment names, due dates, and academic pressure.</p>
+        </article>
+        <article class="data-card reveal">
+          <h3>Google Calendar</h3>
+          <p>Upcoming events, schedule density, conflicts, work shifts, and planning blocks.</p>
+        </article>
+        <article class="data-card reveal">
+          <h3>Google Maps / Routes</h3>
+          <p>Walking routes, commute constraints, map launches, and realistic movement between places.</p>
+        </article>
+        <article class="data-card reveal">
+          <h3>Google Places</h3>
+          <p>Food, study spots, housing/rent, shopping, and campus life search.</p>
+        </article>
+        <article class="data-card reveal">
+          <h3>PlanetTerp</h3>
+          <p>Course metadata, professor reviews, and historical grade signals.</p>
+        </article>
+        <article class="data-card reveal">
+          <h3>Testudo / umd.io</h3>
+          <p>Official course, prerequisite, section, and registration structure.</p>
+        </article>
+        <article class="data-card reveal">
+          <h3>UMD resource catalog</h3>
+          <p>
+            ADS, Counseling Center, TLTC, Career Center, Health Center, Dining,
+            Campus Pantry, ResLife, DOTS, ISSS, Writing Center, tutoring, Guided
+            Study Sessions, Math Success, Keystone, OMSE, Student Legal Aid,
+            Crisis Fund, Financial Aid, Dean of Students, OCRSM, NITE Ride,
+            Paratransit, Terp Ride, Guardian App, Help Center, and related support paths.
+          </p>
+        </article>
+        <article class="data-card reveal">
+          <h3>Optional community signals</h3>
+          <p>
+            Reddit-style or forum context can help with lived experience around courses,
+            housing, commuting, food, and campus life when clearly distinguished from official truth.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section-dark safety" id="safety" aria-labelledby="safety-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Privacy and Safety</p>
+        <h2 id="safety-title">The demo is local-first, opt-in, and careful with sensitive student context.</h2>
+      </div>
+
+      <div class="safety-grid">
+        <article class="safety-card reveal">
+          <h3>Local-first demo</h3>
+          <p>Profile labels are stored locally, and Maya's demo mode does not require real accounts or credentials.</p>
+        </article>
+        <article class="safety-card reveal">
+          <h3>Opt-in live data</h3>
+          <p>Canvas, Google, Maps, and other live connectors are designed to be added through explicit configuration and the student data proxy.</p>
+        </article>
+        <article class="safety-card reveal">
+          <h3>.env safety</h3>
+          <p>Real Gemini, Canvas, and Google keys stay in local `.env` and must not be committed.</p>
+        </article>
+        <article class="safety-card reveal">
+          <h3>Demo-mode actions</h3>
+          <p>Calendar and email actions are mimicked in demo mode unless real OAuth and permission checks are added.</p>
+        </article>
+        <article class="safety-card reveal">
+          <h3>Approval for irreversible actions</h3>
+          <p>Irreversible actions should be blocked or require explicit user approval before execution.</p>
+        </article>
+        <article class="safety-card reveal">
+          <h3>Non-diagnostic wellbeing support</h3>
+          <p>Mental health content is support and resource routing, not diagnosis or therapy.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section-light technical" id="technical" aria-labelledby="technical-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Technical Implementation</p>
+        <h2 id="technical-title">Flutter app, optional student-data-proxy, and practical model fallback.</h2>
+        <p>
+          The README describes ORBIT as a Flutter application with a backend student-data-proxy
+          for optional live integrations. The app separates demo mode from live mode, tries Gemini
+          when `API_KEY` is configured, can fall back to local Gemma/Ollama, and keeps deterministic
+          agent logic available so the demo remains reliable.
+        </p>
+      </div>
+
+      <div class="tech-grid reveal">
+        <article class="tech-card">
+          <h3>Client</h3>
+          <p>Flutter app for web, Android, and Windows desktop.</p>
+        </article>
+        <article class="tech-card">
+          <h3>Backend</h3>
+          <p>Optional `backend/student-data-proxy` Node service for live student data connectors.</p>
+        </article>
+        <article class="tech-card">
+          <h3>Models</h3>
+          <p>Gemini when configured, Gemma/Ollama fallback, then deterministic logic if needed.</p>
+        </article>
+        <article class="tech-card">
+          <h3>Modes</h3>
+          <p>Seeded demo mode for presentations and opt-in live mode for external data.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section-dark run" id="run" aria-labelledby="run-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Run the Project</p>
+        <h2 id="run-title">Developer setup, kept accurate and out of the way.</h2>
+        <p>
+          These commands come from the README. The showcase itself is static and can be opened
+          directly from `showcase/index.html`; the commands below are for running the Flutter app
+          and optional live data proxy.
+        </p>
+      </div>
+
+      <div class="setup-grid">
+        <article class="setup-card reveal">
+          <h3>Prerequisites</h3>
+          <ul class="check-list">
+            <li>Flutter SDK 3.4.1 or later.</li>
+            <li>Dart, included with Flutter.</li>
+            <li>Node.js, only for the optional Student Data Proxy.</li>
+            <li>Ollama, optional for local Gemma synthesis.</li>
+            <li>Android Studio or a physical Android device for mobile testing.</li>
+          </ul>
+        </article>
+
+        <article class="setup-card reveal">
+          <h3>Demo login</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>Email: maya.chen@umd.edu
+Password: 12345
+
+Or click:
+Use Maya demo profile</code></pre>
+        </article>
+      </div>
+
+      <div class="code-stack">
+        <article class="code-panel reveal">
+          <h3>Local environment</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>cd C:\Users\&lt;your-username&gt;\Documents\GitHub\orbit
+
+&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' pub get
+
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Recommended `.env` template</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>API_KEY=
+LOCAL_LLM_ENDPOINT=http://127.0.0.1:11434
+LOCAL_LLM_MODEL=gemma3:4b
+EXTERNAL_DATA_ENABLED=false
+STUDENT_DATA_PROXY_URL=
+STUDENT_DATA_PROXY_USER_ID=demo
+EXTERNAL_DATA_CACHE_SECONDS=300
+EXTERNAL_DATA_TIMEOUT_SECONDS=8
+CANVAS_BASE_URL=https://umd.instructure.com
+CANVAS_ACCESS_TOKEN=
+GOOGLE_ACCESS_TOKEN=
+GOOGLE_MAPS_API_KEY=
+CAMPUS_ROUTE_ORIGIN=McKeldin Library, College Park, MD
+CAMPUS_ROUTE_DESTINATION=University Health Center, College Park, MD</code></pre>
+          <p class="setup-note">Keep real Gemini, Canvas, and Google keys only in local `.env`. Do not commit `.env`.</p>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Web</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' run -d chrome
+
+&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' build web</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Android</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' devices
+&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' run -d android
+
+&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' build apk</code></pre>
+          <pre class="code-block compact"><button type="button" class="copy-btn" data-copy>Copy</button><code>build\app\outputs\flutter-apk\app-release.apk</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Windows desktop</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' config --enable-windows-desktop
+&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' run -d windows</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Optional local Gemma / Ollama</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>ollama pull gemma3:4b
+ollama serve</code></pre>
+          <pre class="code-block compact"><button type="button" class="copy-btn" data-copy>Copy</button><code>LOCAL_LLM_ENDPOINT=http://127.0.0.1:11434
+LOCAL_LLM_MODEL=gemma3:4b</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Optional live data proxy</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>cd C:\Users\&lt;your-username&gt;\Documents\GitHub\orbit\backend\student-data-proxy
+node server.mjs</code></pre>
+          <pre class="code-block compact"><button type="button" class="copy-btn" data-copy>Copy</button><code>EXTERNAL_DATA_ENABLED=true
+STUDENT_DATA_PROXY_URL=http://127.0.0.1:8787
+STUDENT_DATA_PROXY_USER_ID=demo</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Useful proxy endpoints</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>GET  http://127.0.0.1:8787/health
+GET  http://127.0.0.1:8787/auth/google/start?userId=demo
+POST http://127.0.0.1:8787/connect/canvas
+GET  http://127.0.0.1:8787/student/snapshot?userId=demo&amp;taskText=food&amp;preferenceTags=vegan
+GET  http://127.0.0.1:8787/course-planning/umd?courses=CMSC216,STAT400&amp;profileTags=stress_sensitive,commuter</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Canvas connect example</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>Invoke-RestMethod `
+  -Uri http://127.0.0.1:8787/connect/canvas `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"userId":"demo","baseUrl":"https://umd.instructure.com","accessToken":"YOUR_CANVAS_TOKEN"}'</code></pre>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Analyze and test</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\cache\dart-sdk\bin\dart.exe' analyze lib test
+
+&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' test test\agents\orbit_agent_orchestrator_test.dart
+
+&amp; 'C:\Users\&lt;your-username&gt;\flutter\bin\flutter.bat' test</code></pre>
+          <p class="setup-note">If `flutter test` hangs on this Windows machine, prefer `dart analyze lib test` for quick verification and run focused tests from a clean PowerShell session.</p>
+        </article>
+
+        <article class="code-panel reveal">
+          <h3>Project structure</h3>
+          <pre class="code-block"><button type="button" class="copy-btn" data-copy>Copy</button><code>orbit/
+|-- android/
+|-- assets/
+|-- backend/
+|   `-- student-data-proxy/
+|-- docs/
+|-- images/
+|-- ios/
+|-- lib/
+|   |-- agents/
+|   |-- apis/
+|   |-- constants/
+|   |-- data_sources/
+|   |-- demo/
+|   |-- hive/
+|   |-- models/
+|   |-- providers/
+|   |-- screens/
+|   |-- services/
+|   |-- themes/
+|   |-- utilities/
+|   `-- widgets/
+|-- test/
+|-- web/
+|-- .env.example
+|-- pubspec.yaml
+`-- README.md</code></pre>
+        </article>
+      </div>
+
+      <div class="doc-links reveal">
+        <a href="../docs/local-multi-agent-system.md">Local Multi-Agent System Architecture</a>
+        <a href="../backend/student-data-proxy/README.md">Student Data Proxy Backend Setup</a>
+        <a href="../docs/recommendation-skill-router-plan.md">Recommendation Skill Router Plan</a>
+      </div>
+    </section>
+
+    <section class="section section-light takeaway" id="takeaway" aria-labelledby="takeaway-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Final Takeaway</p>
+        <h2 id="takeaway-title">ORBIT proves that student AI can be personal, campus-aware, explainable, and immediately actionable.</h2>
+        <p>
+          The product brings together personalized memory, multi-agent reasoning,
+          UMD-specific data readiness, student-facing empathy, connected actions,
+          explainability, demo reliability, and a production path for opt-in connectors.
+        </p>
+      </div>
+
+      <div class="takeaway-grid">
+        <article class="takeaway-card reveal">
+          <h3>Personalization depth</h3>
+          <p>Durable labels, chat history, report state, and imported context make ORBIT remember what matters.</p>
+        </article>
+        <article class="takeaway-card reveal">
+          <h3>Agentic architecture</h3>
+          <p>Multi-role collaboration lets one question be evaluated across academic, wellbeing, campus, career, and life domains.</p>
+        </article>
+        <article class="takeaway-card reveal">
+          <h3>Real data readiness</h3>
+          <p>The structure supports Canvas/ELMS, Calendar, Maps/Places, PlanetTerp, Testudo/umd.io, UMD resources, and optional community retrieval.</p>
+        </article>
+        <article class="takeaway-card reveal">
+          <h3>Actionability</h3>
+          <p>Answers can become routes, calendar blocks, email drafts, course plans, reports, and resource recommendations.</p>
+        </article>
+        <article class="takeaway-card reveal">
+          <h3>Explainability</h3>
+          <p>Agent traces, audit logs, feedback signals, and model fallback reasons make the path inspectable.</p>
+        </article>
+        <article class="takeaway-card reveal">
+          <h3>Demo reliability</h3>
+          <p>The Maya Chen fixture gives a repeatable walkthrough when OAuth, network APIs, or live credentials are unavailable.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <a class="brand-mark" href="#hero" aria-label="Back to ORBIT home">
+        <span class="brand-orb" aria-hidden="true"></span>
+        <span>ORBIT</span>
+      </a>
+      <p>Personalized multi-agent AI for student life, academic planning, and wellbeing.</p>
+    </div>
+    <a class="text-link" href="../README.md">Read the source README</a>
+  </footer>
+
+  <button class="back-to-top" type="button" aria-label="Back to top" data-back-to-top>Top</button>
+
+  <div class="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" data-lightbox hidden>
+    <button class="lightbox-close" type="button" aria-label="Close image preview" data-lightbox-close>Close</button>
+    <figure>
+      <img src="" alt="" data-lightbox-img>
+      <figcaption data-lightbox-caption></figcaption>
+    </figure>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

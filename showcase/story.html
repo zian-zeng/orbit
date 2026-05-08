@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The ORBIT project build story: why the team built ORBIT, how it works, and why personalized campus-aware student AI matters.">
+  <title>ORBIT | Our Story</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-language="en" class="story-page-body">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" data-header>
+    <nav class="nav-shell" aria-label="Primary navigation">
+      <a class="brand-mark" href="index.html#hero" aria-label="ORBIT home">
+        <span class="brand-orb" aria-hidden="true"></span>
+        <span>ORBIT</span>
+      </a>
+      <div class="nav-actions">
+        <div class="nav-links" id="site-nav" data-nav-links>
+          <a href="index.html#problem" data-i18n="nav.problem">Problem</a>
+          <a href="index.html#overview" data-i18n="nav.overview">Overview</a>
+          <a href="story.html" data-i18n="nav.story" data-story-link>Our Story</a>
+          <a href="index.html#how" data-i18n="nav.how">How It Works</a>
+          <a href="index.html#walkthrough" data-i18n="nav.walkthrough">Walkthrough</a>
+          <a href="index.html#architecture" data-i18n="nav.architecture">Architecture</a>
+          <a href="index.html#run" data-i18n="nav.run">Run</a>
+        </div>
+        <button class="language-toggle" type="button" aria-pressed="false" data-language-toggle>
+          <span data-language-label>中文</span>
+        </button>
+      </div>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main" class="story-main">
+    <section class="story-hero section-dark">
+      <div class="ambient-grid" aria-hidden="true"></div>
+      <div class="story-hero-inner reveal">
+        <a class="story-hero-back" href="index.html#story" data-story-link aria-label="Back to main page">
+          <svg class="story-hero-back-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <path d="M34 16 18 32l16 16"></path>
+            <path d="M20 32h28"></path>
+          </svg>
+        </a>
+        <p class="eyebrow">Project Build Story</p>
+        <h1 class="lang-en">Why We Built ORBIT, How We Built It, and What We Think It Proves</h1>
+        <h1 class="lang-zh">我们为什么构建 ORBIT、如何实现它，以及它证明了什么</h1>
+        <p class="story-deck lang-en">A team-written product and technical reflection on ORBIT's motivation, design decisions, agent architecture, demo strategy, and student-success purpose.</p>
+        <p class="story-deck lang-zh">一篇团队视角的产品与技术反思，介绍 ORBIT 的动机、设计选择、智能体架构、demo 策略和学生成功目标。</p>
+      </div>
+    </section>
+
+    <section class="section section-light story story-full" id="story" aria-labelledby="story-title">
+      <div class="story-reading-shell">
+        <article class="story-paper reveal">
+          <p class="eyebrow lang-en">Project Build Story</p>
+          <p class="eyebrow lang-zh">项目构建故事</p>
+          <h2 id="story-title" class="lang-en">Why We Built ORBIT, How We Built It, and What We Think It Proves</h2>
+          <h2 class="lang-zh">我们为什么构建 ORBIT、如何实现它，以及它证明了什么</h2>
+
+          <div class="essay-text lang-en">
+          <p>
+            When we started thinking about ORBIT, we were not only thinking about building another AI chatbot. As CS and NLP students, we have used a lot of AI tools, and we think many of them are impressive in a very technical sense. They can summarize, write, code, and answer questions quickly. However, what made us pause was that most of these tools still begin from a blank prompt. They do not really understand the messy environment around a student. They do not know that one student might be worrying about a CMSC project, a statistics quiz, a work shift, food cost, a walk across campus, and stress at the same time. That was the gap we wanted ORBIT to explore. We wanted to build something that treats student life as a connected system, not as isolated questions.
+          </p>
+          <p>
+            We think the core idea behind ORBIT is labelization. Instead of forcing a student to explain the same context again and again, ORBIT turns important background information into durable labels. These labels can be simple, like vegan, commuter, working student, or course selection, but they are not just decorations on a profile page. They become routing signals. This was an important design decision for us because we wanted personalization to be lightweight but still meaningful. A label like stress_sensitive should not only change the tone of the response. It should also influence the size of the plan, the agents that activate, the kind of resources that are suggested, and whether the system should avoid overloading the student. In our opinion, that is where personalization becomes more than just remembering a name.
+          </p>
+          <p>
+            To make this idea visible, we built the project around Maya Chen, a seeded UMD student persona. We believe this was crucial because an agentic system is hard to understand if it only exists as an abstract architecture diagram. Maya gives the product a real situation: she has academic pressure, vegan food needs, campus navigation constraints, work-shift pressure, and stress-sensitive planning needs. By designing around one concrete student, we could test whether the system felt coherent. The signup, setup questions, chat workspace, report page, demo path, course planner, and intelligence dashboard all connect back to the same underlying student state. This made the demo more reliable, but it also helped us think more clearly about what the product should actually do.
+          </p>
+          <p>
+            Technically, ORBIT works by taking a student request and building a short-lived decision context around it. The system loads profile labels, chat history, report state, seeded demo data, and any relevant constraints. Then the workflow controller decides which agents should be involved. We implemented the roles as a way to separate different kinds of reasoning: academic planning focuses on assignments, exams, and course choices; stress monitoring focuses on pacing, recovery, and overload; campus resources focuses on UMD offices and support paths; career strategy looks at internships, resumes, and longer-term goals; life logistics handles food, maps, commuting, rent, and daily planning; and the response synthesizer turns the pieces into one student-facing answer. We think this multi-role structure matters because student problems rarely belong to only one category.
+          </p>
+          <p>
+            Another part that stood out to us while building ORBIT was the relationship between reasoning and action. A lot of AI demos stop at advice, but students often need the next operational step. If Maya asks what to do in the next 90 minutes, the useful answer is not just a paragraph telling her to calm down and study. The system should know that she needs vegan food, that IRB and McKeldin matter geographically, that work later limits the plan, and that high stress means the recommendation should be smaller. That is why we added connected action cards for map routes, calendar blocks, and email-like actions. In demo mode, these actions are safely mimicked, which we think is important because the project should be presentable without real credentials or risk of sending real messages.
+          </p>
+          <p>
+            The model path also reflects a practical engineering mindset. ORBIT can use Gemini when an API key is configured, but it can also fall back to local Gemma through Ollama, and then to deterministic logic if both model paths fail. We think this is important because a good demo should not collapse just because a cloud model is unavailable or rate-limited. At the same time, the system should be honest about what happened. That is why the trace and dashboard matter. They show which agents activated, which tools were considered, what model path was used, and why a fallback happened. From our perspective, explainability is not just a nice technical feature. In student support, it is part of trust.
+          </p>
+          <p>
+            What makes ORBIT important to us is that it reframes student AI away from generic productivity and toward actual student success. We believe many students, especially first-generation students, international students, financially stressed students, accessibility-related students, and students dealing with anxiety or burnout, are not only missing information. They are carrying coordination burdens that are invisible from the outside. They have to translate campus websites, course systems, support offices, calendars, routes, food options, and social expectations into one decision after another. ORBIT is our attempt to ask a different question: what if AI could reduce that burden instead of adding another tool to manage?
+          </p>
+          <p>
+            In summary, we see ORBIT as a prototype for a more human-centered kind of agent system. It is not perfect, and it is still a demo-mode project with optional live data paths rather than a full production platform. But we think it proves something valuable. If we combine student labels, campus-specific data, multi-agent reasoning, safety-aware actions, and inspectable traces, then AI can become more than a chatbot that responds. It can become a workspace that helps a student move forward in a realistic, personal, and responsible way. For us, that is the real motivation behind the project.
+          </p>
+          </div>
+
+          <div class="essay-text lang-zh" lang="zh-CN">
+          <p>
+            当我们开始构思 ORBIT 的时候，我们并不是单纯想再做一个 AI 聊天机器人。作为 CS 和 NLP 学生团队，我们平时接触过很多 AI 工具，它们在技术层面确实很强，可以总结、写作、写代码，也可以很快回答问题。但是我们一直觉得，大多数工具还是从一个空白 prompt 开始的。它们并不了解学生真实生活里的混乱状态。它们不知道一个学生可能同时在担心 CMSC 项目、统计考试、打工时间、食物预算、校园路线和压力管理。这就是我们想用 ORBIT 探索的空缺。我们想做的不是一个孤立回答问题的工具，而是一个把学生生活当作连接系统来理解的 AI 工作空间。
+          </p>
+          <p>
+            我们认为 ORBIT 最核心的想法是 labelization，也就是把学生愿意分享的重要背景转化成长期可用的标签。比如 vegan、commuter、working student、course selection 这些标签看起来很简单，但它们不只是个人资料页上的装饰。它们会成为系统路由的信号。这个设计对我们来说很关键，因为我们希望个性化既轻量，又真正有作用。比如 stress_sensitive 这个标签不应该只改变回答语气，它也应该影响计划的大小、激活哪些 agent、推荐什么资源，以及系统是否应该避免给学生增加更多负担。在我们看来，这才是个性化从“记住名字”走向“理解处境”的地方。
+          </p>
+          <p>
+            为了让这个想法更具体，我们围绕 Maya Chen 这个预置的 UMD 演示学生画像来设计项目。我们觉得这非常重要，因为智能体系统如果只停留在架构图里，其实很难被理解。Maya 给产品提供了一个真实情境：她有学业压力，有 vegan 食物需求，有校园导航限制，有打工安排，也需要更温和的压力管理。围绕一个具体学生来设计，让我们可以不断检查系统是否连贯。注册、setup 问题、聊天工作区、学生报告页面、UMD 演示路径、课程规划器和智能仪表盘都连接回同一个学生状态。这样不仅让 demo 更稳定，也让我们更清楚这个产品到底应该帮助学生做什么。
+          </p>
+          <p>
+            从技术上看，ORBIT 会先接收学生请求，然后围绕这个请求构建一个临时决策上下文。系统会加载学生画像标签、聊天历史、报告状态、演示数据和相关限制。接着工作流控制器会决定哪些智能体需要参与。我们把智能体角色拆开，是为了让不同类型的推理更清晰：学业规划智能体关注作业、考试和选课；压力监测智能体关注节奏、恢复和过载；校园资源智能体关注 UMD 办公室和支持路径；职业策略智能体关注实习、简历和长期目标；生活后勤智能体处理食物、地图、通勤、租房和日常安排；回答综合智能体再把这些结果整理成学生能直接读懂的回答。我们认为这种多角色结构很重要，因为学生问题很少只属于一个类别。
+          </p>
+          <p>
+            在构建 ORBIT 的过程中，另一个让我们印象很深的点是推理和行动之间的关系。很多 AI demo 停留在建议层面，但学生真正需要的往往是下一步操作。如果 Maya 问未来 90 分钟应该做什么，有用的回答不应该只是让她冷静下来然后学习。系统应该知道她需要 vegan food，知道 IRB 和 McKeldin 的位置关系，知道她之后要打工，也知道高压力状态下计划应该更小。因此我们加入了地图路线、日历时间块和类似邮件操作的行动卡片。在 demo mode 下，这些动作会被安全地模拟。我们觉得这很重要，因为项目需要可以展示，但不能因为没有真实账号就无法运行，也不能冒险真的发送消息或修改日历。
+          </p>
+          <p>
+            模型路径也体现了比较现实的工程思路。ORBIT 在配置 API key 时可以使用 Gemini，也可以通过 Ollama 回退到本地 Gemma，如果模型路径都失败，还可以使用确定性逻辑保证 demo 仍然可用。我们认为这一点很关键，因为一个好的 demo 不应该因为云端模型不可用或 rate limit 就完全崩掉。同时，系统也应该诚实地告诉用户发生了什么。所以 trace 和 dashboard 很重要，它们展示了哪些智能体被激活、哪些工具被考虑、使用了什么模型路径、为什么发生 fallback。对我们来说，可解释性不是一个额外的技术亮点。在学生支持场景里，它本身就是信任的一部分。
+          </p>
+          <p>
+            ORBIT 对我们最重要的意义，是它把学生 AI 从泛泛的效率工具转向真正的学生成功支持。我们相信很多学生，尤其是第一代大学生、国际学生、经济压力较大的学生、有无障碍相关需求的学生，以及正在经历焦虑或 burnout 的学生，并不只是缺少信息。他们承受的是一种外人很难看到的协调负担。他们要把校园网站、课程系统、支持办公室、日历、路线、食物选择和隐性的社交期待，不断翻译成一个又一个具体决定。ORBIT 其实是在问另一个问题：AI 能不能减少这种负担，而不是再变成一个需要管理的新工具？
+          </p>
+          <p>
+            总结来说，我们把 ORBIT 看成一种更以人为中心的智能体系统原型。它还不是完美产品，也仍然是一个以 demo mode 为主、live data path 可选的项目。但是我们认为它证明了一件有价值的事情：如果我们把学生标签、校园特定数据、多智能体推理、安全感知行动和可检查 traces 结合起来，AI 就不只是一个会回答的聊天机器人。它可以成为一个帮助学生在现实生活里继续往前走的工作空间，而且这个帮助是个人化的、校园感知的、可解释的，也是更负责任的。这就是我们做这个项目最核心的动机。
+          </p>
+          </div>
+        </article>
+
+        <aside class="story-side-rail" aria-label="Story navigation">
+          <a class="story-side-button" href="index.html#story" data-story-link>
+            <span class="lang-en">Back to Showcase</span>
+            <span class="lang-zh">返回展示页</span>
+          </a>
+          <button class="story-side-button" type="button" data-back-to-top>
+            <span class="lang-en">Top</span>
+            <span class="lang-zh">顶部</span>
+          </button>
+        </aside>
+      </div>
+    </section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <a class="brand-mark" href="index.html#hero" aria-label="Back to ORBIT home">
+        <span class="brand-orb" aria-hidden="true"></span>
+        <span>ORBIT</span>
+      </a>
+      <p>Personalized multi-agent AI for student life, academic planning, and wellbeing.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
