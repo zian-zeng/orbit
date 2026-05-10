@@ -325,6 +325,99 @@ router, multi-agent orchestrator, student context aggregator, connected action
 detector, and model fallback path. The student sees a clean answer, while the
 system keeps the reasoning path inspectable through the agent trace.
 
+### 4. Mobile App Experience
+
+ORBIT is designed to travel with the student, not stay at a desk. The mobile app
+keeps the same labelized student profile, chat workspace, connected actions,
+report intelligence, course planning, and agent transparency in a narrow-screen
+flow students can use between classes, while walking across campus, before a work
+shift, or when they need a quick next step.
+
+The screenshots below show the iPhone build. Because ORBIT is built with
+Flutter, the same mobile experience is intended to run on Android as well:
+students can set up their profile, ask for help, open action cards, review
+wellbeing signals, plan courses, and inspect agent logic from the phone they
+already carry.
+
+<table>
+  <tr>
+    <td align="center"><img src="images/iPhone/sign%20up%20page%20-%20iPhone.png" width="170" alt="ORBIT iPhone sign up"><br><sub>Sign up</sub></td>
+    <td align="center"><img src="images/iPhone/login%20page%20-%20iPhone.png" width="170" alt="ORBIT iPhone login"><br><sub>Login</sub></td>
+    <td align="center"><img src="images/iPhone/setup%20page%20-%20iPhone.png" width="170" alt="ORBIT iPhone setup"><br><sub>Adaptive setup</sub></td>
+    <td align="center"><img src="images/iPhone/new%20chat%20page%20-%20iPhone.png" width="170" alt="ORBIT iPhone chat"><br><sub>Chat workspace</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/iPhone/Orbit%20-%20Ask%20for%20Food%20Place%20-%20iPhone.png" width="170" alt="ORBIT iPhone food recommendation"><br><sub>Food plan</sub></td>
+    <td align="center"><img src="images/iPhone/student%20report%20page%20-%20iPhone.png" width="170" alt="ORBIT iPhone student report"><br><sub>Student report</sub></td>
+    <td align="center"><img src="images/iPhone/course%20planner%20page%20-%20iPhone.png" width="170" alt="ORBIT iPhone course planner"><br><sub>Course planner</sub></td>
+    <td align="center"><img src="images/iPhone/intelligence%20dashboard%20page%20-%20iPhone.png" width="170" alt="ORBIT iPhone intelligence dashboard"><br><sub>Agent intelligence</sub></td>
+  </tr>
+</table>
+
+Mobile is where ORBIT becomes a daily coordination companion. A food
+recommendation can become a route, a stressful deadline can become a smaller
+plan, a report can become a recovery cue, and an agent trace can still explain
+why ORBIT suggested the next move.
+
+<details>
+<summary>Full mobile screenshot gallery (iPhone captures)</summary>
+
+#### Onboarding and Chat
+
+<table>
+  <tr>
+    <td align="center"><img src="images/iPhone/sign%20up%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone sign up"><br><sub>Sign up</sub></td>
+    <td align="center"><img src="images/iPhone/login%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone login"><br><sub>Login</sub></td>
+    <td align="center"><img src="images/iPhone/setup%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone setup"><br><sub>Setup</sub></td>
+    <td align="center"><img src="images/iPhone/setup%20page%202%20-%20iPhone.png" width="160" alt="ORBIT iPhone setup continued"><br><sub>Setup labels</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/iPhone/new%20chat%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone new chat"><br><sub>New chat</sub></td>
+    <td align="center"><img src="images/iPhone/new%20chat%20page%202%20-%20iPhone.png" width="160" alt="ORBIT iPhone chat response"><br><sub>Chat response</sub></td>
+    <td align="center"><img src="images/iPhone/history%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone history"><br><sub>History</sub></td>
+    <td align="center"><img src="images/iPhone/Orbit%20-%20Sent%20Email%20-%20iPhone.png" width="160" alt="ORBIT iPhone sent email demo"><br><sub>Email action</sub></td>
+  </tr>
+</table>
+
+#### Connected Actions and Student Care
+
+<table>
+  <tr>
+    <td align="center"><img src="images/iPhone/Orbit%20-%20Ask%20for%20Food%20Place%20-%20iPhone.png" width="160" alt="ORBIT iPhone food place demo"><br><sub>Food request</sub></td>
+    <td align="center"><img src="images/iPhone/Orbit%20-%20Ask%20for%20Food%20Place%202%20-%20iPhone.png" width="160" alt="ORBIT iPhone food place connected action"><br><sub>Action card</sub></td>
+    <td align="center"><img src="images/iPhone/student%20report%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone student report"><br><sub>Report</sub></td>
+    <td align="center"><img src="images/iPhone/student%20report%20page%202%20-%20iPhone.png" width="160" alt="ORBIT iPhone student report details"><br><sub>Report detail</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/iPhone/student%20report%20page%203%20-%20iPhone.png" width="160" alt="ORBIT iPhone student report recommendations"><br><sub>Recommendations</sub></td>
+    <td align="center"><img src="images/iPhone/course%20planner%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone course planner"><br><sub>Planner</sub></td>
+    <td align="center"><img src="images/iPhone/course%20planner%20page%202%20-%20iPhone.png" width="160" alt="ORBIT iPhone course planner details"><br><sub>Course signals</sub></td>
+    <td align="center"><img src="images/iPhone/course%20planner%20page%203%20-%20iPhone.png" width="160" alt="ORBIT iPhone course planner recommendation"><br><sub>Semester fit</sub></td>
+  </tr>
+</table>
+
+#### Demo Path and Explainability
+
+<table>
+  <tr>
+    <td align="center"><img src="images/iPhone/demo%20path%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone demo path"><br><sub>Demo path</sub></td>
+    <td align="center"><img src="images/iPhone/demo%20path%20page%202%20-%20iPhone.png" width="160" alt="ORBIT iPhone demo path labels"><br><sub>Student state</sub></td>
+    <td align="center"><img src="images/iPhone/demo%20path%20page%203%20-%20iPhone.png" width="160" alt="ORBIT iPhone demo path plan"><br><sub>Support plan</sub></td>
+    <td align="center"><img src="images/iPhone/demo%20path%20page%204%20-%20iPhone.png" width="160" alt="ORBIT iPhone demo path resources"><br><sub>Resources</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/iPhone/demo%20path%20page%205%20-%20iPhone.png" width="160" alt="ORBIT iPhone demo path agent trace"><br><sub>Agent trace</sub></td>
+    <td align="center"><img src="images/iPhone/demo%20path%20page%206%20-%20iPhone.png" width="160" alt="ORBIT iPhone demo path privacy"><br><sub>Privacy controls</sub></td>
+    <td align="center"><img src="images/iPhone/intelligence%20dashboard%20page%20-%20iPhone.png" width="160" alt="ORBIT iPhone intelligence dashboard"><br><sub>Dashboard</sub></td>
+    <td align="center"><img src="images/iPhone/intelligence%20dashboard%20page%202%20-%20iPhone.png" width="160" alt="ORBIT iPhone intelligence dashboard skill registry"><br><sub>Skill registry</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/iPhone/intelligence%20dashboard%20page%203%20-%20iPhone.png" width="160" alt="ORBIT iPhone intelligence dashboard audit trail"><br><sub>Audit trail</sub></td>
+  </tr>
+</table>
+
+</details>
+
 ---
 
 ## Live Demo Video 1: Ask for Food Place
